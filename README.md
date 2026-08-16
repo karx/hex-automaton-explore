@@ -12,7 +12,9 @@ v2 layers density, energy glow, momentum arrows, and leak particles, and replace
 
 Also in the repo, unrelated to the field engine but sharing its hex-grid math: **[Langton's Arm](langtons-arm.html)**, a hex-generalized Langton's Ant. Rule LR turns out *not* to build the classic highway on this grid — instead it grows a mirror-symmetric fractal shell pattern, stable out to 10M+ steps. A follow-up sweep tried to evoke that character in the field engine itself; genuine nested rings never emerged, but the attempt produced **Coral Echo** (preset #14) — Resonant Bloom's exact rules, point-seeded into a compact branching fractal instead. See [`docs/LANGTONS_ARM.md`](docs/LANGTONS_ARM.md) for the full, honest writeup of what was tried and what didn't work.
 
-**Run it:** [`index.html`](index.html) (2D) · [`viewer3d.html`](viewer3d.html) (3D) · [`langtons-arm.html`](langtons-arm.html) (Langton's Arm) — needs a static server, see [Quick start](#quick-start).
+**Live:** [2D explorer](https://karx.github.io/hex-automaton-explore/) · [3D viewer](https://karx.github.io/hex-automaton-explore/viewer3d.html) · [Langton's Arm](https://karx.github.io/hex-automaton-explore/langtons-arm.html)
+
+**Run it locally:** [`index.html`](index.html) (2D) · [`viewer3d.html`](viewer3d.html) (3D) · [`langtons-arm.html`](langtons-arm.html) — needs a static server, see [Quick start](#quick-start).
 
 **Write-ups:** [`docs/VARIANT_REPORT.md`](docs/VARIANT_REPORT.md) (v1 engine + original 8 variants) · [`docs/VISUALIZATION_STYLE_GUIDE.md`](docs/VISUALIZATION_STYLE_GUIDE.md) (v2 visual language, ontology, presets, 3D) · [`docs/ATTRIBUTE_GLOSSARY.md`](docs/ATTRIBUTE_GLOSSARY.md) (v4 — what every parameter and slider means, mental model) · [`docs/LANGTONS_ARM.md`](docs/LANGTONS_ARM.md) (hex Langton's Ant findings)
 
@@ -91,6 +93,14 @@ Each field is its own layer. Toggle them independently in the explorer.
 </p>
 
 The 3D viewer (`viewer3d.html`) stacks those same fields in space and draws interaction beams from the engine's per-cell production, reinforcement, and leak magnitudes. Same presets and sliders as 2D.
+
+## CI
+
+Push and pull request both run `npm test` (rule-kit round-trip, Langton/Coral Echo checks, all 14 presets, v1 variant regression). A passing test job on `master` deploys the static site to GitHub Pages. Set **Settings → Pages → Source: GitHub Actions** once.
+
+```bash
+npm test
+```
 
 ## Quick start
 

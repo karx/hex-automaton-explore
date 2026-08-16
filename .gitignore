@@ -37,5 +37,6 @@ scripts/*.png
 # Build / cache leftovers
 .cache/
 dist/
+_site/
 coverage/
 *.local
