@@ -62,6 +62,17 @@
   #metrics { font-size: 12px; color: #9ea3ba; }
   #metrics div { display: flex; justify-content: space-between; padding: 2px 0; }
   #metrics span.v { color: #d8dae2; font-variant-numeric: tabular-nums; }
+
+  .formula-pre {
+    font-size: 10.5px; line-height: 1.5; color: #b9bdd4; background: #0c0e16;
+    border: 1px solid #23263a; border-radius: 6px; padding: 10px;
+    white-space: pre-wrap; word-break: break-word; max-height: 320px; overflow-y: auto;
+  }
+  #exportStatus, #importStatus { min-height: 1.2em; }
+  #exportStatus.ok, #importStatus.ok { color: #8fe0ff; }
+  #exportStatus.err, #importStatus.err { color: #ff7a7a; }
+  .param-label { display: flex; flex-direction: column; }
+  .param-label .key { font-size: 9px; color: #5b5f75; font-family: monospace; }
 </style>
 </head>
 <body>
@@ -149,6 +160,34 @@
       <div class="hint">Editing these directly overrides the ontology sliders above for this preset until you touch Survival Pressure or Momentum Bias again.</div>
     </details>
 
+    <details open>
+      <summary>Rule set formula</summary>
+      <pre id="formulaText" class="formula-pre"></pre>
+      <button id="copyFormulaBtn" style="margin-top:6px">Copy formula</button>
+      <div class="hint">The exact rule set currently running, spelled out with real numbers — see <code>docs/ATTRIBUTE_GLOSSARY.md</code> for what each term means.</div>
+    </details>
+
+    <fieldset>
+      <legend>Export rule kit</legend>
+      <label>Name
+        <input type="text" id="exportName" placeholder="(preset name)" style="flex:1;background:#191c28;color:#d8dae2;border:1px solid #2c2f42;border-radius:6px;padding:6px 8px;font-size:12px" />
+      </label>
+      <label class="checkline"><input type="checkbox" id="exportIncludeState" /> Include canvas state (exact resume, larger file)</label>
+      <div class="row" style="margin-top:6px">
+        <button id="copyJsonBtn">Copy JSON</button>
+        <button id="downloadJsonBtn">Download</button>
+      </div>
+      <div class="hint" id="exportStatus"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Import rule kit</legend>
+      <input type="file" id="importFile" accept="application/json,.json" style="width:100%;font-size:11px;color:#9ea3ba;margin-bottom:6px" />
+      <textarea id="importText" placeholder="…or paste rule kit JSON here" style="width:100%;height:64px;background:#191c28;color:#d8dae2;border:1px solid #2c2f42;border-radius:6px;padding:6px 8px;font-size:11px;font-family:monospace;resize:vertical"></textarea>
+      <button id="loadKitBtn" style="margin-top:6px">Load</button>
+      <div class="hint" id="importStatus"></div>
+    </fieldset>
+
     <div class="hint">Engine: <code>src/engine.js</code> · Ontology: <code>src/ontology.js</code> · Rendering: <code>src/render.js</code></div>
   </div>
 
@@ -160,6 +199,9 @@
     import { PRESETS, getPreset, getPresetParams, getPresetSeedFn } from './src/presets.js';
     import { ONTOLOGY_AXES } from './src/ontology.js';
     import { seedCluster } from './src/seeds.js';
+    import { PARAM_META } from './src/paramMeta.js';
+    import { generateFormula } from './src/formula.js';
+    import { exportRuleKit, ruleKitToJSON, parseRuleKit, buildEngineFromRuleKit, downloadRuleKit, readFileAsText } from './src/ruleKit.js';
 
     const canvas = document.getElementById('cv');
     const ctx = canvas.getContext('2d');
@@ -229,15 +271,25 @@
       descEl.textContent = currentPreset.description;
       particleSystem.clear();
       buildParamSliders();
+      updateFormulaView();
     }
 
     function buildParamSliders() {
       paramSlidersEl.innerHTML = '';
       for (const [key, [min, max, step]] of Object.entries(PARAM_RANGES)) {
+        const meta = PARAM_META[key];
         const val = engine.params[key];
         const wrap = document.createElement('label');
-        const span = document.createElement('span');
-        span.textContent = key;
+        wrap.title = meta ? `${meta.meaning}\n\nHigher: ${meta.higher}\nLower: ${meta.lower}` : key;
+        const labelBox = document.createElement('span');
+        labelBox.className = 'param-label';
+        const labelText = document.createElement('span');
+        labelText.textContent = meta ? meta.label : key;
+        const keyText = document.createElement('span');
+        keyText.className = 'key';
+        keyText.textContent = key;
+        labelBox.appendChild(labelText);
+        labelBox.appendChild(keyText);
         const valSpan = document.createElement('span');
         valSpan.className = 'val';
         valSpan.textContent = val.toFixed(3);
@@ -246,12 +298,23 @@
         input.addEventListener('input', () => {
           engine.params[key] = parseFloat(input.value);
           valSpan.textContent = parseFloat(input.value).toFixed(3);
+          updateFormulaView();
         });
-        wrap.appendChild(span);
+        wrap.appendChild(labelBox);
         wrap.appendChild(valSpan);
         paramSlidersEl.appendChild(wrap);
         paramSlidersEl.appendChild(input);
       }
+    }
+
+    function updateFormulaView() {
+      if (!engine) return;
+      const text = generateFormula(engine.params, {
+        title: currentPreset.name,
+        ontology: { survivalPressure: parseFloat(pressureSlider.value), momentumBias: parseFloat(biasSlider.value) },
+        provenance: { presetName: currentPreset.name, archetype: currentPreset.archetype },
+      });
+      document.getElementById('formulaText').textContent = text;
     }
 
     function applyOntologyLive() {
@@ -262,6 +325,7 @@
       });
       Object.assign(engine.params, params);
       buildParamSliders();
+      updateFormulaView();
     }
 
     canvas.addEventListener('click', (ev) => {
@@ -297,6 +361,108 @@
     playBtn.addEventListener('click', () => {
       running = !running;
       playBtn.textContent = running ? 'Pause' : 'Play';
+    });
+
+    document.getElementById('copyFormulaBtn').addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(document.getElementById('formulaText').textContent);
+      } catch (e) { /* clipboard permission denied — silently ignore, text is still visible/selectable */ }
+    });
+
+    function currentProvenance() {
+      return {
+        presetId: currentPreset.id,
+        presetName: currentPreset.name,
+        archetype: currentPreset.archetype,
+        survivalPressure: parseFloat(pressureSlider.value),
+        momentumBias: parseFloat(biasSlider.value),
+      };
+    }
+
+    function setStatus(el, message, kind) {
+      el.textContent = message;
+      el.classList.remove('ok', 'err');
+      if (kind) el.classList.add(kind);
+    }
+
+    const exportNameInput = document.getElementById('exportName');
+    const exportStateCheckbox = document.getElementById('exportIncludeState');
+    const exportStatusEl = document.getElementById('exportStatus');
+
+    function buildExportKit() {
+      const name = exportNameInput.value.trim() || currentPreset.name;
+      return exportRuleKit(engine, {
+        name,
+        includeState: exportStateCheckbox.checked,
+        provenance: currentProvenance(),
+      });
+    }
+
+    document.getElementById('copyJsonBtn').addEventListener('click', async () => {
+      const json = ruleKitToJSON(buildExportKit());
+      try {
+        await navigator.clipboard.writeText(json);
+        setStatus(exportStatusEl, `Copied to clipboard (${(json.length / 1024).toFixed(1)} KB).`, 'ok');
+      } catch (e) {
+        setStatus(exportStatusEl, 'Clipboard permission denied — use Download instead.', 'err');
+      }
+    });
+
+    document.getElementById('downloadJsonBtn').addEventListener('click', () => {
+      const kit = buildExportKit();
+      downloadRuleKit(kit);
+      setStatus(exportStatusEl, `Downloaded (${kit.state ? 'with' : 'without'} canvas state).`, 'ok');
+    });
+
+    const importFileInput = document.getElementById('importFile');
+    const importTextEl = document.getElementById('importText');
+    const importStatusEl = document.getElementById('importStatus');
+
+    importFileInput.addEventListener('change', async () => {
+      const file = importFileInput.files[0];
+      if (!file) return;
+      importTextEl.value = await readFileAsText(file);
+    });
+
+    document.getElementById('loadKitBtn').addEventListener('click', () => {
+      try {
+        const kit = parseRuleKit(importTextEl.value);
+        const rebuilt = buildEngineFromRuleKit(kit, { fallbackSeedFn: getPresetSeedFn(currentPreset) });
+
+        engine = rebuilt;
+        layout = computeLayout(kit.grid.width, kit.grid.height, cellSize);
+        canvas.width = layout.canvasWidth;
+        canvas.height = layout.canvasHeight;
+        particleSystem.clear();
+        gridSizeInput.value = kit.grid.width;
+        document.getElementById('gridSizeVal').textContent = kit.grid.width;
+
+        if (kit.meta.presetId) {
+          try {
+            currentPreset = getPreset(kit.meta.presetId);
+            presetSelect.value = currentPreset.id;
+          } catch (e) { /* preset id not found locally — keep params, just no preset linkage */ }
+        }
+        if (typeof kit.meta.survivalPressure === 'number') {
+          pressureSlider.value = kit.meta.survivalPressure;
+          pressureVal.textContent = kit.meta.survivalPressure.toFixed(2);
+        }
+        if (typeof kit.meta.momentumBias === 'number') {
+          biasSlider.value = kit.meta.momentumBias;
+          biasVal.textContent = kit.meta.momentumBias.toFixed(2);
+        }
+        descEl.textContent = kit.meta.description || currentPreset.description;
+        buildParamSliders();
+        updateFormulaView();
+
+        setStatus(
+          importStatusEl,
+          `Loaded "${kit.meta.name}"${kit.state ? ` — resumed at generation ${kit.state.generation}.` : ' — fresh seed from rules only.'}`,
+          'ok'
+        );
+      } catch (e) {
+        setStatus(importStatusEl, `Error: ${e.message}`, 'err');
+      }
     });
 
     function updateMeters(stats, params) {

@@ -52,6 +52,9 @@
   #metrics span.v { color: #d8dae2; font-variant-numeric: tabular-nums; }
   #legend3d { position: absolute; left: 12px; bottom: 12px; font-size: 11px; color: #9ea3ba; background: rgba(16,18,26,0.75); border: 1px solid #23263a; border-radius: 6px; padding: 8px 10px; line-height: 1.7; }
   #legend3d .swatch { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 6px; }
+  #exportStatus, #importStatus { min-height: 1.2em; }
+  #exportStatus.ok, #importStatus.ok { color: #8fe0ff; }
+  #exportStatus.err, #importStatus.err { color: #ff7a7a; }
 </style>
 </head>
 <body>
@@ -115,7 +118,28 @@
       <div id="metrics"></div>
     </fieldset>
 
-    <div class="hint">Scene: <code>src/three/viewer3d.js</code> · Engine/ontology shared with the 2D view.</div>
+    <fieldset>
+      <legend>Export rule kit</legend>
+      <label>Name
+        <input type="text" id="exportName" placeholder="(preset name)" style="flex:1;background:#191c28;color:#d8dae2;border:1px solid #2c2f42;border-radius:6px;padding:6px 8px;font-size:12px" />
+      </label>
+      <label class="checkline"><input type="checkbox" id="exportIncludeState" /> Include canvas state (exact resume, larger file)</label>
+      <div class="row" style="margin-top:6px">
+        <button id="copyJsonBtn">Copy JSON</button>
+        <button id="downloadJsonBtn">Download</button>
+      </div>
+      <div class="hint" id="exportStatus"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Import rule kit</legend>
+      <input type="file" id="importFile" accept="application/json,.json" style="width:100%;font-size:11px;color:#9ea3ba;margin-bottom:6px" />
+      <textarea id="importText" placeholder="…or paste rule kit JSON here" style="width:100%;height:64px;background:#191c28;color:#d8dae2;border:1px solid #2c2f42;border-radius:6px;padding:6px 8px;font-size:11px;font-family:monospace;resize:vertical"></textarea>
+      <button id="loadKitBtn" style="margin-top:6px">Load</button>
+      <div class="hint" id="importStatus"></div>
+    </fieldset>
+
+    <div class="hint">Scene: <code>src/three/viewer3d.js</code> · Engine/ontology shared with the 2D view. Raw-parameter tuning and the rule-set formula view live in the 2D view.</div>
   </div>
 
   <script type="module">
@@ -124,6 +148,7 @@
     import { PRESETS, getPreset, getPresetParams, getPresetSeedFn } from './src/presets.js';
     import { ONTOLOGY_AXES } from './src/ontology.js';
     import { seedCluster } from './src/seeds.js';
+    import { exportRuleKit, ruleKitToJSON, parseRuleKit, buildEngineFromRuleKit, downloadRuleKit, readFileAsText } from './src/ruleKit.js';
 
     const sceneWrap = document.getElementById('sceneWrap');
     const presetSelect = document.getElementById('presetSelect');
@@ -211,6 +236,90 @@
     playBtn.addEventListener('click', () => {
       running = !running;
       playBtn.textContent = running ? 'Pause' : 'Play';
+    });
+
+    function setStatus(el, message, kind) {
+      el.textContent = message;
+      el.classList.remove('ok', 'err');
+      if (kind) el.classList.add(kind);
+    }
+
+    const exportNameInput = document.getElementById('exportName');
+    const exportStateCheckbox = document.getElementById('exportIncludeState');
+    const exportStatusEl = document.getElementById('exportStatus');
+
+    function buildExportKit() {
+      const name = exportNameInput.value.trim() || currentPreset.name;
+      return exportRuleKit(engine, {
+        name,
+        includeState: exportStateCheckbox.checked,
+        provenance: {
+          presetId: currentPreset.id,
+          presetName: currentPreset.name,
+          archetype: currentPreset.archetype,
+          survivalPressure: parseFloat(pressureSlider.value),
+          momentumBias: parseFloat(biasSlider.value),
+        },
+      });
+    }
+
+    document.getElementById('copyJsonBtn').addEventListener('click', async () => {
+      const json = ruleKitToJSON(buildExportKit());
+      try {
+        await navigator.clipboard.writeText(json);
+        setStatus(exportStatusEl, `Copied to clipboard (${(json.length / 1024).toFixed(1)} KB).`, 'ok');
+      } catch (e) {
+        setStatus(exportStatusEl, 'Clipboard permission denied — use Download instead.', 'err');
+      }
+    });
+
+    document.getElementById('downloadJsonBtn').addEventListener('click', () => {
+      const kit = buildExportKit();
+      downloadRuleKit(kit);
+      setStatus(exportStatusEl, `Downloaded (${kit.state ? 'with' : 'without'} canvas state).`, 'ok');
+    });
+
+    const importFileInput = document.getElementById('importFile');
+    const importTextEl = document.getElementById('importText');
+    const importStatusEl = document.getElementById('importStatus');
+
+    importFileInput.addEventListener('change', async () => {
+      const file = importFileInput.files[0];
+      if (!file) return;
+      importTextEl.value = await readFileAsText(file);
+    });
+
+    document.getElementById('loadKitBtn').addEventListener('click', () => {
+      try {
+        const kit = parseRuleKit(importTextEl.value);
+        engine = buildEngineFromRuleKit(kit, { fallbackSeedFn: getPresetSeedFn(currentPreset) });
+        gridSizeInput.value = kit.grid.width;
+        document.getElementById('gridSizeVal').textContent = kit.grid.width;
+
+        if (kit.meta.presetId) {
+          try {
+            currentPreset = getPreset(kit.meta.presetId);
+            presetSelect.value = currentPreset.id;
+          } catch (e) { /* preset id not found locally — keep params, just no preset linkage */ }
+        }
+        if (typeof kit.meta.survivalPressure === 'number') {
+          pressureSlider.value = kit.meta.survivalPressure;
+          pressureVal.textContent = kit.meta.survivalPressure.toFixed(2);
+        }
+        if (typeof kit.meta.momentumBias === 'number') {
+          biasSlider.value = kit.meta.momentumBias;
+          biasVal.textContent = kit.meta.momentumBias.toFixed(2);
+        }
+        descEl.textContent = kit.meta.description || currentPreset.description;
+
+        setStatus(
+          importStatusEl,
+          `Loaded "${kit.meta.name}"${kit.state ? ` — resumed at generation ${kit.state.generation}.` : ' — fresh seed from rules only.'}`,
+          'ok'
+        );
+      } catch (e) {
+        setStatus(importStatusEl, `Error: ${e.message}`, 'err');
+      }
     });
 
     function loop() {

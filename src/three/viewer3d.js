@@ -184,7 +184,9 @@ export class Viewer3D {
   // Read the engine's current field state and update all instance transforms,
   // colors, and beam geometry. Call once per rendered frame after engine.step().
   update(engine) {
-    if (engine.n !== this.n) this.buildForGrid(engine.width, engine.height);
+    if (engine.n !== this.n || engine.width !== this.gridWidth || engine.height !== this.gridHeight) {
+      this.buildForGrid(engine.width, engine.height);
+    }
     const { density, energy, momX, momY, productionField, reinforcementField, leakOutField, leakPrimaryAmount, n } = engine;
     const pos = this.positions;
     const M = this._scratchMatrix, Q = this._scratchQuat, P = this._scratchPos, S = this._scratchScale;

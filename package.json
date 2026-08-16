@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "npx --yes serve .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node scripts/verify-rulekit.mjs && node scripts/verify-presets.mjs && node scripts/regress-presets.mjs"
   },
   "keywords": [
     "cellular-automaton",

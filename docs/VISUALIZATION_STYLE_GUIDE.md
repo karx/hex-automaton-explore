@@ -119,6 +119,10 @@ steps, not just the sampled ones.
 
 ## The control ontology (`src/ontology.js`)
 
+*(For the plain-language "what does this actually do" explanation of every
+raw parameter and both sliders, see `docs/ATTRIBUTE_GLOSSARY.md` — this
+section stays focused on the implementation.)*
+
 Two sliders replace direct manipulation of raw parameters, each 0–1, neutral
 (preset's authored values, unchanged) at 0.5:
 

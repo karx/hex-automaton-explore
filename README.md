@@ -8,11 +8,11 @@ Three coupled fields on a hexagonal torus — **density**, **energy**, and **mom
 </p>
 <p align="center"><sub><b>Resonant Bloom</b> — ring seed (left, GIF) to a high-resonance front at generation 520 (right). Still expanding; resonance 0.94.</sub></p>
 
-v2 layers density, energy glow, momentum arrows, and leak particles, and replaces raw engine knobs with two sliders (**Survival Pressure**, **Momentum Bias**). A 13-preset library was found by sweeping those axes. v3 adds a 3D viewer: each field as its own stacked layer, linked by beams that track per-cell production, reinforcement, and leak.
+v2 layers density, energy glow, momentum arrows, and leak particles, and replaces raw engine knobs with two sliders (**Survival Pressure**, **Momentum Bias**). A 13-preset library was found by sweeping those axes. v3 adds a 3D viewer: each field as its own stacked layer, linked by beams that track per-cell production, reinforcement, and leak. v4 adds a **Rule Set Formula** view (the live rule set as real numbers, not just a param name), a **rule kit export/import** (JSON — share the ruleset alone, or with exact canvas state to resume mid-growth), and a full glossary of what every attribute actually does.
 
 **Run it:** [`index.html`](index.html) (2D) · [`viewer3d.html`](viewer3d.html) (3D) — needs a static server, see [Quick start](#quick-start).
 
-**Write-ups:** [`docs/VARIANT_REPORT.md`](docs/VARIANT_REPORT.md) (v1 engine + original 8 variants) · [`docs/VISUALIZATION_STYLE_GUIDE.md`](docs/VISUALIZATION_STYLE_GUIDE.md) (v2 visual language, ontology, presets, 3D)
+**Write-ups:** [`docs/VARIANT_REPORT.md`](docs/VARIANT_REPORT.md) (v1 engine + original 8 variants) · [`docs/VISUALIZATION_STYLE_GUIDE.md`](docs/VISUALIZATION_STYLE_GUIDE.md) (v2 visual language, ontology, presets, 3D) · [`docs/ATTRIBUTE_GLOSSARY.md`](docs/ATTRIBUTE_GLOSSARY.md) (v4 — what every parameter and slider means, mental model)
 
 ## Showcase
 
@@ -101,9 +101,9 @@ npx serve .          # or: python -m http.server
 
 Open the printed URL for **`index.html`** (2D) or **`viewer3d.html`** (3D) — each links to the other. Both share the same simulation engine, presets, and ontology sliders.
 
-**2D:** pick a preset (sliders jump to its authored position); click the grid to drop seed clusters. Ontology sliders and the four visual-layer checkboxes update live. Raw engine parameters are under Advanced.
+**2D:** pick a preset (sliders jump to its authored position); click the grid to drop seed clusters. Ontology sliders and the four visual-layer checkboxes update live. Raw engine parameters are under Advanced, each with a hover tooltip explaining what it does. "Rule set formula" prints the live rule set as real numbers. "Export rule kit" / "Import rule kit" share or resume it.
 
-**3D:** density as extruded hex height, energy as glowing orbs, momentum as oriented arrows. Drag to orbit, scroll to zoom, toggle any layer or the beams. No raw-parameter panel here — use 2D for that.
+**3D:** density as extruded hex height, energy as glowing orbs, momentum as oriented arrows. Drag to orbit, scroll to zoom, toggle any layer or the beams. Export/import rule kits here too. No raw-parameter panel or formula view here — use 2D for that.
 
 ## How it works
 
@@ -112,6 +112,27 @@ Open the printed URL for **`index.html`** (2D) or **`viewer3d.html`** (3D) — e
 - **Energy:** produced by dense clusters, spent on activity, leaked along momentum, plus a flat decay.
 - **Momentum:** unit vector. New cells inherit a density-weighted average of their neighbors; leak follows this direction.
 - **Ontology:** Survival Pressure and Momentum Bias compose onto a preset's archetype params (`src/ontology.js`). There is no hidden state a slider cannot reach.
+
+Full explanation of every parameter — what it means, what turning it up or
+down actually does — is in [`docs/ATTRIBUTE_GLOSSARY.md`](docs/ATTRIBUTE_GLOSSARY.md).
+
+## Sharing and resuming a rule set
+
+Every rule set can be exported as a portable JSON **rule kit**
+(`src/ruleKit.js`) — from either the 2D or 3D view:
+
+- **Rules only** (a few KB): the complete, resolved parameter set — a
+  portable version of "this preset at these slider positions," valid even if
+  the sender hand-tuned raw parameters beyond what the sliders reach.
+- **Rules + canvas state** (checkbox, scales with grid size): also captures
+  every cell's density/energy/momentum and the current generation, so
+  loading it resumes the *exact* simulation, not just the rules — verified
+  bit-identical in `scripts/verify-rulekit.mjs`.
+
+Import accepts a pasted-in `.json` file or a direct file upload. The **Rule
+set formula** panel (2D view) shows the same rule set as a human-readable
+formula sheet — grouped birth/survival/energy/momentum equations with your
+current numbers substituted in, not a raw parameter dump.
 
 ## Preset library
 
@@ -175,6 +196,11 @@ node scripts/capture-readme-ui.mjs     # -> docs/shots/ui-*.png
 # v3 (3D viewer regression check — needs a static server on :4175 first)
 npx serve -l 4175 .
 node scripts/smoke-test-3d.mjs         # headless Chromium + software-GL
+
+# v4 (rule kit export/import)
+node scripts/verify-rulekit.mjs        # headless round-trip: export -> parse -> resume -> step, bit-identical
+npx serve -l 4177 .                    # then, for the browser UI path:
+node scripts/smoke-test-rulekit.mjs    # export/import/formula on both index.html and viewer3d.html
 ```
 
 ## Layout
@@ -191,6 +217,9 @@ src/flowDiagram.js       animated interaction-flow diagram (2D)
 src/seeds.js             seed placement helpers
 src/three/hexGeometry.js hex prism / arrow / energy-orb geometry
 src/three/viewer3d.js    3D stacked InstancedMesh layers + interaction beams
+src/paramMeta.js         per-parameter meaning/effect metadata (glossary + tooltip source)
+src/formula.js           live rule set -> human-readable formula text
+src/ruleKit.js           rule kit export/import (params + optional canvas state)
 index.html               interactive 2D browser demo
 viewer3d.html            interactive 3D browser demo
 scripts/                 sweep, discovery, verification, GIF + still capture
@@ -199,4 +228,5 @@ gifs-v2/                 v2 GIFs (layered rendering, showcase presets)
 docs/shots/              README stills, layer breakdown, UI screenshots
 docs/VARIANT_REPORT.md   v1 write-up
 docs/VISUALIZATION_STYLE_GUIDE.md    v2 + v3 write-up
+docs/ATTRIBUTE_GLOSSARY.md           v4 write-up — every parameter + ontology slider, explained
 ```
