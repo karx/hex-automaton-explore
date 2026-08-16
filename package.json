@@ -1,0 +1,28 @@
+{
+  "name": "fieldca",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Multi-field hexagonal cellular automaton with density, energy, and momentum fields, plus 2D and 3D viewers.",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "start": "npx --yes serve .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "cellular-automaton",
+    "hex-grid",
+    "visualization"
+  ],
+  "license": "ISC",
+  "dependencies": {
+    "@napi-rs/canvas": "^1.0.5",
+    "gifenc": "^1.0.3",
+    "three": "^0.185.1"
+  },
+  "devDependencies": {
+    "playwright": "^1.62.1"
+  }
+}

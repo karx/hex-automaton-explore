@@ -1,0 +1,474 @@
+[
+  {
+    "id": "crystal-bloom",
+    "name": "Crystal Bloom",
+    "outPath": "gifs/crystal-bloom.gif",
+    "sizeKB": 3154,
+    "frames": 80,
+    "generationsSimulated": 720,
+    "died": false,
+    "exploded": false,
+    "finalFracAlive": 0.5829,
+    "metricsLog": [
+      {
+        "generation": 0,
+        "aliveCells": 41,
+        "fracAlive": 0.0084
+      },
+      {
+        "generation": 100,
+        "aliveCells": 829,
+        "fracAlive": 0.1692
+      },
+      {
+        "generation": 200,
+        "aliveCells": 2346,
+        "fracAlive": 0.4788
+      },
+      {
+        "generation": 300,
+        "aliveCells": 2992,
+        "fracAlive": 0.6106
+      },
+      {
+        "generation": 400,
+        "aliveCells": 2860,
+        "fracAlive": 0.5837
+      },
+      {
+        "generation": 500,
+        "aliveCells": 2866,
+        "fracAlive": 0.5849
+      },
+      {
+        "generation": 600,
+        "aliveCells": 2864,
+        "fracAlive": 0.5845
+      },
+      {
+        "generation": 700,
+        "aliveCells": 2855,
+        "fracAlive": 0.5827
+      },
+      {
+        "generation": 719,
+        "aliveCells": 2856,
+        "fracAlive": 0.5829
+      }
+    ],
+    "tookMs": 8289
+  },
+  {
+    "id": "dense-coral",
+    "name": "Dense Coral",
+    "outPath": "gifs/dense-coral.gif",
+    "sizeKB": 2369,
+    "frames": 80,
+    "generationsSimulated": 720,
+    "died": false,
+    "exploded": false,
+    "finalFracAlive": 0.5845,
+    "metricsLog": [
+      {
+        "generation": 0,
+        "aliveCells": 41,
+        "fracAlive": 0.0084
+      },
+      {
+        "generation": 100,
+        "aliveCells": 233,
+        "fracAlive": 0.0476
+      },
+      {
+        "generation": 200,
+        "aliveCells": 564,
+        "fracAlive": 0.1151
+      },
+      {
+        "generation": 300,
+        "aliveCells": 1281,
+        "fracAlive": 0.2614
+      },
+      {
+        "generation": 400,
+        "aliveCells": 2828,
+        "fracAlive": 0.5771
+      },
+      {
+        "generation": 500,
+        "aliveCells": 3280,
+        "fracAlive": 0.6694
+      },
+      {
+        "generation": 600,
+        "aliveCells": 2924,
+        "fracAlive": 0.5967
+      },
+      {
+        "generation": 700,
+        "aliveCells": 2868,
+        "fracAlive": 0.5853
+      },
+      {
+        "generation": 719,
+        "aliveCells": 2864,
+        "fracAlive": 0.5845
+      }
+    ],
+    "tookMs": 5911
+  },
+  {
+    "id": "vortex-drift",
+    "name": "Vortex Drift",
+    "outPath": "gifs/vortex-drift.gif",
+    "sizeKB": 2299,
+    "frames": 80,
+    "generationsSimulated": 720,
+    "died": false,
+    "exploded": false,
+    "finalFracAlive": 0.5737,
+    "metricsLog": [
+      {
+        "generation": 0,
+        "aliveCells": 33,
+        "fracAlive": 0.0067
+      },
+      {
+        "generation": 100,
+        "aliveCells": 271,
+        "fracAlive": 0.0553
+      },
+      {
+        "generation": 200,
+        "aliveCells": 762,
+        "fracAlive": 0.1555
+      },
+      {
+        "generation": 300,
+        "aliveCells": 1628,
+        "fracAlive": 0.3322
+      },
+      {
+        "generation": 400,
+        "aliveCells": 2552,
+        "fracAlive": 0.5208
+      },
+      {
+        "generation": 500,
+        "aliveCells": 2629,
+        "fracAlive": 0.5365
+      },
+      {
+        "generation": 600,
+        "aliveCells": 2918,
+        "fracAlive": 0.5955
+      },
+      {
+        "generation": 700,
+        "aliveCells": 2825,
+        "fracAlive": 0.5765
+      },
+      {
+        "generation": 719,
+        "aliveCells": 2811,
+        "fracAlive": 0.5737
+      }
+    ],
+    "tookMs": 7794
+  },
+  {
+    "id": "storm-field",
+    "name": "Storm Field",
+    "outPath": "gifs/storm-field.gif",
+    "sizeKB": 1294,
+    "frames": 80,
+    "generationsSimulated": 720,
+    "died": false,
+    "exploded": false,
+    "finalFracAlive": 0.4598,
+    "metricsLog": [
+      {
+        "generation": 0,
+        "aliveCells": 41,
+        "fracAlive": 0.0084
+      },
+      {
+        "generation": 100,
+        "aliveCells": 153,
+        "fracAlive": 0.0312
+      },
+      {
+        "generation": 200,
+        "aliveCells": 524,
+        "fracAlive": 0.1069
+      },
+      {
+        "generation": 300,
+        "aliveCells": 550,
+        "fracAlive": 0.1122
+      },
+      {
+        "generation": 400,
+        "aliveCells": 943,
+        "fracAlive": 0.1924
+      },
+      {
+        "generation": 500,
+        "aliveCells": 1276,
+        "fracAlive": 0.2604
+      },
+      {
+        "generation": 600,
+        "aliveCells": 1616,
+        "fracAlive": 0.3298
+      },
+      {
+        "generation": 700,
+        "aliveCells": 2188,
+        "fracAlive": 0.4465
+      },
+      {
+        "generation": 719,
+        "aliveCells": 2253,
+        "fracAlive": 0.4598
+      }
+    ],
+    "tookMs": 5692
+  },
+  {
+    "id": "pulsar",
+    "name": "Pulsar",
+    "outPath": "gifs/pulsar.gif",
+    "sizeKB": 510,
+    "frames": 80,
+    "generationsSimulated": 720,
+    "died": false,
+    "exploded": false,
+    "finalFracAlive": 0.1731,
+    "metricsLog": [
+      {
+        "generation": 0,
+        "aliveCells": 36,
+        "fracAlive": 0.0073
+      },
+      {
+        "generation": 100,
+        "aliveCells": 62,
+        "fracAlive": 0.0127
+      },
+      {
+        "generation": 200,
+        "aliveCells": 101,
+        "fracAlive": 0.0206
+      },
+      {
+        "generation": 300,
+        "aliveCells": 452,
+        "fracAlive": 0.0922
+      },
+      {
+        "generation": 400,
+        "aliveCells": 220,
+        "fracAlive": 0.0449
+      },
+      {
+        "generation": 500,
+        "aliveCells": 350,
+        "fracAlive": 0.0714
+      },
+      {
+        "generation": 600,
+        "aliveCells": 582,
+        "fracAlive": 0.1188
+      },
+      {
+        "generation": 700,
+        "aliveCells": 856,
+        "fracAlive": 0.1747
+      },
+      {
+        "generation": 719,
+        "aliveCells": 848,
+        "fracAlive": 0.1731
+      }
+    ],
+    "tookMs": 1815
+  },
+  {
+    "id": "ember-ring",
+    "name": "Ember Ring",
+    "outPath": "gifs/ember-ring.gif",
+    "sizeKB": 747,
+    "frames": 80,
+    "generationsSimulated": 720,
+    "died": false,
+    "exploded": false,
+    "finalFracAlive": 0.2035,
+    "metricsLog": [
+      {
+        "generation": 0,
+        "aliveCells": 36,
+        "fracAlive": 0.0073
+      },
+      {
+        "generation": 100,
+        "aliveCells": 101,
+        "fracAlive": 0.0206
+      },
+      {
+        "generation": 200,
+        "aliveCells": 245,
+        "fracAlive": 0.05
+      },
+      {
+        "generation": 300,
+        "aliveCells": 446,
+        "fracAlive": 0.091
+      },
+      {
+        "generation": 400,
+        "aliveCells": 586,
+        "fracAlive": 0.1196
+      },
+      {
+        "generation": 500,
+        "aliveCells": 773,
+        "fracAlive": 0.1578
+      },
+      {
+        "generation": 600,
+        "aliveCells": 877,
+        "fracAlive": 0.179
+      },
+      {
+        "generation": 700,
+        "aliveCells": 983,
+        "fracAlive": 0.2006
+      },
+      {
+        "generation": 719,
+        "aliveCells": 997,
+        "fracAlive": 0.2035
+      }
+    ],
+    "tookMs": 2464
+  },
+  {
+    "id": "spreading-front-ring",
+    "name": "Spreading Front (Ring)",
+    "outPath": "gifs/spreading-front-ring.gif",
+    "sizeKB": 654,
+    "frames": 80,
+    "generationsSimulated": 720,
+    "died": false,
+    "exploded": false,
+    "finalFracAlive": 0.1888,
+    "metricsLog": [
+      {
+        "generation": 0,
+        "aliveCells": 36,
+        "fracAlive": 0.0073
+      },
+      {
+        "generation": 100,
+        "aliveCells": 118,
+        "fracAlive": 0.0241
+      },
+      {
+        "generation": 200,
+        "aliveCells": 218,
+        "fracAlive": 0.0445
+      },
+      {
+        "generation": 300,
+        "aliveCells": 320,
+        "fracAlive": 0.0653
+      },
+      {
+        "generation": 400,
+        "aliveCells": 459,
+        "fracAlive": 0.0937
+      },
+      {
+        "generation": 500,
+        "aliveCells": 611,
+        "fracAlive": 0.1247
+      },
+      {
+        "generation": 600,
+        "aliveCells": 774,
+        "fracAlive": 0.158
+      },
+      {
+        "generation": 700,
+        "aliveCells": 919,
+        "fracAlive": 0.1876
+      },
+      {
+        "generation": 719,
+        "aliveCells": 925,
+        "fracAlive": 0.1888
+      }
+    ],
+    "tookMs": 1977
+  },
+  {
+    "id": "fault-line",
+    "name": "Fault Line",
+    "outPath": "gifs/fault-line.gif",
+    "sizeKB": 317,
+    "frames": 80,
+    "generationsSimulated": 720,
+    "died": false,
+    "exploded": false,
+    "finalFracAlive": 0.089,
+    "metricsLog": [
+      {
+        "generation": 0,
+        "aliveCells": 34,
+        "fracAlive": 0.0069
+      },
+      {
+        "generation": 100,
+        "aliveCells": 29,
+        "fracAlive": 0.0059
+      },
+      {
+        "generation": 200,
+        "aliveCells": 71,
+        "fracAlive": 0.0145
+      },
+      {
+        "generation": 300,
+        "aliveCells": 100,
+        "fracAlive": 0.0204
+      },
+      {
+        "generation": 400,
+        "aliveCells": 150,
+        "fracAlive": 0.0306
+      },
+      {
+        "generation": 500,
+        "aliveCells": 202,
+        "fracAlive": 0.0412
+      },
+      {
+        "generation": 600,
+        "aliveCells": 294,
+        "fracAlive": 0.06
+      },
+      {
+        "generation": 700,
+        "aliveCells": 426,
+        "fracAlive": 0.0869
+      },
+      {
+        "generation": 719,
+        "aliveCells": 436,
+        "fracAlive": 0.089
+      }
+    ],
+    "tookMs": 1200
+  }
+]

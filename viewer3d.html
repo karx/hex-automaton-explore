@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Multi-Field Hex Automaton — 3D Viewer</title>
+<script type="importmap">
+{
+  "imports": {
+    "three": "./node_modules/three/build/three.module.js",
+    "three/addons/": "./node_modules/three/examples/jsm/"
+  }
+}
+</script>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: #05060a; color: #d8dae2;
+    font: 14px/1.4 system-ui, -apple-system, Segoe UI, sans-serif;
+    display: flex; height: 100vh; overflow: hidden;
+  }
+  #sceneWrap { flex: 1; position: relative; }
+  #sceneWrap canvas { display: block; }
+  #panel {
+    width: 340px; flex-shrink: 0; background: #10121a; border-left: 1px solid #23263a;
+    padding: 16px; overflow-y: auto;
+  }
+  h1 { font-size: 15px; margin: 0 0 4px; letter-spacing: .02em; }
+  .sub { color: #7b7f95; font-size: 12px; margin-bottom: 12px; }
+  .sub a { color: #7ecbff; }
+  fieldset { border: 1px solid #23263a; border-radius: 8px; margin-bottom: 12px; padding: 10px 12px; }
+  legend { padding: 0 6px; color: #9ea3ba; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
+  label { display: flex; justify-content: space-between; align-items: center; margin: 8px 0; gap: 8px; font-size: 12px; }
+  label.checkline { justify-content: flex-start; }
+  label.checkline input { margin-right: 8px; accent-color: #7ecbff; }
+  label span.val { color: #7ecbff; font-variant-numeric: tabular-nums; min-width: 3.5em; text-align: right; }
+  input[type=range] { flex: 1; accent-color: #7ecbff; }
+  select, button {
+    width: 100%; background: #191c28; color: #d8dae2; border: 1px solid #2c2f42;
+    border-radius: 6px; padding: 8px; font-size: 13px; cursor: pointer;
+  }
+  button:hover, select:hover { border-color: #7ecbff; }
+  .row { display: flex; gap: 8px; }
+  .row > * { flex: 1; }
+  .axis-endpoints { display: flex; justify-content: space-between; font-size: 10px; color: #5b5f75; margin-top: -4px; margin-bottom: 4px; }
+  .axis-desc { font-size: 11px; color: #6b6f85; margin: -2px 0 6px; }
+  #desc { font-size: 12px; color: #9ea3ba; margin-top: 4px; }
+  .hint { font-size: 11px; color: #5b5f75; margin-top: 8px; }
+  code { background: #191c28; padding: 1px 4px; border-radius: 4px; }
+  #metrics { font-size: 12px; color: #9ea3ba; }
+  #metrics div { display: flex; justify-content: space-between; padding: 2px 0; }
+  #metrics span.v { color: #d8dae2; font-variant-numeric: tabular-nums; }
+  #legend3d { position: absolute; left: 12px; bottom: 12px; font-size: 11px; color: #9ea3ba; background: rgba(16,18,26,0.75); border: 1px solid #23263a; border-radius: 6px; padding: 8px 10px; line-height: 1.7; }
+  #legend3d .swatch { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 6px; }
+</style>
+</head>
+<body>
+  <div id="sceneWrap">
+    <div id="legend3d">
+      <div><span class="swatch" style="background:#ffb545"></span>Density layer (height = amount)</div>
+      <div><span class="swatch" style="background:#ff8a3d"></span>Energy layer (glow orbs)</div>
+      <div><span class="swatch" style="background:#8fe0ff"></span>Momentum layer (arrows)</div>
+      <div><span class="swatch" style="background:#ffcf8a"></span>Beams: production/reinforcement</div>
+      <div><span class="swatch" style="background:#66aaff"></span>Beams: leak (blue=isotropic, orange=directional)</div>
+      <div style="margin-top:4px;color:#5b5f75">Drag to orbit · scroll to zoom</div>
+    </div>
+  </div>
+  <div id="panel">
+    <h1>Multi-Field Hex Automaton — 3D</h1>
+    <div class="sub">Each field as its own layer · <a href="./index.html">2D view</a></div>
+
+    <fieldset>
+      <legend>Preset</legend>
+      <select id="presetSelect"></select>
+      <div id="desc"></div>
+      <div class="row" style="margin-top:10px">
+        <button id="restartBtn">Restart</button>
+        <button id="playBtn">Pause</button>
+      </div>
+      <button id="seedBtn" style="margin-top:8px">Add Seed Cluster</button>
+    </fieldset>
+
+    <fieldset>
+      <legend>Controls</legend>
+      <label>Survival Pressure <span class="val" id="pressureVal">0.50</span>
+        <input type="range" id="pressureSlider" min="0" max="1" step="0.01" value="0.5" />
+      </label>
+      <div class="axis-endpoints"><span>Fragile</span><span>Robust</span></div>
+      <div class="axis-desc" id="pressureDesc"></div>
+
+      <label>Momentum Bias <span class="val" id="biasVal">0.50</span>
+        <input type="range" id="biasSlider" min="0" max="1" step="0.01" value="0.5" />
+      </label>
+      <div class="axis-endpoints"><span>Isotropic</span><span>Directional</span></div>
+      <div class="axis-desc" id="biasDesc"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Layers</legend>
+      <label class="checkline"><input type="checkbox" id="layerDensity" checked /> Density</label>
+      <label class="checkline"><input type="checkbox" id="layerEnergy" checked /> Energy</label>
+      <label class="checkline"><input type="checkbox" id="layerMomentum" checked /> Momentum</label>
+      <label class="checkline"><input type="checkbox" id="layerBeams" checked /> Interaction beams</label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Grid</legend>
+      <label>Size <span class="val" id="gridSizeVal"></span>
+        <input type="range" id="gridSize" min="20" max="90" step="5" value="50" />
+      </label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Metrics</legend>
+      <div id="metrics"></div>
+    </fieldset>
+
+    <div class="hint">Scene: <code>src/three/viewer3d.js</code> · Engine/ontology shared with the 2D view.</div>
+  </div>
+
+  <script type="module">
+    import { Engine } from './src/engine.js';
+    import { Viewer3D } from './src/three/viewer3d.js';
+    import { PRESETS, getPreset, getPresetParams, getPresetSeedFn } from './src/presets.js';
+    import { ONTOLOGY_AXES } from './src/ontology.js';
+    import { seedCluster } from './src/seeds.js';
+
+    const sceneWrap = document.getElementById('sceneWrap');
+    const presetSelect = document.getElementById('presetSelect');
+    const descEl = document.getElementById('desc');
+    const restartBtn = document.getElementById('restartBtn');
+    const playBtn = document.getElementById('playBtn');
+    const seedBtn = document.getElementById('seedBtn');
+    const gridSizeInput = document.getElementById('gridSize');
+    const metricsEl = document.getElementById('metrics');
+    const pressureSlider = document.getElementById('pressureSlider');
+    const biasSlider = document.getElementById('biasSlider');
+    const pressureVal = document.getElementById('pressureVal');
+    const biasVal = document.getElementById('biasVal');
+
+    document.getElementById('pressureDesc').textContent = ONTOLOGY_AXES.survivalPressure.description;
+    document.getElementById('biasDesc').textContent = ONTOLOGY_AXES.momentumBias.description;
+
+    const classicGroup = document.createElement('optgroup');
+    classicGroup.label = 'Classic';
+    const discoveredGroup = document.createElement('optgroup');
+    discoveredGroup.label = 'Discovered (resonance sweep)';
+    for (const p of PRESETS) {
+      const opt = document.createElement('option');
+      opt.value = p.id; opt.textContent = p.name;
+      (p.discovered ? discoveredGroup : classicGroup).appendChild(opt);
+    }
+    presetSelect.appendChild(classicGroup);
+    presetSelect.appendChild(discoveredGroup);
+
+    let engine, running = true, frame = 0, lastFpsT = performance.now(), fps = 0;
+    let currentPreset = getPreset('resonant-bloom');
+
+    const viewer = new Viewer3D(sceneWrap);
+
+    const layerState = { density: true, energy: true, momentum: true, beams: true };
+    document.getElementById('layerDensity').addEventListener('change', (e) => { layerState.density = e.target.checked; viewer.setLayerVisible('density', e.target.checked); });
+    document.getElementById('layerEnergy').addEventListener('change', (e) => { layerState.energy = e.target.checked; viewer.setLayerVisible('energy', e.target.checked); });
+    document.getElementById('layerMomentum').addEventListener('change', (e) => { layerState.momentum = e.target.checked; viewer.setLayerVisible('momentum', e.target.checked); });
+    document.getElementById('layerBeams').addEventListener('change', (e) => { layerState.beams = e.target.checked; viewer.setBeamsVisible(e.target.checked); });
+
+    function buildEngine() {
+      const size = parseInt(gridSizeInput.value, 10);
+      const params = getPresetParams(currentPreset, {
+        survivalPressure: parseFloat(pressureSlider.value),
+        momentumBias: parseFloat(biasSlider.value),
+      });
+      const seedFn = getPresetSeedFn(currentPreset);
+      engine = new Engine(size, size, params, seedFn);
+      descEl.textContent = currentPreset.description;
+    }
+
+    function applyOntologyLive() {
+      if (!engine) return;
+      const params = getPresetParams(currentPreset, {
+        survivalPressure: parseFloat(pressureSlider.value),
+        momentumBias: parseFloat(biasSlider.value),
+      });
+      Object.assign(engine.params, params);
+    }
+
+    presetSelect.addEventListener('change', () => {
+      currentPreset = getPreset(presetSelect.value);
+      pressureSlider.value = currentPreset.survivalPressure;
+      biasSlider.value = currentPreset.momentumBias;
+      pressureVal.textContent = currentPreset.survivalPressure.toFixed(2);
+      biasVal.textContent = currentPreset.momentumBias.toFixed(2);
+      buildEngine();
+    });
+    presetSelect.value = currentPreset.id;
+
+    restartBtn.addEventListener('click', buildEngine);
+    gridSizeInput.addEventListener('change', buildEngine);
+    gridSizeInput.addEventListener('input', () => { document.getElementById('gridSizeVal').textContent = gridSizeInput.value; });
+    document.getElementById('gridSizeVal').textContent = gridSizeInput.value;
+
+    seedBtn.addEventListener('click', () => {
+      const c = Math.floor(engine.width / 2) + Math.floor((Math.random() - 0.5) * engine.width * 0.4);
+      const r = Math.floor(engine.height / 2) + Math.floor((Math.random() - 0.5) * engine.height * 0.4);
+      seedCluster(engine, c, r, 2, 0.9, 0.6);
+    });
+
+    pressureSlider.addEventListener('input', () => { pressureVal.textContent = parseFloat(pressureSlider.value).toFixed(2); applyOntologyLive(); });
+    biasSlider.addEventListener('input', () => { biasVal.textContent = parseFloat(biasSlider.value).toFixed(2); applyOntologyLive(); });
+
+    playBtn.addEventListener('click', () => {
+      running = !running;
+      playBtn.textContent = running ? 'Pause' : 'Play';
+    });
+
+    function loop() {
+      if (running) {
+        engine.step();
+        frame++;
+      }
+      viewer.update(engine);
+      viewer.render();
+
+      const now = performance.now();
+      if (now - lastFpsT > 300) {
+        fps = Math.round((frame * 1000) / (now - lastFpsT));
+        frame = 0; lastFpsT = now;
+        const s = engine.lastStats;
+        metricsEl.innerHTML = `
+          <div>FPS <span class="v">${fps}</span></div>
+          <div>Generation <span class="v">${s.generation}</span></div>
+          <div>Alive % <span class="v">${((s.aliveCells / engine.n) * 100).toFixed(1)}%</span></div>
+          <div>Resonance <span class="v">${(s.resonance * 100).toFixed(0)}%</span></div>
+          <div>Leak directionality <span class="v">${(s.leakDirectionality * 100).toFixed(0)}%</span></div>
+          <div>Momentum coherence <span class="v">${(s.momentumCoherence * 100).toFixed(0)}%</span></div>
+        `;
+      }
+      requestAnimationFrame(loop);
+    }
+
+    pressureSlider.value = currentPreset.survivalPressure;
+    biasSlider.value = currentPreset.momentumBias;
+    pressureVal.textContent = currentPreset.survivalPressure.toFixed(2);
+    biasVal.textContent = currentPreset.momentumBias.toFixed(2);
+    buildEngine();
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>

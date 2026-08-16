@@ -1,0 +1,380 @@
+[
+  {
+    "id": "stable-crystal",
+    "name": "Stable Crystal",
+    "outPath": "gifs-v2/stable-crystal.gif",
+    "sizeKB": 3045,
+    "frames": 82,
+    "generationsSimulated": 650,
+    "died": false,
+    "exploded": false,
+    "finalFracAlive": 0.5803,
+    "finalResonance": 0.909,
+    "metricsLog": [
+      {
+        "generation": 0,
+        "aliveCells": 39,
+        "fracAlive": 0.0108,
+        "resonance": 0.481
+      },
+      {
+        "generation": 100,
+        "aliveCells": 619,
+        "fracAlive": 0.1719,
+        "resonance": 0.769
+      },
+      {
+        "generation": 200,
+        "aliveCells": 1978,
+        "fracAlive": 0.5494,
+        "resonance": 0.742
+      },
+      {
+        "generation": 300,
+        "aliveCells": 2119,
+        "fracAlive": 0.5886,
+        "resonance": 0.753
+      },
+      {
+        "generation": 400,
+        "aliveCells": 2090,
+        "fracAlive": 0.5806,
+        "resonance": 0.877
+      },
+      {
+        "generation": 500,
+        "aliveCells": 2085,
+        "fracAlive": 0.5792,
+        "resonance": 0.904
+      },
+      {
+        "generation": 600,
+        "aliveCells": 2088,
+        "fracAlive": 0.58,
+        "resonance": 0.909
+      },
+      {
+        "generation": 649,
+        "aliveCells": 2089,
+        "fracAlive": 0.5803,
+        "resonance": 0.909
+      }
+    ],
+    "tookMs": 12816
+  },
+  {
+    "id": "resonant-bloom",
+    "name": "Resonant Bloom",
+    "outPath": "gifs-v2/resonant-bloom.gif",
+    "sizeKB": 708,
+    "frames": 82,
+    "generationsSimulated": 650,
+    "died": false,
+    "exploded": false,
+    "finalFracAlive": 0.2261,
+    "finalResonance": 0.87,
+    "metricsLog": [
+      {
+        "generation": 0,
+        "aliveCells": 36,
+        "fracAlive": 0.01,
+        "resonance": 0.391
+      },
+      {
+        "generation": 100,
+        "aliveCells": 114,
+        "fracAlive": 0.0317,
+        "resonance": 0.788
+      },
+      {
+        "generation": 200,
+        "aliveCells": 189,
+        "fracAlive": 0.0525,
+        "resonance": 0.957
+      },
+      {
+        "generation": 300,
+        "aliveCells": 261,
+        "fracAlive": 0.0725,
+        "resonance": 0.783
+      },
+      {
+        "generation": 400,
+        "aliveCells": 385,
+        "fracAlive": 0.1069,
+        "resonance": 0.992
+      },
+      {
+        "generation": 500,
+        "aliveCells": 529,
+        "fracAlive": 0.1469,
+        "resonance": 0.834
+      },
+      {
+        "generation": 600,
+        "aliveCells": 720,
+        "fracAlive": 0.2,
+        "resonance": 0.874
+      },
+      {
+        "generation": 649,
+        "aliveCells": 814,
+        "fracAlive": 0.2261,
+        "resonance": 0.87
+      }
+    ],
+    "tookMs": 4412
+  },
+  {
+    "id": "ember-bloom",
+    "name": "Ember Bloom",
+    "outPath": "gifs-v2/ember-bloom.gif",
+    "sizeKB": 1614,
+    "frames": 82,
+    "generationsSimulated": 650,
+    "died": false,
+    "exploded": false,
+    "finalFracAlive": 0.6336,
+    "finalResonance": 0.834,
+    "metricsLog": [
+      {
+        "generation": 0,
+        "aliveCells": 36,
+        "fracAlive": 0.01,
+        "resonance": 0.202
+      },
+      {
+        "generation": 100,
+        "aliveCells": 126,
+        "fracAlive": 0.035,
+        "resonance": 0.955
+      },
+      {
+        "generation": 200,
+        "aliveCells": 278,
+        "fracAlive": 0.0772,
+        "resonance": 0.662
+      },
+      {
+        "generation": 300,
+        "aliveCells": 658,
+        "fracAlive": 0.1828,
+        "resonance": 0.735
+      },
+      {
+        "generation": 400,
+        "aliveCells": 1176,
+        "fracAlive": 0.3267,
+        "resonance": 0.741
+      },
+      {
+        "generation": 500,
+        "aliveCells": 1804,
+        "fracAlive": 0.5011,
+        "resonance": 0.817
+      },
+      {
+        "generation": 600,
+        "aliveCells": 2279,
+        "fracAlive": 0.6331,
+        "resonance": 0.817
+      },
+      {
+        "generation": 649,
+        "aliveCells": 2281,
+        "fracAlive": 0.6336,
+        "resonance": 0.834
+      }
+    ],
+    "tookMs": 7719
+  },
+  {
+    "id": "drifting-vortex",
+    "name": "Drifting Vortex",
+    "outPath": "gifs-v2/drifting-vortex.gif",
+    "sizeKB": 1890,
+    "frames": 82,
+    "generationsSimulated": 650,
+    "died": false,
+    "exploded": false,
+    "finalFracAlive": 0.6047,
+    "finalResonance": 0.85,
+    "metricsLog": [
+      {
+        "generation": 0,
+        "aliveCells": 34,
+        "fracAlive": 0.0094,
+        "resonance": 0.128
+      },
+      {
+        "generation": 100,
+        "aliveCells": 213,
+        "fracAlive": 0.0592,
+        "resonance": 0.766
+      },
+      {
+        "generation": 200,
+        "aliveCells": 313,
+        "fracAlive": 0.0869,
+        "resonance": 0.898
+      },
+      {
+        "generation": 300,
+        "aliveCells": 945,
+        "fracAlive": 0.2625,
+        "resonance": 0.974
+      },
+      {
+        "generation": 400,
+        "aliveCells": 1353,
+        "fracAlive": 0.3758,
+        "resonance": 0.984
+      },
+      {
+        "generation": 500,
+        "aliveCells": 2008,
+        "fracAlive": 0.5578,
+        "resonance": 0.861
+      },
+      {
+        "generation": 600,
+        "aliveCells": 2232,
+        "fracAlive": 0.62,
+        "resonance": 0.83
+      },
+      {
+        "generation": 649,
+        "aliveCells": 2177,
+        "fracAlive": 0.6047,
+        "resonance": 0.85
+      }
+    ],
+    "tookMs": 18710
+  },
+  {
+    "id": "pulsing-heart",
+    "name": "Pulsing Heart",
+    "outPath": "gifs-v2/pulsing-heart.gif",
+    "sizeKB": 1565,
+    "frames": 82,
+    "generationsSimulated": 650,
+    "died": false,
+    "exploded": false,
+    "finalFracAlive": 0.65,
+    "finalResonance": 0.926,
+    "metricsLog": [
+      {
+        "generation": 0,
+        "aliveCells": 35,
+        "fracAlive": 0.0097,
+        "resonance": 0.167
+      },
+      {
+        "generation": 100,
+        "aliveCells": 84,
+        "fracAlive": 0.0233,
+        "resonance": 0.888
+      },
+      {
+        "generation": 200,
+        "aliveCells": 163,
+        "fracAlive": 0.0453,
+        "resonance": 0.715
+      },
+      {
+        "generation": 300,
+        "aliveCells": 511,
+        "fracAlive": 0.1419,
+        "resonance": 0.948
+      },
+      {
+        "generation": 400,
+        "aliveCells": 1812,
+        "fracAlive": 0.5033,
+        "resonance": 0.883
+      },
+      {
+        "generation": 500,
+        "aliveCells": 1890,
+        "fracAlive": 0.525,
+        "resonance": 0.932
+      },
+      {
+        "generation": 600,
+        "aliveCells": 1849,
+        "fracAlive": 0.5136,
+        "resonance": 0.895
+      },
+      {
+        "generation": 649,
+        "aliveCells": 2340,
+        "fracAlive": 0.65,
+        "resonance": 0.926
+      }
+    ],
+    "tookMs": 15550
+  },
+  {
+    "id": "charged-current",
+    "name": "Charged Current",
+    "outPath": "gifs-v2/charged-current.gif",
+    "sizeKB": 2840,
+    "frames": 82,
+    "generationsSimulated": 650,
+    "died": false,
+    "exploded": false,
+    "finalFracAlive": 0.5917,
+    "finalResonance": 0.818,
+    "metricsLog": [
+      {
+        "generation": 0,
+        "aliveCells": 38,
+        "fracAlive": 0.0106,
+        "resonance": 0.346
+      },
+      {
+        "generation": 100,
+        "aliveCells": 459,
+        "fracAlive": 0.1275,
+        "resonance": 0.965
+      },
+      {
+        "generation": 200,
+        "aliveCells": 1438,
+        "fracAlive": 0.3994,
+        "resonance": 0.91
+      },
+      {
+        "generation": 300,
+        "aliveCells": 2614,
+        "fracAlive": 0.7261,
+        "resonance": 0.754
+      },
+      {
+        "generation": 400,
+        "aliveCells": 2300,
+        "fracAlive": 0.6389,
+        "resonance": 0.751
+      },
+      {
+        "generation": 500,
+        "aliveCells": 2166,
+        "fracAlive": 0.6017,
+        "resonance": 0.8
+      },
+      {
+        "generation": 600,
+        "aliveCells": 2140,
+        "fracAlive": 0.5944,
+        "resonance": 0.813
+      },
+      {
+        "generation": 649,
+        "aliveCells": 2130,
+        "fracAlive": 0.5917,
+        "resonance": 0.818
+      }
+    ],
+    "tookMs": 18820
+  }
+]
