@@ -1,0 +1,49 @@
+{
+  "name": "Multi-Field Hex Automaton — Live explorer",
+  "short_name": "Hex Automaton",
+  "description": "Three coupled fields on a hex torus. Pick a preset, drag two sliders, export a portable rule kit.",
+  "start_url": "/hex-automaton-explore/",
+  "scope": "/hex-automaton-explore/",
+  "id": "/hex-automaton-explore/",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#0a0b10",
+  "background_color": "#05060a",
+  "icons": [
+    { "src": "favicon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "favicon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ],
+  "screenshots": [
+    {
+      "src": "og-image.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Hex Automaton social card — density field and live explorer"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "2D Explorer",
+      "short_name": "2D",
+      "description": "Layered hex explorer with presets and rule kits",
+      "url": "/hex-automaton-explore/"
+    },
+    {
+      "name": "3D Viewer",
+      "short_name": "3D",
+      "description": "Stacked field layers with interaction beams",
+      "url": "/hex-automaton-explore/viewer3d.html"
+    },
+    {
+      "name": "Langton's Arm",
+      "short_name": "Arm",
+      "description": "Hex-grid Langton's Ant",
+      "url": "/hex-automaton-explore/langtons-arm.html"
+    }
+  ],
+  "categories": ["education", "entertainment", "utilities"],
+  "lang": "en",
+  "dir": "ltr"
+}

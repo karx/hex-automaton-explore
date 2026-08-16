@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <style>
+    .bg { fill: #05060a; }
+    .outer { fill: #ffb545; }
+    .inner { fill: #4a4de0; }
+    @media (prefers-color-scheme: light) {
+      .bg { fill: #f4f1ea; }
+      .outer { fill: #4a4de0; }
+      .inner { fill: #ffb545; }
+    }
+  </style>
+  <rect class="bg" width="32" height="32"/>
+  <polygon class="outer" points="16,3.2 26.4,9.2 26.4,22.8 16,28.8 5.6,22.8 5.6,9.2"/>
+  <polygon class="inner" points="16,11.2 20.2,13.6 20.2,18.4 16,20.8 11.8,18.4 11.8,13.6"/>
+</svg>

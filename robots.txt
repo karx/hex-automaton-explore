@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://karx.github.io/hex-automaton-explore/sitemap.xml

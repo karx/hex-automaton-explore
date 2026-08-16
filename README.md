@@ -216,6 +216,10 @@ node scripts/verify-rulekit.mjs        # headless round-trip: export -> parse ->
 npx serve -l 4177 .                    # then, for the browser UI path:
 node scripts/smoke-test-rulekit.mjs    # export/import/formula on both index.html and viewer3d.html
 
+# SEO assets (OG card + favicon PNGs)
+node scripts/generate-seo-assets.mjs
+node scripts/verify-seo.mjs            # head tags, JSON-LD, robots/sitemap/manifest
+
 # Langton's Arm (hex Langton's Ant)
 node scripts/verify-langtons-arm.mjs   # parseRule, determinism, no-highway, Coral Echo identity
 node scripts/analyze-langtons-arm.mjs  # long-run displacement analysis (highway detection)
@@ -246,6 +250,10 @@ src/langtonsAntRender.js auto-fitting canvas rendering for the ant's growing pat
 index.html               interactive 2D browser demo
 viewer3d.html            interactive 3D browser demo
 langtons-arm.html        interactive Langton's Arm demo
+og-image.png             Open Graph / Twitter card (1200x630)
+favicon.svg              hex favicon (dark/light)
+site.webmanifest         PWA manifest (project Pages paths)
+robots.txt sitemap.xml   crawl hints
 scripts/                 sweep, discovery, verification, GIF + still capture
 gifs/                    v1 GIFs (one per original variant)
 gifs-v2/                 v2 GIFs (layered rendering, showcase presets)

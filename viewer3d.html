@@ -1,8 +1,65 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" prefix="og: https://ogp.me/ns#">
 <head>
 <meta charset="utf-8" />
-<title>Multi-Field Hex Automaton — 3D Viewer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hex Automaton — 3D stacked field layers</title>
+<meta name="title" content="Hex Automaton — 3D stacked field layers" />
+<meta name="description" content="Orbit density, energy, and momentum as stacked layers. Same presets and sliders as 2D — beams track real production, leak, and reinforcement." />
+<meta name="keywords" content="hexagonal cellular automaton, 3D visualization, hex grid, density energy momentum, three.js, interactive simulation, field layers" />
+<meta name="author" content="karx" />
+<meta name="robots" content="index, follow" />
+<meta name="googlebot" content="index, follow" />
+<meta name="language" content="English" />
+<meta name="revisit-after" content="7 days" />
+<meta name="rating" content="General" />
+<link rel="canonical" href="https://karx.github.io/hex-automaton-explore/viewer3d.html" />
+<meta name="theme-color" content="#05060a" />
+<meta name="color-scheme" content="dark" />
+<meta name="msapplication-TileColor" content="#05060a" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Hex Automaton" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://karx.github.io/hex-automaton-explore/viewer3d.html" />
+<meta property="og:title" content="Hex Automaton — 3D stacked field layers" />
+<meta property="og:description" content="Orbit density, energy, and momentum as physical layers. Same presets and sliders as the 2D explorer." />
+<meta property="og:image" content="https://karx.github.io/hex-automaton-explore/og-image.png" />
+<meta property="og:image:secure_url" content="https://karx.github.io/hex-automaton-explore/og-image.png" />
+<meta property="og:image:type" content="image/png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="Multi-Field Hex Automaton — 3D stacked field layers" />
+<meta property="og:site_name" content="Multi-Field Hex Automaton" />
+<meta property="og:locale" content="en_US" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:url" content="https://karx.github.io/hex-automaton-explore/viewer3d.html" />
+<meta name="twitter:title" content="Hex Automaton — 3D stacked field layers" />
+<meta name="twitter:description" content="Orbit density, energy, and momentum as physical layers. Same presets and sliders as the 2D explorer." />
+<meta name="twitter:image" content="https://karx.github.io/hex-automaton-explore/og-image.png" />
+<meta name="twitter:image:alt" content="Multi-Field Hex Automaton 3D viewer" />
+<link rel="icon" type="image/svg+xml" href="favicon.svg" />
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<link rel="manifest" href="site.webmanifest" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Multi-Field Hex Automaton 3D Viewer",
+  "url": "https://karx.github.io/hex-automaton-explore/viewer3d.html",
+  "description": "3D viewer that stacks density, energy, and momentum as physical layers with interaction beams driven by the live simulation.",
+  "applicationCategory": "EducationalApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires JavaScript and WebGL",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "author": { "@type": "Person", "name": "karx", "url": "https://github.com/karx" },
+  "image": "https://karx.github.io/hex-automaton-explore/og-image.png",
+  "isPartOf": { "@type": "WebApplication", "name": "Multi-Field Hex Automaton", "url": "https://karx.github.io/hex-automaton-explore/" },
+  "inLanguage": "en",
+  "isAccessibleForFree": true
+}
+</script>
 <script type="importmap">
 {
   "imports": {

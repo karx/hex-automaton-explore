@@ -1,8 +1,65 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" prefix="og: https://ogp.me/ns#">
 <head>
 <meta charset="utf-8" />
-<title>Langton's Arm — Hex Ant (rule LR)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Langton's Arm — Hex ant, no highway</title>
+<meta name="title" content="Langton's Arm — Hex ant, no highway" />
+<meta name="description" content="Run a hex-grid Langton's Ant. Rule LR grows a fractal shell, not a highway — stable past ten million steps. Change the L/R rule live." />
+<meta name="keywords" content="langton's ant, hex grid, cellular automaton, fractal shell, langton highway, interactive ant, hexagonal CA" />
+<meta name="author" content="karx" />
+<meta name="robots" content="index, follow" />
+<meta name="googlebot" content="index, follow" />
+<meta name="language" content="English" />
+<meta name="revisit-after" content="7 days" />
+<meta name="rating" content="General" />
+<link rel="canonical" href="https://karx.github.io/hex-automaton-explore/langtons-arm.html" />
+<meta name="theme-color" content="#0a0b10" />
+<meta name="color-scheme" content="dark" />
+<meta name="msapplication-TileColor" content="#0a0b10" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Langton's Arm" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://karx.github.io/hex-automaton-explore/langtons-arm.html" />
+<meta property="og:title" content="Langton's Arm — Hex ant, no highway" />
+<meta property="og:description" content="Rule LR on a hex grid grows a mirror-symmetric fractal shell, not the classic highway. Stable past ten million steps." />
+<meta property="og:image" content="https://karx.github.io/hex-automaton-explore/og-image.png" />
+<meta property="og:image:secure_url" content="https://karx.github.io/hex-automaton-explore/og-image.png" />
+<meta property="og:image:type" content="image/png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="Langton's Arm — hex-grid Langton's Ant" />
+<meta property="og:site_name" content="Multi-Field Hex Automaton" />
+<meta property="og:locale" content="en_US" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:url" content="https://karx.github.io/hex-automaton-explore/langtons-arm.html" />
+<meta name="twitter:title" content="Langton's Arm — Hex ant, no highway" />
+<meta name="twitter:description" content="Rule LR on a hex grid grows a fractal shell, not the classic highway. Stable past ten million steps." />
+<meta name="twitter:image" content="https://karx.github.io/hex-automaton-explore/og-image.png" />
+<meta name="twitter:image:alt" content="Langton's Arm social card" />
+<link rel="icon" type="image/svg+xml" href="favicon.svg" />
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<link rel="manifest" href="site.webmanifest" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Langton's Arm",
+  "url": "https://karx.github.io/hex-automaton-explore/langtons-arm.html",
+  "description": "Hex-grid generalization of Langton's Ant. Rule LR grows a bounded fractal shell instead of a highway.",
+  "applicationCategory": "EducationalApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires JavaScript",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "author": { "@type": "Person", "name": "karx", "url": "https://github.com/karx" },
+  "image": "https://karx.github.io/hex-automaton-explore/og-image.png",
+  "isPartOf": { "@type": "WebApplication", "name": "Multi-Field Hex Automaton", "url": "https://karx.github.io/hex-automaton-explore/" },
+  "inLanguage": "en",
+  "isAccessibleForFree": true
+}
+</script>
 <style>
   :root { color-scheme: dark; }
   * { box-sizing: border-box; }
