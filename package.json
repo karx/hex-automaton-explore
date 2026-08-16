@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "npx --yes serve .",
-    "test": "node scripts/verify-rulekit.mjs && node scripts/verify-presets.mjs && node scripts/regress-presets.mjs"
+    "test": "node scripts/verify-rulekit.mjs && node scripts/verify-langtons-arm.mjs && node scripts/verify-presets.mjs && node scripts/regress-presets.mjs"
   },
   "keywords": [
     "cellular-automaton",

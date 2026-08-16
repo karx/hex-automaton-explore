@@ -10,9 +10,11 @@ Three coupled fields on a hexagonal torus — **density**, **energy**, and **mom
 
 v2 layers density, energy glow, momentum arrows, and leak particles, and replaces raw engine knobs with two sliders (**Survival Pressure**, **Momentum Bias**). A 13-preset library was found by sweeping those axes. v3 adds a 3D viewer: each field as its own stacked layer, linked by beams that track per-cell production, reinforcement, and leak. v4 adds a **Rule Set Formula** view (the live rule set as real numbers, not just a param name), a **rule kit export/import** (JSON — share the ruleset alone, or with exact canvas state to resume mid-growth), and a full glossary of what every attribute actually does.
 
-**Run it:** [`index.html`](index.html) (2D) · [`viewer3d.html`](viewer3d.html) (3D) — needs a static server, see [Quick start](#quick-start).
+Also in the repo, unrelated to the field engine but sharing its hex-grid math: **[Langton's Arm](langtons-arm.html)**, a hex-generalized Langton's Ant. Rule LR turns out *not* to build the classic highway on this grid — instead it grows a mirror-symmetric fractal shell pattern, stable out to 10M+ steps. A follow-up sweep tried to evoke that character in the field engine itself; genuine nested rings never emerged, but the attempt produced **Coral Echo** (preset #14) — Resonant Bloom's exact rules, point-seeded into a compact branching fractal instead. See [`docs/LANGTONS_ARM.md`](docs/LANGTONS_ARM.md) for the full, honest writeup of what was tried and what didn't work.
 
-**Write-ups:** [`docs/VARIANT_REPORT.md`](docs/VARIANT_REPORT.md) (v1 engine + original 8 variants) · [`docs/VISUALIZATION_STYLE_GUIDE.md`](docs/VISUALIZATION_STYLE_GUIDE.md) (v2 visual language, ontology, presets, 3D) · [`docs/ATTRIBUTE_GLOSSARY.md`](docs/ATTRIBUTE_GLOSSARY.md) (v4 — what every parameter and slider means, mental model)
+**Run it:** [`index.html`](index.html) (2D) · [`viewer3d.html`](viewer3d.html) (3D) · [`langtons-arm.html`](langtons-arm.html) (Langton's Arm) — needs a static server, see [Quick start](#quick-start).
+
+**Write-ups:** [`docs/VARIANT_REPORT.md`](docs/VARIANT_REPORT.md) (v1 engine + original 8 variants) · [`docs/VISUALIZATION_STYLE_GUIDE.md`](docs/VISUALIZATION_STYLE_GUIDE.md) (v2 visual language, ontology, presets, 3D) · [`docs/ATTRIBUTE_GLOSSARY.md`](docs/ATTRIBUTE_GLOSSARY.md) (v4 — what every parameter and slider means, mental model) · [`docs/LANGTONS_ARM.md`](docs/LANGTONS_ARM.md) (hex Langton's Ant findings)
 
 ## Showcase
 
@@ -136,7 +138,7 @@ current numbers substituted in, not a raw parameter dump.
 
 ## Preset library
 
-The first eight are the original v1 variants at neutral sliders `(0.5, 0.5)`. The last five were found by `scripts/discover.mjs` and verified to 1000 generations.
+The first eight are the original v1 variants at neutral sliders `(0.5, 0.5)`. The next five were found by `scripts/discover.mjs` and verified to 1000 generations. The last was found by `scripts/discover-shell.mjs`, a sweep aimed at evoking Langton's Arm's fractal character (see [`docs/LANGTONS_ARM.md`](docs/LANGTONS_ARM.md)).
 
 | Preset | Archetype | P / B | Character |
 |---|---|---|---|
@@ -153,6 +155,7 @@ The first eight are the original v1 variants at neutral sliders `(0.5, 0.5)`. Th
 | Resonant Bloom | spreading-front-ring | 0.5 / 0.1 | Still growing at gen 1000, resonance ~1 |
 | Ember Bloom | ember-ring | 0.5 / 0.1 | Sparse ember flipped into a 63% bloom |
 | Pulse Current | storm-field | 0.5 / 0.9 | Uneven surges, resonance spikes to 0.99 |
+| Coral Echo | spreading-front-ring | 0.5 / 0.1 | Resonant Bloom's rules, point-seeded — compact branching fractal, not a ring |
 
 ## v1 — flat renderer
 
@@ -178,11 +181,12 @@ node scripts/verify.mjs                # 1500-gen stability check on top sweep c
 node scripts/verify-line.mjs           # line/single-cell seed checks
 node scripts/generate-gifs.mjs         # renders all 8 variants -> gifs/*.gif + gifs/summary.json
 
-# v2 (ontology-guided discovery sweep, 13-preset library)
+# v2 (ontology-guided discovery sweep, 14-preset library)
 node scripts/regress-presets.mjs       # confirm v1 variants still survive after the engine change
 node scripts/discover.mjs              # sweep Survival Pressure x Momentum Bias x archetypes
 node scripts/verify-discoveries.mjs    # 1000-gen stability check on discovery-sweep winners
-node scripts/verify-presets.mjs        # confirm all 13 presets.js entries survive end-to-end
+node scripts/discover-shell.mjs        # sweep aimed at Langton's-Arm-style shell/lace character
+node scripts/verify-presets.mjs        # confirm all 14 presets.js entries survive end-to-end
 node scripts/generate-gifs-v2.mjs      # renders showcase presets with full v2 layers -> gifs-v2/
 
 # README stills (late-generation PNGs — GIFs start at gen 0, which is a tiny seed)
@@ -201,6 +205,13 @@ node scripts/smoke-test-3d.mjs         # headless Chromium + software-GL
 node scripts/verify-rulekit.mjs        # headless round-trip: export -> parse -> resume -> step, bit-identical
 npx serve -l 4177 .                    # then, for the browser UI path:
 node scripts/smoke-test-rulekit.mjs    # export/import/formula on both index.html and viewer3d.html
+
+# Langton's Arm (hex Langton's Ant)
+node scripts/verify-langtons-arm.mjs   # parseRule, determinism, no-highway, Coral Echo identity
+node scripts/analyze-langtons-arm.mjs  # long-run displacement analysis (highway detection)
+node scripts/render-langtons-arm.mjs   # snapshot PNGs at increasing step counts -> scripts/
+npx serve -l 4178 .
+node scripts/smoke-test-langtons-arm.mjs
 ```
 
 ## Layout
@@ -209,7 +220,7 @@ node scripts/smoke-test-rulekit.mjs    # export/import/formula on both index.htm
 src/engine.js            CA engine: hex grid, fields, rules, leak-direction softmax,
                          per-cell interaction fields, lastStats
 src/ontology.js          Survival Pressure / Momentum Bias -> raw param transforms
-src/presets.js           the 13-preset library
+src/presets.js           the 14-preset library
 src/variants.js          the original 8 v1 variants (raw params)
 src/render.js            layered 2D hex rendering
 src/particles.js         leak-flow particle system (2D)
@@ -220,8 +231,11 @@ src/three/viewer3d.js    3D stacked InstancedMesh layers + interaction beams
 src/paramMeta.js         per-parameter meaning/effect metadata (glossary + tooltip source)
 src/formula.js           live rule set -> human-readable formula text
 src/ruleKit.js           rule kit export/import (params + optional canvas state)
+src/langtonsAnt.js       hex-generalized Langton's Ant (sparse infinite grid; unrelated to Engine)
+src/langtonsAntRender.js auto-fitting canvas rendering for the ant's growing pattern
 index.html               interactive 2D browser demo
 viewer3d.html            interactive 3D browser demo
+langtons-arm.html        interactive Langton's Arm demo
 scripts/                 sweep, discovery, verification, GIF + still capture
 gifs/                    v1 GIFs (one per original variant)
 gifs-v2/                 v2 GIFs (layered rendering, showcase presets)
@@ -229,4 +243,5 @@ docs/shots/              README stills, layer breakdown, UI screenshots
 docs/VARIANT_REPORT.md   v1 write-up
 docs/VISUALIZATION_STYLE_GUIDE.md    v2 + v3 write-up
 docs/ATTRIBUTE_GLOSSARY.md           v4 write-up — every parameter + ontology slider, explained
+docs/LANGTONS_ARM.md                 hex Langton's Ant findings (no highway, fractal shell instead)
 ```

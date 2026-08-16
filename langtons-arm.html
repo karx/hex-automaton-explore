@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Langton's Arm — Hex Ant (rule LR)</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: #0a0b10; color: #d8dae2;
+    font: 14px/1.4 system-ui, -apple-system, Segoe UI, sans-serif;
+    display: flex; height: 100vh; overflow: hidden;
+  }
+  #canvasWrap { flex: 1; position: relative; background: #05060a; }
+  #cv { display: block; width: 100%; height: 100%; }
+  #panel {
+    width: 340px; flex-shrink: 0; background: #10121a; border-left: 1px solid #23263a;
+    padding: 16px; overflow-y: auto;
+  }
+  h1 { font-size: 15px; margin: 0 0 4px; letter-spacing: .02em; }
+  .sub { color: #7b7f95; font-size: 12px; margin-bottom: 12px; }
+  .sub a { color: #7ecbff; }
+  fieldset { border: 1px solid #23263a; border-radius: 8px; margin-bottom: 12px; padding: 10px 12px; }
+  legend { padding: 0 6px; color: #9ea3ba; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
+  label { display: flex; justify-content: space-between; align-items: center; margin: 8px 0; gap: 8px; font-size: 12px; }
+  label span.val { color: #7ecbff; font-variant-numeric: tabular-nums; min-width: 4.5em; text-align: right; }
+  input[type=range] { flex: 1; accent-color: #7ecbff; }
+  input[type=text] {
+    flex: 1; background: #191c28; color: #d8dae2; border: 1px solid #2c2f42;
+    border-radius: 6px; padding: 6px 8px; font-size: 13px; font-family: monospace;
+  }
+  select, button {
+    width: 100%; background: #191c28; color: #d8dae2; border: 1px solid #2c2f42;
+    border-radius: 6px; padding: 8px; font-size: 13px; cursor: pointer;
+  }
+  button:hover, select:hover { border-color: #7ecbff; }
+  .row { display: flex; gap: 8px; margin-top: 6px; }
+  .row > * { flex: 1; }
+  .hint { font-size: 11px; color: #5b5f75; margin-top: 8px; }
+  code { background: #191c28; padding: 1px 4px; border-radius: 4px; }
+  #metrics { font-size: 12px; color: #9ea3ba; }
+  #metrics div { display: flex; justify-content: space-between; padding: 2px 0; }
+  #metrics span.v { color: #d8dae2; font-variant-numeric: tabular-nums; }
+  #ruleStatus { min-height: 1.2em; font-size: 11px; margin-top: 4px; }
+  #ruleStatus.err { color: #ff7a7a; }
+  #ruleStatus.ok { color: #8fe0ff; }
+  #highwayBadge {
+    padding: 8px 10px; border-radius: 6px; background: #181b26; border: 1px solid #2c2f42;
+    font-size: 12px; margin-top: 8px;
+  }
+</style>
+</head>
+<body>
+  <div id="canvasWrap"><canvas id="cv"></canvas></div>
+  <div id="panel">
+    <h1>Langton's Arm</h1>
+    <div class="sub">Hex-generalized Langton's Ant · <a href="./index.html">2D fields</a> · <a href="./viewer3d.html">3D fields</a></div>
+
+    <fieldset>
+      <legend>Rule</legend>
+      <label>Rule string
+        <input type="text" id="ruleInput" value="LR" maxlength="16" />
+      </label>
+      <div class="row">
+        <button id="applyRuleBtn">Apply &amp; Restart</button>
+      </div>
+      <div id="ruleStatus"></div>
+      <div class="hint">One L/R per cell state (state 0 → rule[0], state 1 → rule[1], …). Cell state advances by 1 (mod length) each visit. Classic Langton's Ant is "LR".</div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Playback</legend>
+      <div class="row">
+        <button id="playBtn">Pause</button>
+        <button id="stepBtn">Step ×1</button>
+      </div>
+      <label style="margin-top:10px">Steps / frame <span class="val" id="speedVal">100</span>
+        <input type="range" id="speedSlider" min="0" max="4.3" step="0.05" value="2" />
+      </label>
+      <div class="hint">Log scale — full right ≈ 20,000 steps rendered per frame, for fast-forwarding toward the interesting step counts.</div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Jump to</legend>
+      <div class="row">
+        <button data-jump="1000">1K</button>
+        <button data-jump="10000">10K</button>
+        <button data-jump="100000">100K</button>
+      </div>
+      <div class="row">
+        <button data-jump="1000000">1M</button>
+        <button data-jump="5000000">5M</button>
+        <button id="resetBtn">Reset</button>
+      </div>
+      <div class="hint" id="jumpStatus"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Stats</legend>
+      <div id="metrics"></div>
+      <div id="highwayBadge">
+        <div>Displacement from origin: <span id="dispVal">0</span> cells</div>
+        <div class="hint" style="margin-top:4px" id="highwayNote">A steadily growing displacement means the ant has locked into a directional "highway." Rule LR on this hex grid does not — see <code>docs/LANGTONS_ARM.md</code>.</div>
+      </div>
+    </fieldset>
+
+    <div class="hint">Engine: <code>src/langtonsAnt.js</code> · Rendering: <code>src/langtonsAntRender.js</code> — a sparse infinite grid, unrelated to the density/energy/momentum field engine used elsewhere in this project.</div>
+  </div>
+
+  <script type="module">
+    import { LangtonsAnt } from './src/langtonsAnt.js';
+    import { renderLangtonsAnt } from './src/langtonsAntRender.js';
+
+    const canvas = document.getElementById('cv');
+    const ctx = canvas.getContext('2d');
+    const canvasWrap = document.getElementById('canvasWrap');
+    const ruleInput = document.getElementById('ruleInput');
+    const ruleStatus = document.getElementById('ruleStatus');
+    const playBtn = document.getElementById('playBtn');
+    const speedSlider = document.getElementById('speedSlider');
+    const speedVal = document.getElementById('speedVal');
+    const metricsEl = document.getElementById('metrics');
+    const dispVal = document.getElementById('dispVal');
+    const jumpStatus = document.getElementById('jumpStatus');
+
+    let ant = new LangtonsAnt('LR');
+    let running = true;
+    let lastDispSample = 0;
+    let lastDispStep = 0;
+
+    function resizeCanvas() {
+      canvas.width = canvasWrap.clientWidth;
+      canvas.height = canvasWrap.clientHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function stepsPerFrame() {
+      return Math.max(1, Math.round(Math.pow(10, parseFloat(speedSlider.value))));
+    }
+    speedSlider.addEventListener('input', () => {
+      speedVal.textContent = stepsPerFrame().toLocaleString();
+    });
+    speedVal.textContent = stepsPerFrame().toLocaleString();
+
+    document.getElementById('applyRuleBtn').addEventListener('click', () => {
+      try {
+        ant = new LangtonsAnt(ruleInput.value);
+        ruleStatus.textContent = `Restarted with rule "${ant.ruleString}" (${ant.states} states).`;
+        ruleStatus.className = 'ok';
+      } catch (e) {
+        ruleStatus.textContent = `Error: ${e.message}`;
+        ruleStatus.className = 'err';
+      }
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      ant = new LangtonsAnt(ant.ruleString);
+      jumpStatus.textContent = '';
+    });
+
+    document.getElementById('stepBtn').addEventListener('click', () => {
+      ant.step();
+      render();
+    });
+
+    playBtn.addEventListener('click', () => {
+      running = !running;
+      playBtn.textContent = running ? 'Pause' : 'Play';
+    });
+
+    for (const btn of document.querySelectorAll('[data-jump]')) {
+      btn.addEventListener('click', () => {
+        const target = parseInt(btn.dataset.jump, 10);
+        if (target <= ant.steps) {
+          jumpStatus.textContent = `Already past step ${target.toLocaleString()} (at ${ant.steps.toLocaleString()}) — Reset first to jump backward.`;
+          return;
+        }
+        const t0 = performance.now();
+        ant.stepN(target - ant.steps);
+        jumpStatus.textContent = `Ran to step ${target.toLocaleString()} in ${(performance.now() - t0).toFixed(0)}ms.`;
+        render();
+      });
+    }
+
+    function render() {
+      const { cellCount } = renderLangtonsAnt(ctx, ant, canvas.width, canvas.height);
+      const disp = ant.displacement();
+      dispVal.textContent = disp.toFixed(1);
+      metricsEl.innerHTML = `
+        <div>Steps <span class="v">${ant.steps.toLocaleString()}</span></div>
+        <div>Visited cells <span class="v">${cellCount.toLocaleString()}</span></div>
+        <div>Bounding box <span class="v">${ant.maxQ - ant.minQ} × ${ant.maxR - ant.minR}</span></div>
+        <div>Heading <span class="v">${ant.dir} / 6</span></div>
+      `;
+    }
+
+    function loop() {
+      if (running) {
+        ant.stepN(stepsPerFrame());
+      }
+      render();
+      requestAnimationFrame(loop);
+    }
+
+    render();
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>

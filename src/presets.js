@@ -156,6 +156,16 @@ export const PRESETS = [
     discovered: true,
     description: 'Storm Field with strong directional bias but neutral survival pressure: climbs unevenly through several surges (27% -> 44% -> 41% -> 62%) with resonance frequently exceeding 0.9 and briefly hitting 0.99 at generation 400 — visibly pulses rather than climbing smoothly.',
   },
+  {
+    id: 'coral-echo',
+    name: 'Coral Echo',
+    archetype: 'spreading-front-ring',
+    survivalPressure: 0.5,
+    momentumBias: 0.1,
+    seedType: 'cluster',
+    discovered: true,
+    description: 'The exact same rules and sliders as Resonant Bloom — only the seed shape changes, from a ring to a small point cluster. That one change produces a completely different early character: a compact, radially-branching, coral-like fractal growing outward from a single origin, with visible internal maze veining. Slow-burning (0.2% alive for 500+ generations before breaking out), so its most striking phase is generations ~100-600, before it grows large enough to self-interfere on the torus and thicken into a filled mass like the project\'s other wavefront presets. An evocation of Langton\'s Arm\'s fractal branching, not its concentric-ring geometry — see docs/LANGTONS_ARM.md for why genuine nested rings did not emerge from any configuration tried.',
+  },
 ];
 
 export function getPreset(id) {
