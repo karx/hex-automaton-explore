@@ -69,7 +69,7 @@ for (let g = 0; g < 400; g++) {
 check('coral-echo survives 400 gens on a 40x40 grid', !died && !exploded && engine.lastStats.aliveCells > 0);
 
 if (failed) {
-  console.error(`\nverify-langtons-arm: ${failed} check(s) failed`);
+  console.error(`\nverify-langtons-ant: ${failed} check(s) failed`);
   process.exit(1);
 }
-console.log('\nverify-langtons-arm: all checks passed');
+console.log('\nverify-langtons-ant: all checks passed');

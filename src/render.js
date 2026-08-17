@@ -73,12 +73,40 @@ export function renderDensityLayer(ctx, engine, layout, cellSize) {
 
 // Energy -> additive-blend radial glow, warm for positive energy (production/heat),
 // cool violet for negative energy (deficit). Skipped entirely for near-zero energy.
+//
+// The two gradients are built ONCE per call, in local space (centered at the
+// origin), then repositioned per-cell via ctx.translate() rather than passing
+// each cell's own (cx, cy) into a fresh createRadialGradient() call. Per-cell
+// intensity (`mag`) is applied via globalAlpha instead of being baked into the
+// gradient's color stops, which is mathematically equivalent (globalAlpha
+// multiplies the fill's alpha channel, same as scaling the stop's alpha) but
+// avoids reconstructing a gradient for every energetic cell. This mattered:
+// createRadialGradient() per cell was the dominant cost by far — isolating
+// this layer alone (density/momentum/particles off) dropped FPS from a solid
+// 60 to ~8 on a ~60%-alive preset (~2900 energetic cells on a 70x70 grid),
+// while every other layer held 60fps at the same cell count.
 export function renderEnergyGlowLayer(ctx, engine, layout, cellSize) {
   const { positions, offsetX, offsetY } = layout;
   const { energy, n } = engine;
   const prevOp = ctx.globalCompositeOperation;
   ctx.globalCompositeOperation = 'lighter';
-  const glowR = cellSize * 2.1;
+  // Radius matters far more than gradient/blend-mode choice for this layer's
+  // cost — it's fill-rate/rasterization-bound, not JS-object-allocation-bound
+  // (measured via scripts/profile-energy-isolate.html: shrinking radius from
+  // 17px to 10px at ~2900 overlapping cells took a synthetic worst-case from
+  // ~12fps to ~34fps, while switching blend mode or reusing one shared
+  // gradient object made almost no difference on their own). 1.3x still
+  // overlaps neighboring hex cells enough to merge into a bloom — hex
+  // spacing at this cellSize is ~1.7x cellSize center-to-center — just not
+  // as aggressively as the original 2.1x.
+  const glowR = cellSize * 1.3;
+
+  const warmGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, glowR);
+  warmGrad.addColorStop(0, 'rgba(255, 200, 110, 0.55)');
+  warmGrad.addColorStop(1, 'rgba(255, 160, 60, 0)');
+  const coolGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, glowR);
+  coolGrad.addColorStop(0, 'rgba(130, 140, 255, 0.4)');
+  coolGrad.addColorStop(1, 'rgba(90, 90, 220, 0)');
 
   for (let i = 0; i < n; i++) {
     const e = energy[i];
@@ -86,19 +114,17 @@ export function renderEnergyGlowLayer(ctx, engine, layout, cellSize) {
     const [px, py] = positions[i];
     const cx = px + offsetX, cy = py + offsetY;
     const mag = Math.min(1, Math.abs(e) / 2);
-    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowR);
-    if (e > 0) {
-      grad.addColorStop(0, `rgba(255, 200, 110, ${0.55 * mag})`);
-      grad.addColorStop(1, 'rgba(255, 160, 60, 0)');
-    } else {
-      grad.addColorStop(0, `rgba(130, 140, 255, ${0.4 * mag})`);
-      grad.addColorStop(1, 'rgba(90, 90, 220, 0)');
-    }
-    ctx.fillStyle = grad;
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.globalAlpha = mag;
+    ctx.fillStyle = e > 0 ? warmGrad : coolGrad;
     ctx.beginPath();
-    ctx.arc(cx, cy, glowR, 0, Math.PI * 2);
+    ctx.arc(0, 0, glowR, 0, Math.PI * 2);
     ctx.fill();
+    ctx.restore();
   }
+  ctx.globalAlpha = 1;
   ctx.globalCompositeOperation = prevOp;
 }
 

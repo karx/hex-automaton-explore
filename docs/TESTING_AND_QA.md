@@ -1,0 +1,83 @@
+# Testing & QA — What's Actually Verified Here
+
+An honest accounting of this project's test coverage, current as of the
+state verified below (`npm test`, exit code 0). No formal test framework is
+used anywhere in this repo — everything described here is bespoke Node
+scripts and manual browser checks. This document exists so that "tests
+pass" and "CI is green" mean something specific and checkable, not a vague
+assurance.
+
+## TL;DR
+
+- **No test framework.** No Jest, Vitest, Mocha, AVA, tap, or `node:test`. No coverage tool. No linter (no ESLint/Prettier config). Every check is a plain `.mjs` script run with `node`.
+- **`npm test` runs in CI on every push/PR and gates the GitHub Pages deploy** (`.github/workflows/ci.yml`) — but only **3 of the 5 scripts it chains can actually fail the build.** The other 2 compute pass/fail data, print it, and always exit 0 regardless of the result. See "The gap" below — this is the single most important thing to know before trusting a green CI run.
+- **Simulation correctness (math/invariants) is well covered** and CI-enforced: rule-kit export/import round-trips exactly, Langton's Ant is deterministic, hex direction ordering is verified, SEO metadata is checked line-by-line.
+- **All rendering — 2D canvas, 3D/WebGL, every UI interaction — has zero automated coverage.** It's checked only when a human (or an agent, mid-session, on request) manually starts a server and runs a Playwright script. Nothing re-runs this automatically, ever.
+
+## What CI actually enforces
+
+`npm test` = `verify-seo.mjs && verify-rulekit.mjs && verify-langtons-ant.mjs && verify-presets.mjs && regress-presets.mjs`, run on every push and pull request, required to pass before the Pages deploy job runs (`needs: test` in `ci.yml`).
+
+**`verify-seo.mjs`** — 41 checks across `index.html`, `viewer3d.html`, `langtons-ant.html`: required assets exist and aren't empty, `og-image.png` stays under 300KB, titles/canonicals/JSON-LD/Open Graph/Twitter Card tags are present and correctly formed, title and description lengths stay in SEO-safe ranges, `robots.txt`/`sitemap.xml`/`site.webmanifest` are internally consistent. Real assertions via a `check(label, ok)` helper that increments a `failed` counter and calls `process.exit(1)` if anything failed.
+
+**`verify-rulekit.mjs`** — exports a running simulation both with and without canvas state, re-imports it, and asserts: resolved params round-trip exactly; a no-state import starts at generation 0 with a fresh seed; a with-state import restores generation count and all four field arrays (density/energy/momX/momY) to within float tolerance; **stepping the re-imported engine one more generation produces output identical to stepping the original** (the strongest test in the suite — it doesn't just check the data restored, it checks the restored engine *behaves* identically going forward); malformed JSON and size-mismatched state are both rejected with clear errors. Real assertions, exits 1 on failure.
+
+**`verify-langtons-ant.mjs`** — rule-string parsing and validation; **determinism** (two ants given the identical rule stay in exact lockstep — same position, heading, and visited-cell count — after 10,000 steps, which is what you'd want from a deterministic cellular automaton and is worth checking explicitly rather than assuming); the "no highway" finding is itself pinned as a regression check (displacement stays under a fixed bound at 50k steps, so if a future engine change accidentally made rule LR start drifting, this would catch it); Coral Echo's invariant that it shares Resonant Bloom's exact resolved parameters (only the seed shape differs) and survives 400 generations without dying or exploding. Real assertions, exits 1 on failure.
+
+## The gap: two scripts that can't fail
+
+**`verify-presets.mjs`** and **`regress-presets.mjs`** — despite the names, despite being chained into `npm test`, despite printing a `[DIED]` / `[EXPLODED]` / `[ok]` status column that looks exactly like a test result — **contain no assertion, no `throw`, no `process.exit(1)` anywhere.** They compute `died`/`exploded` per preset (or per v1 variant) over 700 generations and just `console.log` the result. Node exits 0 by default unless something explicitly fails, so:
+
+> If a future change caused every single preset to die on generation 1, `npm test` would still exit 0, CI would still go green, and the site would still deploy. The only way anyone would notice is by actually reading the CI log output.
+
+This isn't a hypothetical gap — it's the exact mechanism that makes the rest of this document worth writing rather than just pointing at "CI is green." Closing it is a small, mechanical fix (add the same `check()`-and-`process.exit(1)` pattern the other three scripts already use) but it hasn't been done, so as of this writing it stands as a real, load-bearing hole in the safety net.
+
+## What has zero automated coverage
+
+Six Playwright scripts exist — `smoke-test.mjs`, `smoke-test-v2.mjs`, `smoke-test-3d.mjs`, `smoke-test-rulekit.mjs`, `smoke-test-langtons-ant.mjs`, `smoke-test-coral-echo.mjs` — covering the 2D explorer, layered rendering, the 3D viewer (with software-GL flags since headless Chromium has no real GPU), rule-kit export/import through the actual UI, and the Langton's Ant page. Each launches headless Chromium, navigates the page, exercises some interactions (preset switching, slider drags, layer toggles, camera orbit, export/import round-trips), and takes screenshots.
+
+None of this runs in CI, and none of it is wired to fail on error even when run manually:
+
+- They require a static file server already running on a specific `localhost` port — nothing in CI starts one, and the scripts aren't invoked from `ci.yml` at all.
+- Every one of them ends with `console.log('...errors:', errors.length ? errors : 'none')` — a report, not an assertion. A script that logs 5 console errors and one that logs `none` both exit 0.
+- Screenshots are written to disk for a human to look at, then manually deleted afterward. There's no visual-regression diffing (no Percy/Chromatic/pixelmatch-against-a-baseline) — a rendering regression would only be caught if a human happens to look at a fresh screenshot and notices something's wrong compared to memory of how it used to look.
+
+**Practical consequence:** the entire visual/interactive surface of this project — hex rendering, energy glow, momentum arrows, particle effects, the 3D scene and its camera controls, every button and slider in both HTML pages, the rule-kit UI flow, the Langton's Ant canvas — is verified only episodically, by hand, when someone (a developer or an agent acting on explicit instruction) decides to run one of these scripts and look at the output. It is not verified on a schedule, on every commit, or automatically in any sense.
+
+## What doesn't exist at all
+
+- **No unit tests in the conventional sense** (no framework, no `describe`/`it`, no isolated per-function test files). The closest equivalents are the `check()`-based scripts above, which test end-to-end behavior (e.g. "does a full round-trip preserve state") rather than individual functions in isolation.
+- **No coverage measurement.** There's no way to know what fraction of `src/*.js` is exercised by any of the above without adding a coverage tool.
+- **No linting or formatting enforcement.** No ESLint config, no Prettier config, nothing blocking a stylistically inconsistent or lint-flagged commit.
+- **No cross-browser testing.** The Playwright scripts use Chromium exclusively (with `--use-gl=swiftshader`-style flags for the WebGL page, since CI-style headless environments have no GPU). Firefox, Safari, and mobile browsers are never exercised.
+- **No accessibility testing.** No axe-core or equivalent; keyboard navigation, screen-reader compatibility, and color contrast are unverified.
+- **No performance regression tracking.** FPS/perf work (e.g. the energy-glow rendering fix — see git history around `src/render.js`) was diagnosed and fixed ad hoc during a development session using one-off profiling scripts that were deleted afterward. There is no benchmark that runs automatically and would flag a future change that reintroduces a slowdown.
+- **No fuzzing or property-based testing.** Rule-kit import validation is checked against exactly two malformed inputs (`verify-rulekit.mjs`); arbitrary malformed/adversarial JSON is not tried.
+
+## Research/generation scripts (not tests, not meant to be)
+
+`sweep.mjs`, `discover.mjs`, `discover-shell.mjs`, `analyze-langtons-ant.mjs`, `render-*.mjs`, `generate-gifs*.mjs`, `capture-readme-ui.mjs`, `render-readme-shots.mjs`, `generate-seo-assets.mjs` — these produce data tables, PNGs, and GIFs for human review during development (parameter sweeps, preset discovery, documentation assets). They have no pass/fail concept and were never meant to; listed here only so they aren't mistaken for missing tests.
+
+## How to interpret a green CI run, honestly
+
+A passing `npm test` / green CI check on this project currently tells you:
+
+1. SEO metadata and required static assets are intact across all three pages.
+2. Rule-kit export/import is byte-exact and round-trips a simulation's exact future behavior, not just its snapshot data.
+3. Langton's Ant is deterministic, the hex-grid "no highway" finding hasn't regressed, and Coral Echo's defining invariant (identical resolved params to Resonant Bloom) still holds.
+
+It does **not** currently tell you:
+
+4. That any preset still survives without dying or exploding (computed, silently unenforced).
+5. Anything at all about whether the 2D explorer, the 3D viewer, or the Langton's Ant page still render or function correctly in a browser.
+
+If you're deciding how much to trust a change based on CI going green, weight it accordingly — items 1–3 are real guarantees; items 4–5 require either reading the CI log by hand (for #4) or manually running the relevant `smoke-test-*.mjs` script against a local server (for #5).
+
+## If closing these gaps becomes a priority
+
+In rough order of effort-to-value:
+
+1. Add `check()` + `process.exit(1)` to `verify-presets.mjs` and `regress-presets.mjs` — mechanical, small, closes the most misleading gap (a script that already computes the right answer but doesn't act on it).
+2. Wire at least one `smoke-test-*.mjs` into CI: start a static server as a CI step, run the script, and make it `process.exit(1)` when `errors.length > 0`. Even one script (e.g. `smoke-test.mjs` for the 2D page) would catch the class of bug this project has actually hit before (a broken import, a runtime exception on load).
+3. Add a baseline visual-regression check (screenshot-diff against a committed reference image) for at least the default view of each of the three pages, so rendering regressions stop depending on a human noticing.
+4. Everything else in "What doesn't exist at all" is a reasonable next tier, roughly in the order listed there.

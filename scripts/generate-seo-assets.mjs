@@ -92,7 +92,7 @@ function writePng(name, canvas) {
   ctx.lineTo(420, 272);
   ctx.stroke();
 
-  const pills = ['2D explorer', '3D layers', '14 presets', 'Rule kits', "Langton's Arm"];
+  const pills = ['2D explorer', '3D layers', '14 presets', 'Rule kits', "Langton's Ant"];
   ctx.font = '600 16px Arial, sans-serif';
   let px = 48, py = 310;
   for (const p of pills) {

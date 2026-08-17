@@ -6,7 +6,7 @@ const errors = [];
 page.on('console', (msg) => { if (msg.type() === 'error') errors.push(msg.text()); });
 page.on('pageerror', (err) => errors.push(String(err)));
 
-await page.goto('http://localhost:4178/langtons-arm.html', { waitUntil: 'load' });
+await page.goto('http://localhost:4178/langtons-ant.html', { waitUntil: 'load' });
 await page.waitForSelector('canvas#cv');
 await page.waitForTimeout(1500);
 await page.screenshot({ path: 'scripts/arm-01-default.png' });

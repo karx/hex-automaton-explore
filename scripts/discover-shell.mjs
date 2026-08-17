@@ -1,5 +1,5 @@
 // Guided sweep for "shell/lace" visual character in the field engine — an
-// evocation of Langton's Arm's fractal shell pattern (docs/LANGTONS_ARM.md)
+// evocation of Langton's Ant's fractal shell pattern (docs/LANGTONS_ANT.md)
 // using this engine's completely different, continuous mechanics. Scores
 // candidates on: concentric-ring structure (radial density profile peaks),
 // lacy texture (edge complexity), and thinness (low mean density among alive

@@ -19,9 +19,9 @@ const pages = [
     canonical: 'https://karx.github.io/hex-automaton-explore/viewer3d.html',
   },
   {
-    file: 'langtons-arm.html',
-    title: "Langton's Arm — Hex ant, no highway",
-    canonical: 'https://karx.github.io/hex-automaton-explore/langtons-arm.html',
+    file: 'langtons-ant.html',
+    title: "Langton's Ant — Hex ant, no highway",
+    canonical: 'https://karx.github.io/hex-automaton-explore/langtons-ant.html',
   },
 ];
 
@@ -82,7 +82,7 @@ const sitemap = readFileSync('sitemap.xml', 'utf8');
 check('sitemap has all three pages',
   sitemap.includes('https://karx.github.io/hex-automaton-explore/</loc>')
   && sitemap.includes('viewer3d.html')
-  && sitemap.includes('langtons-arm.html'));
+  && sitemap.includes('langtons-ant.html'));
 
 const manifest = JSON.parse(readFileSync('site.webmanifest', 'utf8'));
 check('manifest start_url is project Pages path', manifest.start_url === '/hex-automaton-explore/');

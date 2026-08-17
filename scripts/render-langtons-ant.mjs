@@ -1,6 +1,6 @@
 // Renders snapshots of the hex Langton's Ant at increasing step counts, to
 // see the actual shape of the bounded-but-growing pattern found by
-// scripts/analyze-langtons-arm.mjs.
+// scripts/analyze-langtons-ant.mjs.
 import { createCanvas } from '@napi-rs/canvas';
 import { writeFileSync } from 'fs';
 import { LangtonsAnt } from '../src/langtonsAnt.js';
@@ -72,5 +72,5 @@ let done = 0;
 for (const cp of checkpoints) {
   ant.stepN(cp - done);
   done = cp;
-  render(ant, `scripts/langtons-arm-${cp}.png`);
+  render(ant, `scripts/langtons-ant-${cp}.png`);
 }

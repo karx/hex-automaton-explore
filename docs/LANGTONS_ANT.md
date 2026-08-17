@@ -1,4 +1,4 @@
-# Langton's Arm — Hex-Generalized Langton's Ant
+# Langton's Ant — Hex-Generalized Langton's Ant
 
 Added 2026-08-16. A single discrete walker automaton, unrelated to the
 density/energy/momentum field engine used everywhere else in this project —
@@ -9,8 +9,8 @@ what it produces.
 
 - **Engine:** `src/langtonsAnt.js`
 - **Rendering:** `src/langtonsAntRender.js` (auto-fits the growing pattern to the canvas each frame)
-- **Interactive page:** `langtons-arm.html`
-- **Analysis:** `scripts/analyze-langtons-arm.mjs`, `scripts/render-langtons-arm.mjs`
+- **Interactive page:** `langtons-ant.html`
+- **Analysis:** `scripts/analyze-langtons-ant.mjs`, `scripts/render-langtons-ant.mjs`
 
 ## The rule
 
@@ -41,7 +41,7 @@ drift) — one of the most-cited emergent-order results in cellular automata.
 **The hex version does not do this.** Measured directly, not assumed:
 
 ```
-node scripts/analyze-langtons-arm.mjs
+node scripts/analyze-langtons-ant.mjs
 ```
 
 Over 2,000,000 steps, the ant's displacement from its origin oscillates
@@ -55,12 +55,12 @@ i.e. the *pattern* keeps growing and getting more intricate, but the *ant*
 keeps returning toward its starting region rather than escaping.
 
 Rules `RL`, `LLRR`, and `LRRL` were spot-checked too (200k steps each,
-`scripts/analyze-langtons-arm.mjs`) — same story, no directional escape in
+`scripts/analyze-langtons-ant.mjs`) — same story, no directional escape in
 that window.
 
 ## What it looks like instead
 
-Rendered snapshots (`scripts/render-langtons-arm.mjs`) at increasing step
+Rendered snapshots (`scripts/render-langtons-ant.mjs`) at increasing step
 counts show something more interesting than "no highway": a **mirror-symmetric,
 fractal, shell-like growth pattern** — nested outline "shells" expanding
 outward from the center, densely fractal/lace-like fill inside, and the
@@ -68,8 +68,8 @@ bilateral (mirror) symmetry holding all the way out to at least a million
 steps.
 
 <p align="center">
-  <img src="shots/langtons-arm-10k.png" width="30%" alt="Rule LR at 10,000 steps">
-  <img src="shots/langtons-arm-100k.png" width="60%" alt="Rule LR at 100,000 steps">
+  <img src="shots/langtons-ant-10k.png" width="30%" alt="Rule LR at 10,000 steps">
+  <img src="shots/langtons-ant-100k.png" width="60%" alt="Rule LR at 100,000 steps">
 </p>
 <p align="center"><sub>Rule LR at 10,000 steps (left) and 100,000 steps (right). The mirror symmetry is exact, not approximate — a consequence of the fixed start heading breaking the hex grid's 6-fold symmetry down to one reflection axis.</sub></p>
 
@@ -83,7 +83,7 @@ than approximate.
 
 ## Using the interactive page
 
-`langtons-arm.html` — rule string input (validated, clear error on invalid
+`langtons-ant.html` — rule string input (validated, clear error on invalid
 characters), Play/Pause, single-step, a log-scale "steps per frame" slider
 for fast-forwarding, and Jump-to buttons at the step counts above (1K
 through 5M) so you don't have to sit through the intermediate frames to see
@@ -135,7 +135,7 @@ inspection matters, not just numbers):
 wavelength-selecting term the way a reaction-diffusion "target pattern"
 system would, so genuine nested rings aren't in its reachable behavior
 space — at least not from anything tried here. What *is* genuinely there,
-and genuinely evocative of Langton's Arm's fractal branching character (if
+and genuinely evocative of Langton's Ant's fractal branching character (if
 not its ring geometry), is the **Coral Echo** preset: the exact same rules
 and ontology-slider position as Resonant Bloom, with the seed changed from a
 ring to a small point cluster. That one change is enough to produce a

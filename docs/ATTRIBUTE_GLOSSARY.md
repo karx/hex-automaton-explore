@@ -12,6 +12,12 @@ document is the expanded, narrative companion — if the two ever disagree,
 `paramMeta.js` is authoritative for what the engine actually does; open an
 issue against this doc.
 
+**This document explains what each parameter *does* mechanically within the
+engine's own rules — not whether "energy," "momentum," or their interactions
+mean what those words mean in physics. They don't, in several important
+ways. See [`docs/PHYSICS_DISCLAIMER.md`](PHYSICS_DISCLAIMER.md) before
+assuming any dimensional or physical correctness behind these names.
+
 ## The three fields, in one sentence each
 
 - **Density** (0–1 per cell): how much "material" is here. This is the only

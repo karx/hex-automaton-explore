@@ -10,13 +10,13 @@ Three coupled fields on a hexagonal torus — **density**, **energy**, and **mom
 
 v2 layers density, energy glow, momentum arrows, and leak particles, and replaces raw engine knobs with two sliders (**Survival Pressure**, **Momentum Bias**). A 13-preset library was found by sweeping those axes. v3 adds a 3D viewer: each field as its own stacked layer, linked by beams that track per-cell production, reinforcement, and leak. v4 adds a **Rule Set Formula** view (the live rule set as real numbers, not just a param name), a **rule kit export/import** (JSON — share the ruleset alone, or with exact canvas state to resume mid-growth), and a full glossary of what every attribute actually does.
 
-Also in the repo, unrelated to the field engine but sharing its hex-grid math: **[Langton's Arm](langtons-arm.html)**, a hex-generalized Langton's Ant. Rule LR turns out *not* to build the classic highway on this grid — instead it grows a mirror-symmetric fractal shell pattern, stable out to 10M+ steps. A follow-up sweep tried to evoke that character in the field engine itself; genuine nested rings never emerged, but the attempt produced **Coral Echo** (preset #14) — Resonant Bloom's exact rules, point-seeded into a compact branching fractal instead. See [`docs/LANGTONS_ARM.md`](docs/LANGTONS_ARM.md) for the full, honest writeup of what was tried and what didn't work.
+Also in the repo, unrelated to the field engine but sharing its hex-grid math: **[Langton's Ant](langtons-ant.html)**, a hex-generalized Langton's Ant. Rule LR turns out *not* to build the classic highway on this grid — instead it grows a mirror-symmetric fractal shell pattern, stable out to 10M+ steps. A follow-up sweep tried to evoke that character in the field engine itself; genuine nested rings never emerged, but the attempt produced **Coral Echo** (preset #14) — Resonant Bloom's exact rules, point-seeded into a compact branching fractal instead. See [`docs/LANGTONS_ANT.md`](docs/LANGTONS_ANT.md) for the full, honest writeup of what was tried and what didn't work.
 
-**Live:** [2D explorer](https://karx.github.io/hex-automaton-explore/) · [3D viewer](https://karx.github.io/hex-automaton-explore/viewer3d.html) · [Langton's Arm](https://karx.github.io/hex-automaton-explore/langtons-arm.html)
+**Live:** [2D explorer](https://karx.github.io/hex-automaton-explore/) · [3D viewer](https://karx.github.io/hex-automaton-explore/viewer3d.html) · [Langton's Ant](https://karx.github.io/hex-automaton-explore/langtons-ant.html)
 
-**Run it locally:** [`index.html`](index.html) (2D) · [`viewer3d.html`](viewer3d.html) (3D) · [`langtons-arm.html`](langtons-arm.html) — needs a static server, see [Quick start](#quick-start).
+**Run it locally:** [`index.html`](index.html) (2D) · [`viewer3d.html`](viewer3d.html) (3D) · [`langtons-ant.html`](langtons-ant.html) — needs a static server, see [Quick start](#quick-start).
 
-**Write-ups:** [`docs/VARIANT_REPORT.md`](docs/VARIANT_REPORT.md) (v1 engine + original 8 variants) · [`docs/VISUALIZATION_STYLE_GUIDE.md`](docs/VISUALIZATION_STYLE_GUIDE.md) (v2 visual language, ontology, presets, 3D) · [`docs/ATTRIBUTE_GLOSSARY.md`](docs/ATTRIBUTE_GLOSSARY.md) (v4 — what every parameter and slider means, mental model) · [`docs/LANGTONS_ARM.md`](docs/LANGTONS_ARM.md) (hex Langton's Ant findings)
+**Write-ups:** [`docs/VARIANT_REPORT.md`](docs/VARIANT_REPORT.md) (v1 engine + original 8 variants) · [`docs/VISUALIZATION_STYLE_GUIDE.md`](docs/VISUALIZATION_STYLE_GUIDE.md) (v2 visual language, ontology, presets, 3D) · [`docs/ATTRIBUTE_GLOSSARY.md`](docs/ATTRIBUTE_GLOSSARY.md) (v4 — what every parameter and slider means, mental model) · [`docs/LANGTONS_ANT.md`](docs/LANGTONS_ANT.md) (hex Langton's Ant findings) · [`docs/TESTING_AND_QA.md`](docs/TESTING_AND_QA.md) (what's actually tested vs. not — read before trusting a green CI run) · [`docs/PHYSICS_DISCLAIMER.md`](docs/PHYSICS_DISCLAIMER.md) (this is not a physics simulation — what "energy," "momentum," and "force" do and don't mean here)
 
 ## Showcase
 
@@ -148,7 +148,7 @@ current numbers substituted in, not a raw parameter dump.
 
 ## Preset library
 
-The first eight are the original v1 variants at neutral sliders `(0.5, 0.5)`. The next five were found by `scripts/discover.mjs` and verified to 1000 generations. The last was found by `scripts/discover-shell.mjs`, a sweep aimed at evoking Langton's Arm's fractal character (see [`docs/LANGTONS_ARM.md`](docs/LANGTONS_ARM.md)).
+The first eight are the original v1 variants at neutral sliders `(0.5, 0.5)`. The next five were found by `scripts/discover.mjs` and verified to 1000 generations. The last was found by `scripts/discover-shell.mjs`, a sweep aimed at evoking Langton's Ant's fractal character (see [`docs/LANGTONS_ANT.md`](docs/LANGTONS_ANT.md)).
 
 | Preset | Archetype | P / B | Character |
 |---|---|---|---|
@@ -220,12 +220,12 @@ node scripts/smoke-test-rulekit.mjs    # export/import/formula on both index.htm
 node scripts/generate-seo-assets.mjs
 node scripts/verify-seo.mjs            # head tags, JSON-LD, robots/sitemap/manifest
 
-# Langton's Arm (hex Langton's Ant)
-node scripts/verify-langtons-arm.mjs   # parseRule, determinism, no-highway, Coral Echo identity
-node scripts/analyze-langtons-arm.mjs  # long-run displacement analysis (highway detection)
-node scripts/render-langtons-arm.mjs   # snapshot PNGs at increasing step counts -> scripts/
+# Langton's Ant (hex Langton's Ant)
+node scripts/verify-langtons-ant.mjs   # parseRule, determinism, no-highway, Coral Echo identity
+node scripts/analyze-langtons-ant.mjs  # long-run displacement analysis (highway detection)
+node scripts/render-langtons-ant.mjs   # snapshot PNGs at increasing step counts -> scripts/
 npx serve -l 4178 .
-node scripts/smoke-test-langtons-arm.mjs
+node scripts/smoke-test-langtons-ant.mjs
 ```
 
 ## Layout
@@ -249,7 +249,7 @@ src/langtonsAnt.js       hex-generalized Langton's Ant (sparse infinite grid; un
 src/langtonsAntRender.js auto-fitting canvas rendering for the ant's growing pattern
 index.html               interactive 2D browser demo
 viewer3d.html            interactive 3D browser demo
-langtons-arm.html        interactive Langton's Arm demo
+langtons-ant.html        interactive Langton's Ant demo
 og-image.png             Open Graph / Twitter card (1200x630)
 favicon.svg              hex favicon (dark/light)
 site.webmanifest         PWA manifest (project Pages paths)
@@ -261,5 +261,7 @@ docs/shots/              README stills, layer breakdown, UI screenshots
 docs/VARIANT_REPORT.md   v1 write-up
 docs/VISUALIZATION_STYLE_GUIDE.md    v2 + v3 write-up
 docs/ATTRIBUTE_GLOSSARY.md           v4 write-up — every parameter + ontology slider, explained
-docs/LANGTONS_ARM.md                 hex Langton's Ant findings (no highway, fractal shell instead)
+docs/LANGTONS_ANT.md                 hex Langton's Ant findings (no highway, fractal shell instead)
+docs/TESTING_AND_QA.md               what's actually tested vs. not — read before trusting a green CI run
+docs/PHYSICS_DISCLAIMER.md           this is not a physics simulation — what the field names don't mean
 ```

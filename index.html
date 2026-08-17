@@ -68,7 +68,7 @@
   "potentialAction": [
     { "@type": "PlayAction", "name": "Open 2D explorer", "target": "https://karx.github.io/hex-automaton-explore/" },
     { "@type": "ViewAction", "name": "Open 3D viewer", "target": "https://karx.github.io/hex-automaton-explore/viewer3d.html" },
-    { "@type": "PlayAction", "name": "Run Langton's Arm", "target": "https://karx.github.io/hex-automaton-explore/langtons-arm.html" }
+    { "@type": "PlayAction", "name": "Run Langton's Ant", "target": "https://karx.github.io/hex-automaton-explore/langtons-ant.html" }
   ]
 }
 </script>
@@ -148,7 +148,7 @@
   <div id="canvasWrap"><canvas id="cv"></canvas></div>
   <div id="panel">
     <h1>Multi-Field Hex Automaton</h1>
-    <div class="sub">Density · Energy · Momentum — click the grid to seed a cluster · <a href="./viewer3d.html" style="color:#7ecbff">3D view</a> · <a href="./langtons-arm.html" style="color:#7ecbff">Langton's Arm</a></div>
+    <div class="sub">Density · Energy · Momentum — click the grid to seed a cluster · <a href="./viewer3d.html" style="color:#7ecbff">3D view</a> · <a href="./langtons-ant.html" style="color:#7ecbff">Langton's Ant</a></div>
 
     <fieldset>
       <legend>Preset</legend>
@@ -223,7 +223,7 @@
       </label>
     </fieldset>
 
-    <details>
+    <details open>
       <summary>Advanced: raw parameters</summary>
       <div id="paramSliders" style="margin-top:8px"></div>
       <div class="hint">Editing these directly overrides the ontology sliders above for this preset until you touch Survival Pressure or Momentum Bias again.</div>
