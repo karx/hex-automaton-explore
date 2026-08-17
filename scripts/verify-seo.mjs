@@ -10,8 +10,13 @@ function check(label, ok) {
 const pages = [
   {
     file: 'index.html',
-    title: 'Hex Automaton — Live 2D field explorer',
+    title: 'Hex Automaton — watch a living hex field',
     canonical: 'https://karx.github.io/hex-automaton-explore/',
+  },
+  {
+    file: 'explorer.html',
+    title: 'Hex Automaton — Live 2D field explorer',
+    canonical: 'https://karx.github.io/hex-automaton-explore/explorer.html',
   },
   {
     file: 'viewer3d.html',
@@ -20,7 +25,7 @@ const pages = [
   },
   {
     file: 'langtons-ant.html',
-    title: "Langton's Ant — Hex ant, no highway",
+    title: "Langton's Ant — hex grid, no highway",
     canonical: 'https://karx.github.io/hex-automaton-explore/langtons-ant.html',
   },
 ];
@@ -79,8 +84,11 @@ const robots = readFileSync('robots.txt', 'utf8');
 check('robots.txt points at sitemap', robots.includes('https://karx.github.io/hex-automaton-explore/sitemap.xml'));
 
 const sitemap = readFileSync('sitemap.xml', 'utf8');
-check('sitemap has all three pages',
+check('sitemap has landing, library, workbench, explorer',
   sitemap.includes('https://karx.github.io/hex-automaton-explore/</loc>')
+  && sitemap.includes('explorations/library.html')
+  && sitemap.includes('explorations/workbench.html')
+  && sitemap.includes('explorer.html')
   && sitemap.includes('viewer3d.html')
   && sitemap.includes('langtons-ant.html'));
 

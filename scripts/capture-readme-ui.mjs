@@ -19,7 +19,7 @@ const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 page.on('console', (msg) => { if (msg.type() === 'error') errors.push(msg.text()); });
 page.on('pageerror', (err) => errors.push(String(err)));
 
-await page.goto(`${BASE}/index.html`, { waitUntil: 'load' });
+await page.goto(`${BASE}/explorer.html`, { waitUntil: 'load' });
 await page.waitForSelector('canvas#cv');
 await shot(page, 'docs/shots/ui-2d.png', 7000);
 

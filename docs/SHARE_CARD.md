@@ -8,7 +8,8 @@ There are two clocks. One runs in the background. One fires when you click.
 
 Source: `src/share-data.js` (one assembler), `src/share-capture.js` (stills +
 growth tape), `src/share-card.js` (1200×630 SVG), `src/share-text.js`,
-`src/share-url.js`. Wired from `index.html` and `viewer3d.html`.
+`src/share-url.js`. Wired from `explorer.html`, `viewer3d.html`, and
+the workbench. A `#s=` hash on the site root redirects into the workbench.
 
 ---
 

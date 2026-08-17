@@ -2,7 +2,7 @@
 <html lang="en" prefix="og: https://ogp.me/ns#">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Langton's Ant — hex grid, no highway</title>
 <meta name="title" content="Langton's Ant — hex grid, no highway" />
 <meta name="description" content="Run a hex-grid Langton's Ant. Rule LR grows a fractal shell, not a highway — stable past ten million steps. Change the L/R rule live." />
@@ -105,13 +105,32 @@
     padding: 8px 10px; border-radius: 6px; background: #181b26; border: 1px solid #2c2f42;
     font-size: 12px; margin-top: 8px;
   }
+  #canvasWrap { min-width: 0; min-height: 0; }
 </style>
+<link rel="stylesheet" href="./src/shell.css" />
 </head>
 <body>
-  <div id="canvasWrap"><canvas id="cv"></canvas></div>
-  <div id="panel">
+  <header id="topbar">
+    <button id="panelToggle" type="button" aria-expanded="false" aria-controls="panel">Panel</button>
+    <span class="brand">HEX AUTOMATON</span>
+    <span class="crumb">ANT</span>
+    <span id="topStatus" class="top-status">STEP 0</span>
+    <button id="topPlayBtn" type="button">Pause</button>
+    <nav>
+      <a href="./index.html">Home</a>
+      <a href="./explorations/library.html">Library</a>
+      <a href="./explorations/workbench.html">Workbench</a>
+      <a href="./explorer.html">2D</a>
+      <a href="./viewer3d.html">3D</a>
+      <a href="./langtons-ant.html" aria-current="page">Ant</a>
+    </nav>
+  </header>
+  <div id="workspace">
+    <div id="canvasWrap"><canvas id="cv"></canvas></div>
+    <div id="panelBackdrop"></div>
+    <div id="panel">
     <h1>Langton's Ant</h1>
-    <div class="sub">Hex-generalized Langton's Ant · <a href="./index.html">2D fields</a> · <a href="./viewer3d.html">3D fields</a></div>
+    <div class="sub">Hex-generalized Langton's Ant. Rule LR grows a fractal shell, not a highway.</div>
 
     <fieldset>
       <legend>Rule</legend>
@@ -161,12 +180,18 @@
       </div>
     </fieldset>
 
-    <div class="hint">Engine: <code>src/langtonsAnt.js</code> · Rendering: <code>src/langtonsAntRender.js</code> — a sparse infinite grid, unrelated to the density/energy/momentum field engine used elsewhere in this project.</div>
+    <div class="hint">Space play/pause · P panel · jump buttons fast-forward</div>
+    </div>
   </div>
+  <footer id="statusbar">
+    <span id="statusLeft">STEP 0</span>
+    <span id="statusRight">SPACE PLAY/PAUSE</span>
+  </footer>
 
   <script type="module">
     import { LangtonsAnt } from './src/langtonsAnt.js';
     import { renderLangtonsAnt } from './src/langtonsAntRender.js';
+    import { initShell } from './src/shell.js';
 
     const canvas = document.getElementById('cv');
     const ctx = canvas.getContext('2d');
@@ -221,10 +246,17 @@
       render();
     });
 
+    const shell = initShell({
+      playButtons: [playBtn, document.getElementById('topPlayBtn')],
+      statusEls: [document.getElementById('topStatus'), document.getElementById('statusLeft')],
+      getStatus: () => `STEP ${ant.steps.toLocaleString()} · VISITED ${ant.visitedCount()}`,
+    });
+
     playBtn.addEventListener('click', () => {
       running = !running;
-      playBtn.textContent = running ? 'Pause' : 'Play';
+      shell.setPlayLabel(running);
     });
+    document.getElementById('topPlayBtn').addEventListener('click', () => playBtn.click());
 
     for (const btn of document.querySelectorAll('[data-jump]')) {
       btn.addEventListener('click', () => {
@@ -250,6 +282,7 @@
         <div>Bounding box <span class="v">${ant.maxQ - ant.minQ} × ${ant.maxR - ant.minR}</span></div>
         <div>Heading <span class="v">${ant.dir} / 6</span></div>
       `;
+      shell.updateStatus(running);
     }
 
     function loop() {

@@ -2,10 +2,10 @@
 <html lang="en" prefix="og: https://ogp.me/ns#">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Hex Automaton — Live 2D field explorer</title>
-<meta name="title" content="Hex Automaton — Live 2D field explorer" />
-<meta name="description" content="Grow living patterns on a hex torus. Three fields, two sliders, fourteen presets, and a portable rule kit you can export or resume mid-run." />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Hex Automaton — watch a living hex field</title>
+<meta name="title" content="Hex Automaton — watch a living hex field" />
+<meta name="description" content="Watch three coupled fields grow on a hex torus. No closed form: the only way to know the next state is to run it. Then open the library or the workbench." />
 <meta name="keywords" content="hexagonal cellular automaton, hex grid, multi-field CA, density energy momentum, emergent patterns, interactive simulation, rule kit, generative art, hex torus, langton ant" />
 <meta name="author" content="karx" />
 <meta name="robots" content="index, follow" />
@@ -14,16 +14,16 @@
 <meta name="revisit-after" content="7 days" />
 <meta name="rating" content="General" />
 <link rel="canonical" href="https://karx.github.io/hex-automaton-explore/" />
-<meta name="theme-color" content="#0a0b10" />
+<meta name="theme-color" content="#000000" />
 <meta name="color-scheme" content="dark" />
-<meta name="msapplication-TileColor" content="#0a0b10" />
+<meta name="msapplication-TileColor" content="#000000" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="Hex Automaton" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://karx.github.io/hex-automaton-explore/" />
 <meta property="og:title" content="Hex Automaton — Grow living hex fields" />
-<meta property="og:description" content="Three coupled fields on a hex torus. Pick a preset, drag two sliders, export a portable rule kit." />
+<meta property="og:description" content="Three coupled fields on a hex torus. Watch a pattern compute, then open the library or the workbench." />
 <meta property="og:image" content="https://karx.github.io/hex-automaton-explore/og-image.png" />
 <meta property="og:image:secure_url" content="https://karx.github.io/hex-automaton-explore/og-image.png" />
 <meta property="og:image:type" content="image/png" />
@@ -35,7 +35,7 @@
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:url" content="https://karx.github.io/hex-automaton-explore/" />
 <meta name="twitter:title" content="Hex Automaton — Grow living hex fields" />
-<meta name="twitter:description" content="Three coupled fields on a hex torus. Pick a preset, drag two sliders, export a portable rule kit." />
+<meta name="twitter:description" content="Three coupled fields on a hex torus. Watch a pattern compute, then open the library or the workbench." />
 <meta name="twitter:image" content="https://karx.github.io/hex-automaton-explore/og-image.png" />
 <meta name="twitter:image:alt" content="Multi-Field Hex Automaton social card" />
 <link rel="icon" type="image/svg+xml" href="favicon.svg" />
@@ -56,10 +56,11 @@
   "author": { "@type": "Person", "name": "karx", "url": "https://github.com/karx" },
   "image": "https://karx.github.io/hex-automaton-explore/og-image.png",
   "featureList": [
+    "Reading landing with a live field",
+    "Preset library",
+    "Canvas-first workbench",
     "Layered 2D hex explorer",
     "3D stacked field viewer",
-    "14 emergent presets",
-    "Survival Pressure and Momentum Bias sliders",
     "Rule kit export and import",
     "Per-run share card",
     "Hex-grid Langton's Ant"
@@ -67,631 +68,265 @@
   "inLanguage": "en",
   "isAccessibleForFree": true,
   "potentialAction": [
-    { "@type": "PlayAction", "name": "Open 2D explorer", "target": "https://karx.github.io/hex-automaton-explore/" },
+    { "@type": "ViewAction", "name": "Open landing", "target": "https://karx.github.io/hex-automaton-explore/" },
+    { "@type": "ViewAction", "name": "Open library", "target": "https://karx.github.io/hex-automaton-explore/explorations/library.html" },
+    { "@type": "PlayAction", "name": "Open workbench", "target": "https://karx.github.io/hex-automaton-explore/explorations/workbench.html" },
+    { "@type": "PlayAction", "name": "Open 2D explorer", "target": "https://karx.github.io/hex-automaton-explore/explorer.html" },
     { "@type": "ViewAction", "name": "Open 3D viewer", "target": "https://karx.github.io/hex-automaton-explore/viewer3d.html" },
     { "@type": "PlayAction", "name": "Run Langton's Ant", "target": "https://karx.github.io/hex-automaton-explore/langtons-ant.html" }
   ]
 }
 </script>
+<link rel="stylesheet" href="./explorations/explore.css" />
 <style>
-  :root { color-scheme: dark; }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0; background: #0a0b10; color: #d8dae2;
-    font: 14px/1.4 system-ui, -apple-system, Segoe UI, sans-serif;
-    display: flex; height: 100vh; overflow: hidden;
+  .watch-canvas {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    cursor: crosshair;
   }
-  #canvasWrap { flex: 1; display: flex; align-items: center; justify-content: center; overflow: auto; background: #05060a; }
-  canvas#cv { image-rendering: pixelated; box-shadow: 0 0 40px rgba(0,0,0,0.6); }
-  #panel {
-    width: 340px; flex-shrink: 0; background: #10121a; border-left: 1px solid #23263a;
-    padding: 16px; overflow-y: auto;
+  .watch-canvas canvas {
+    position: absolute;
+    left: 0;
+    top: 0;
+    max-width: none;
+    max-height: none;
+    transform-origin: 0 0;
+    cursor: crosshair;
   }
-  h1 { font-size: 15px; margin: 0 0 4px; letter-spacing: .02em; }
-  .sub { color: #7b7f95; font-size: 12px; margin-bottom: 16px; }
-  fieldset { border: 1px solid #23263a; border-radius: 8px; margin-bottom: 12px; padding: 10px 12px; }
-  legend { padding: 0 6px; color: #9ea3ba; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
-  label { display: flex; justify-content: space-between; align-items: center; margin: 8px 0; gap: 8px; font-size: 12px; }
-  label.checkline { justify-content: flex-start; }
-  label.checkline input { margin-right: 8px; accent-color: #7ecbff; }
-  label span.val { color: #7ecbff; font-variant-numeric: tabular-nums; min-width: 3.5em; text-align: right; }
-  input[type=range] { flex: 1; accent-color: #7ecbff; }
-  select, button {
-    width: 100%; background: #191c28; color: #d8dae2; border: 1px solid #2c2f42;
-    border-radius: 6px; padding: 8px; font-size: 13px; cursor: pointer;
+  .land {
+    position: absolute;
+    left: 16px;
+    top: 16px;
+    z-index: 5;
+    pointer-events: none;
+    max-width: 36rem;
   }
-  button:hover, select:hover { border-color: #7ecbff; }
-  .row { display: flex; gap: 8px; }
-  .row > * { flex: 1; }
-  .axis-endpoints { display: flex; justify-content: space-between; font-size: 10px; color: #5b5f75; margin-top: -4px; margin-bottom: 4px; }
-  .axis-desc { font-size: 11px; color: #6b6f85; margin: -2px 0 6px; }
-  #desc { font-size: 12px; color: #9ea3ba; margin-top: 4px; }
-  .hint { font-size: 11px; color: #5b5f75; margin-top: 8px; }
-  code { background: #191c28; padding: 1px 4px; border-radius: 4px; }
-  details summary { cursor: pointer; color: #9ea3ba; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; padding: 2px 0; }
-
-  .meter { margin: 8px 0; }
-  .meter-label { display: flex; justify-content: space-between; font-size: 11px; color: #9ea3ba; margin-bottom: 3px; }
-  .meter-track { height: 7px; border-radius: 4px; background: #1c1f2c; overflow: hidden; }
-  .meter-fill { height: 100%; border-radius: 4px; transition: width 0.15s linear; }
-  .meter-fill.density { background: linear-gradient(90deg, #4a4de0, #ffb545); }
-  .meter-fill.energy { background: linear-gradient(90deg, #6a5cff, #ff8a3d); }
-  .meter-fill.momentum { background: linear-gradient(90deg, #2a8fae, #8fe0ff); }
-
-  #resonanceBadge {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 8px 10px; border-radius: 6px; background: #181b26; border: 1px solid #2c2f42;
-    font-size: 12px; margin-top: 4px;
+  .land-plaque {
+    pointer-events: auto;
+    background: #080800;
+    border: 1px solid #1e1e00;
+    border-left: 2px solid #ff6600;
+    padding: 14px 16px 14px 14px;
+    max-width: 40ch;
   }
-  #resonanceBadge.hot { border-color: #ffb545; box-shadow: 0 0 14px rgba(255, 181, 69, 0.35); animation: pulse 1.6s ease-in-out infinite; }
-  @keyframes pulse { 0%, 100% { box-shadow: 0 0 8px rgba(255, 181, 69, 0.25); } 50% { box-shadow: 0 0 20px rgba(255, 181, 69, 0.55); } }
-  #resonanceVal { font-variant-numeric: tabular-nums; color: #ffb545; font-weight: 600; }
-
-  #flowCanvas { width: 100%; height: 140px; display: block; background: #0c0e16; border-radius: 6px; }
-
-  #metrics { font-size: 12px; color: #9ea3ba; }
-  #metrics div { display: flex; justify-content: space-between; padding: 2px 0; }
-  #metrics span.v { color: #d8dae2; font-variant-numeric: tabular-nums; }
-
-  .formula-pre {
-    font-size: 10.5px; line-height: 1.5; color: #b9bdd4; background: #0c0e16;
-    border: 1px solid #23263a; border-radius: 6px; padding: 10px;
-    white-space: pre-wrap; word-break: break-word; max-height: 320px; overflow-y: auto;
+  .land .kicker {
+    margin: 0 0 6px;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #ffaa00;
   }
-  #exportStatus, #importStatus, #shareStatus { min-height: 1.2em; }
-  #exportStatus.ok, #importStatus.ok, #shareStatus.ok { color: #8fe0ff; }
-  #exportStatus.err, #importStatus.err, #shareStatus.err { color: #ff7a7a; }
-  .param-label { display: flex; flex-direction: column; }
-  .param-label .key { font-size: 9px; color: #5b5f75; font-family: monospace; }
+  .land h1 {
+    margin: 0 0 10px;
+    font-size: 14px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #ff6600;
+    font-weight: 700;
+  }
+  .land p {
+    margin: 0 0 10px;
+    color: #ccccaa;
+    max-width: 42ch;
+    line-height: 1.4;
+    font-size: 12px;
+  }
+  .land p.dim { color: #445544; font-size: 11px; }
+  .land .live {
+    margin: 12px 0 4px;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: #e8e000;
+    font-variant-numeric: tabular-nums;
+  }
+  .land .hint {
+    margin: 0 0 12px;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #445544;
+  }
+  .land .acts { display: flex; flex-wrap: wrap; gap: 8px; }
+  .land a.act {
+    display: inline-block;
+    background: #101008;
+    color: #ccccaa;
+    border: 1px solid #1e1e00;
+    border-radius: 2px;
+    padding: 6px 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 11px;
+  }
+  .land a.act:hover { border-color: #ff6600; color: #ff6600; }
+  .land a.act.primary { color: #ff6600; border-color: #ff6600; }
+  @media (max-width: 800px) {
+    .top .crumb, .top .here { display: none; }
+    .top nav { gap: 8px; }
+    .land {
+      left: 10px; right: 10px; top: auto; bottom: 10px; max-width: none;
+    }
+    .land-plaque { max-width: none; }
+    .land h1 { font-size: 13px; }
+    .land p { margin: 0 0 8px; }
+    .status span:last-child { display: none; }
+  }
 </style>
+<script>
+  function redirectShareHash() {
+    if (location.hash.indexOf('#s=') === 0) {
+      location.replace('./explorations/workbench.html' + location.search + location.hash);
+    }
+  }
+  redirectShareHash();
+  window.addEventListener('hashchange', redirectShareHash);
+</script>
 </head>
 <body>
-  <div id="canvasWrap"><canvas id="cv"></canvas></div>
-  <div id="panel">
-    <h1>Multi-Field Hex Automaton</h1>
-    <div class="sub">Density · Energy · Momentum — click the grid to seed a cluster · <a href="./viewer3d.html" style="color:#7ecbff">3D view</a> · <a href="./langtons-ant.html" style="color:#7ecbff">Langton's Ant</a></div>
-
-    <fieldset>
-      <legend>Preset</legend>
-      <select id="presetSelect"></select>
-      <div id="desc"></div>
-      <div class="row" style="margin-top:10px">
-        <button id="restartBtn">Restart</button>
-        <button id="playBtn">Pause</button>
+  <header class="top">
+    <span class="brand">HEX AUTOMATON</span>
+    <span class="crumb">›</span>
+    <span class="here">Home</span>
+    <nav>
+      <a href="./explorations/library.html">Library</a>
+      <a href="./explorations/workbench.html">Workbench</a>
+      <a href="./explorer.html">2D</a>
+      <a href="./viewer3d.html">3D</a>
+      <a href="./langtons-ant.html">Ant</a>
+    </nav>
+  </header>
+  <div class="stage">
+    <div class="boot" id="boot">
+      connecting field
+      <div class="line" id="bootLine">seeding torus…</div>
+    </div>
+    <div class="watch-canvas"><canvas id="cv"></canvas></div>
+    <div class="land">
+      <div class="land-plaque">
+        <p class="kicker">Live field</p>
+        <h1>No closed form</h1>
+        <p>Three coupled fields on a hexagonal torus — density, energy, momentum. A pattern here is not a video. It exists because these steps ran.</p>
+        <p class="live" id="liveLine">Resonant Bloom · GEN 0</p>
+        <p class="hint">Click the field to seed</p>
+        <div class="acts">
+          <a class="act" href="./explorations/library.html">Enter library</a>
+          <a class="act primary" href="./explorations/workbench.html">Open workbench</a>
+        </div>
       </div>
-    </fieldset>
-
-    <fieldset>
-      <legend>Controls</legend>
-      <label>Survival Pressure <span class="val" id="pressureVal">0.50</span>
-        <input type="range" id="pressureSlider" min="0" max="1" step="0.01" value="0.5" />
-      </label>
-      <div class="axis-endpoints"><span>Fragile</span><span>Robust</span></div>
-      <div class="axis-desc" id="pressureDesc"></div>
-
-      <label>Momentum Bias <span class="val" id="biasVal">0.50</span>
-        <input type="range" id="biasSlider" min="0" max="1" step="0.01" value="0.5" />
-      </label>
-      <div class="axis-endpoints"><span>Isotropic</span><span>Directional</span></div>
-      <div class="axis-desc" id="biasDesc"></div>
-    </fieldset>
-
-    <fieldset>
-      <legend>Visual Layers</legend>
-      <label class="checkline"><input type="checkbox" id="layerDensity" checked /> Density (filled hexes)</label>
-      <label class="checkline"><input type="checkbox" id="layerEnergy" checked /> Energy (glow)</label>
-      <label class="checkline"><input type="checkbox" id="layerMomentum" checked /> Momentum (arrows)</label>
-      <label class="checkline"><input type="checkbox" id="layerParticles" checked /> Particles (leak flow)</label>
-    </fieldset>
-
-    <fieldset>
-      <legend>Field Balance</legend>
-      <div class="meter">
-        <div class="meter-label"><span>Density</span><span id="densityMeterVal">0%</span></div>
-        <div class="meter-track"><div class="meter-fill density" id="densityMeterFill" style="width:0%"></div></div>
-      </div>
-      <div class="meter">
-        <div class="meter-label"><span>Energy</span><span id="energyMeterVal">0%</span></div>
-        <div class="meter-track"><div class="meter-fill energy" id="energyMeterFill" style="width:0%"></div></div>
-      </div>
-      <div class="meter">
-        <div class="meter-label"><span>Momentum</span><span id="momentumMeterVal">0%</span></div>
-        <div class="meter-track"><div class="meter-fill momentum" id="momentumMeterFill" style="width:0%"></div></div>
-      </div>
-      <div id="resonanceBadge">
-        <span>Resonance (production ≈ dissipation)</span>
-        <span id="resonanceVal">0%</span>
-      </div>
-    </fieldset>
-
-    <fieldset>
-      <legend>Interaction Flow</legend>
-      <canvas id="flowCanvas" width="300" height="140"></canvas>
-    </fieldset>
-
-    <fieldset>
-      <legend>Metrics</legend>
-      <div id="metrics"></div>
-    </fieldset>
-
-    <fieldset>
-      <legend>Grid</legend>
-      <label>Size <span class="val" id="gridSizeVal"></span>
-        <input type="range" id="gridSize" min="30" max="120" step="10" value="70" />
-      </label>
-      <label>Cell px <span class="val" id="cellSizeVal"></span>
-        <input type="range" id="cellSize" min="4" max="16" step="1" value="8" />
-      </label>
-    </fieldset>
-
-    <details open>
-      <summary>Advanced: raw parameters</summary>
-      <div id="paramSliders" style="margin-top:8px"></div>
-      <div class="hint">Editing these directly overrides the ontology sliders above for this preset until you touch Survival Pressure or Momentum Bias again.</div>
-    </details>
-
-    <details open>
-      <summary>Rule set formula</summary>
-      <pre id="formulaText" class="formula-pre"></pre>
-      <button id="copyFormulaBtn" style="margin-top:6px">Copy formula</button>
-      <div class="hint">The exact rule set currently running, spelled out with real numbers — see <code>docs/ATTRIBUTE_GLOSSARY.md</code> for what each term means.</div>
-    </details>
-
-    <fieldset>
-      <legend>Share this run</legend>
-      <div class="row">
-        <button id="previewCardBtn" type="button">Preview card</button>
-        <button id="shareCardBtn" type="button">Share card</button>
-      </div>
-      <div class="row" style="margin-top:6px">
-        <button id="copyShareTextBtn" type="button">Copy text</button>
-        <button id="copyShareLinkBtn" type="button">Copy link</button>
-      </div>
-      <div class="hint" id="shareStatus">A unique 1200×630 receipt of this grown field. The only way to know generation N is to run N steps. JSON below is for exact resume.</div>
-    </fieldset>
-
-    <fieldset>
-      <legend>Export rule kit</legend>
-      <label>Name
-        <input type="text" id="exportName" placeholder="(preset name)" style="flex:1;background:#191c28;color:#d8dae2;border:1px solid #2c2f42;border-radius:6px;padding:6px 8px;font-size:12px" />
-      </label>
-      <label class="checkline"><input type="checkbox" id="exportIncludeState" /> Include canvas state (exact resume, larger file)</label>
-      <div class="row" style="margin-top:6px">
-        <button id="copyJsonBtn">Copy JSON</button>
-        <button id="downloadJsonBtn">Download</button>
-      </div>
-      <div class="hint" id="exportStatus"></div>
-    </fieldset>
-
-    <fieldset>
-      <legend>Import rule kit</legend>
-      <input type="file" id="importFile" accept="application/json,.json" style="width:100%;font-size:11px;color:#9ea3ba;margin-bottom:6px" />
-      <textarea id="importText" placeholder="…or paste rule kit JSON here" style="width:100%;height:64px;background:#191c28;color:#d8dae2;border:1px solid #2c2f42;border-radius:6px;padding:6px 8px;font-size:11px;font-family:monospace;resize:vertical"></textarea>
-      <button id="loadKitBtn" style="margin-top:6px">Load</button>
-      <div class="hint" id="importStatus"></div>
-    </fieldset>
-
-    <div class="hint">Engine: <code>src/engine.js</code> · Ontology: <code>src/ontology.js</code> · Rendering: <code>src/render.js</code></div>
+    </div>
   </div>
-
+  <footer class="status">
+    <span id="statusLeft">COMPUTING</span>
+    <span>Library · Workbench · 2D still at explorer.html</span>
+  </footer>
   <script type="module">
     import { Engine } from './src/engine.js';
     import { renderFrame, computeLayout } from './src/render.js';
-    import { ParticleSystem } from './src/particles.js';
-    import { renderFlowDiagram } from './src/flowDiagram.js';
-    import { PRESETS, getPreset, getPresetParams, getPresetSeedFn } from './src/presets.js';
-    import { ONTOLOGY_AXES } from './src/ontology.js';
+    import { getPreset, getPresetParams, getPresetSeedFn } from './src/presets.js';
     import { seedCluster } from './src/seeds.js';
-    import { PARAM_META } from './src/paramMeta.js';
-    import { generateFormula } from './src/formula.js';
-    import { exportRuleKit, ruleKitToJSON, parseRuleKit, buildEngineFromRuleKit, downloadRuleKit, readFileAsText } from './src/ruleKit.js';
-    import { buildCardData } from './src/share-data.js';
-    import { parseShareHash } from './src/share-url.js';
-    import { bindShareControls } from './src/share-ui.js';
-    import { GrowthTape } from './src/share-capture.js';
 
+    const preset = getPreset('resonant-bloom');
     const canvas = document.getElementById('cv');
     const ctx = canvas.getContext('2d');
-    const flowCanvas = document.getElementById('flowCanvas');
-    const flowCtx = flowCanvas.getContext('2d');
+    const stageEl = canvas.parentElement;
+    const size = 56;
+    const cell = 8;
+    const engine = new Engine(size, size, getPresetParams(preset), getPresetSeedFn(preset));
+    const layout = computeLayout(size, size, cell);
+    canvas.width = layout.canvasWidth;
+    canvas.height = layout.canvasHeight;
 
-    const presetSelect = document.getElementById('presetSelect');
-    const descEl = document.getElementById('desc');
-    const restartBtn = document.getElementById('restartBtn');
-    const playBtn = document.getElementById('playBtn');
-    const gridSizeInput = document.getElementById('gridSize');
-    const cellSizeInput = document.getElementById('cellSize');
-    const paramSlidersEl = document.getElementById('paramSliders');
-    const metricsEl = document.getElementById('metrics');
-    const pressureSlider = document.getElementById('pressureSlider');
-    const biasSlider = document.getElementById('biasSlider');
-    const pressureVal = document.getElementById('pressureVal');
-    const biasVal = document.getElementById('biasVal');
-
-    document.getElementById('pressureDesc').textContent = ONTOLOGY_AXES.survivalPressure.description;
-    document.getElementById('biasDesc').textContent = ONTOLOGY_AXES.momentumBias.description;
-
-    const classicGroup = document.createElement('optgroup');
-    classicGroup.label = 'Classic';
-    const discoveredGroup = document.createElement('optgroup');
-    discoveredGroup.label = 'Discovered (resonance sweep)';
-    for (const p of PRESETS) {
-      const opt = document.createElement('option');
-      opt.value = p.id; opt.textContent = p.name;
-      (p.discovered ? discoveredGroup : classicGroup).appendChild(opt);
-    }
-    presetSelect.appendChild(classicGroup);
-    presetSelect.appendChild(discoveredGroup);
-
-    const PARAM_RANGES = {
-      birthLow: [0, 5, 0.05], birthHigh: [0, 6, 0.05], birthDensity: [0, 1, 0.01],
-      birthEnergyMin: [-1, 1, 0.01], surviveLow: [0, 5, 0.05], surviveHigh: [0, 6, 0.05],
-      surviveDecay: [0.9, 1, 0.001], deathDecay: [0, 1, 0.01], deadDecay: [0, 1, 0.01],
-      energyBirthCoupling: [0, 3, 0.05], energyToDensity: [0, 0.2, 0.002],
-      densityToEnergy: [0, 0.3, 0.002], activityCost: [0, 2, 0.02],
-      energyLeakRate: [0, 0.6, 0.01], energyDecay: [0, 0.1, 0.002],
-      momentumSmoothing: [0, 1, 0.01], leakConcentration: [0, 1, 0.01],
-    };
-
-    let engine, layout, cellSize, running = true, frame = 0, lastFpsT = performance.now(), fps = 0;
-    let particleSystem = new ParticleSystem();
-    let currentPreset = getPreset('resonant-bloom');
-    let flowAnimT = 0;
-    const growthTape = new GrowthTape({ every: 24 });
-
-    const layerState = { density: true, energyGlow: true, momentumArrows: true, particles: true };
-    for (const [id, key] of [['layerDensity', 'density'], ['layerEnergy', 'energyGlow'], ['layerMomentum', 'momentumArrows'], ['layerParticles', 'particles']]) {
-      document.getElementById(id).addEventListener('change', (e) => { layerState[key] = e.target.checked; });
-    }
-
-    function buildEngine() {
-      const size = parseInt(gridSizeInput.value, 10);
-      cellSize = parseInt(cellSizeInput.value, 10);
-      const params = getPresetParams(currentPreset, {
-        survivalPressure: parseFloat(pressureSlider.value),
-        momentumBias: parseFloat(biasSlider.value),
-      });
-      const seedFn = getPresetSeedFn(currentPreset);
-      engine = new Engine(size, size, params, seedFn);
-      layout = computeLayout(size, size, cellSize);
-      canvas.width = layout.canvasWidth;
-      canvas.height = layout.canvasHeight;
-      descEl.textContent = currentPreset.description;
-      particleSystem.clear();
-      growthTape.reset();
-      growthTape.capture(engine);
-      buildParamSliders();
-      updateFormulaView();
-    }
-
-    function buildParamSliders() {
-      paramSlidersEl.innerHTML = '';
-      for (const [key, [min, max, step]] of Object.entries(PARAM_RANGES)) {
-        const meta = PARAM_META[key];
-        const val = engine.params[key];
-        const wrap = document.createElement('label');
-        wrap.title = meta ? `${meta.meaning}\n\nHigher: ${meta.higher}\nLower: ${meta.lower}` : key;
-        const labelBox = document.createElement('span');
-        labelBox.className = 'param-label';
-        const labelText = document.createElement('span');
-        labelText.textContent = meta ? meta.label : key;
-        const keyText = document.createElement('span');
-        keyText.className = 'key';
-        keyText.textContent = key;
-        labelBox.appendChild(labelText);
-        labelBox.appendChild(keyText);
-        const valSpan = document.createElement('span');
-        valSpan.className = 'val';
-        valSpan.textContent = val.toFixed(3);
-        const input = document.createElement('input');
-        input.type = 'range'; input.min = min; input.max = max; input.step = step; input.value = val;
-        input.addEventListener('input', () => {
-          engine.params[key] = parseFloat(input.value);
-          valSpan.textContent = parseFloat(input.value).toFixed(3);
-          updateFormulaView();
-        });
-        wrap.appendChild(labelBox);
-        wrap.appendChild(valSpan);
-        paramSlidersEl.appendChild(wrap);
-        paramSlidersEl.appendChild(input);
+    const boot = document.getElementById('boot');
+    const bootLine = document.getElementById('bootLine');
+    const lines = ['seeding torus…', 'preset resonant bloom', 'no closed form'];
+    let li = 0;
+    const bootTimer = setInterval(() => {
+      li += 1;
+      if (li < lines.length) bootLine.textContent = lines[li];
+      else {
+        clearInterval(bootTimer);
+        boot.classList.add('hide');
       }
+    }, 220);
+
+    const cam = { x: 0, y: 0, s: 1 };
+    function livingBox() {
+      const dens = engine.density;
+      const pos = layout.positions;
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      let any = false;
+      for (let i = 0; i < dens.length; i++) {
+        if (dens[i] <= 0.04) continue;
+        any = true;
+        const x = pos[i][0] + layout.offsetX;
+        const y = pos[i][1] + layout.offsetY;
+        if (x < minX) minX = x;
+        if (y < minY) minY = y;
+        if (x > maxX) maxX = x;
+        if (y > maxY) maxY = y;
+      }
+      return any ? { minX, minY, maxX, maxY } : null;
     }
 
-    function updateFormulaView() {
-      if (!engine) return;
-      const text = generateFormula(engine.params, {
-        title: currentPreset.name,
-        ontology: { survivalPressure: parseFloat(pressureSlider.value), momentumBias: parseFloat(biasSlider.value) },
-        provenance: { presetName: currentPreset.name, archetype: currentPreset.archetype },
-      });
-      document.getElementById('formulaText').textContent = text;
+    function frameField() {
+      const box = livingBox();
+      const sw = stageEl.clientWidth;
+      const sh = stageEl.clientHeight;
+      if (!box || sw < 40 || sh < 40) return;
+      const pad = cell * 10;
+      const bw = Math.max(box.maxX - box.minX + pad * 2, cell * 18);
+      const bh = Math.max(box.maxY - box.minY + pad * 2, cell * 18);
+      const mobile = sw < 800;
+      const leftGutter = mobile ? 0 : Math.min(400, sw * 0.36);
+      const bottomGutter = mobile ? Math.min(sh * 0.46, 300) : 0;
+      const fw = Math.max(80, sw - leftGutter);
+      const fh = Math.max(80, sh - bottomGutter);
+      const targetS = Math.min(fw / bw, fh / bh) * (mobile ? 0.94 : 0.9);
+      const cx = (box.minX + box.maxX) / 2;
+      const cy = (box.minY + box.maxY) / 2;
+      const tx = leftGutter + fw / 2 - cx * targetS;
+      const ty = fh / 2 - cy * targetS;
+      const k = cam.s === 1 && cam.x === 0 ? 1 : 0.1;
+      cam.s += (targetS - cam.s) * k;
+      cam.x += (tx - cam.x) * k;
+      cam.y += (ty - cam.y) * k;
+      canvas.style.transform = `translate(${cam.x}px, ${cam.y}px) scale(${cam.s})`;
     }
 
-    function applyOntologyLive() {
-      if (!engine) return;
-      const params = getPresetParams(currentPreset, {
-        survivalPressure: parseFloat(pressureSlider.value),
-        momentumBias: parseFloat(biasSlider.value),
-      });
-      Object.assign(engine.params, params);
-      buildParamSliders();
-      updateFormulaView();
+    function hexAtEvent(ev) {
+      const stageRect = stageEl.getBoundingClientRect();
+      const s = cam.s || 1;
+      const x = (ev.clientX - stageRect.left - cam.x) / s - layout.offsetX;
+      const y = (ev.clientY - stageRect.top - cam.y) / s - layout.offsetY;
+      const r = Math.round(y / (1.5 * cell));
+      const q = Math.round(x / (Math.sqrt(3) * cell) - r / 2);
+      return { q, r };
     }
 
-    canvas.addEventListener('click', (ev) => {
-      const rect = canvas.getBoundingClientRect();
-      const x = (ev.clientX - rect.left) - layout.offsetX;
-      const y = (ev.clientY - rect.top) - layout.offsetY;
-      const r = Math.round(y / (1.5 * cellSize));
-      const q = Math.round(x / (Math.sqrt(3) * cellSize) - r / 2);
-      seedCluster(engine, q, r, 2, 0.9, 0.6);
+    let seedNoteUntil = 0;
+    stageEl.addEventListener('click', (ev) => {
+      if (ev.target.closest('.land')) return;
+      const at = hexAtEvent(ev);
+      seedCluster(engine, at.q, at.r, 2, 0.9, 0.6);
+      seedNoteUntil = performance.now() + 1400;
+      document.getElementById('statusLeft').textContent = `SEEDED · ${at.q},${at.r}`;
     });
 
-    presetSelect.addEventListener('change', () => {
-      currentPreset = getPreset(presetSelect.value);
-      pressureSlider.value = currentPreset.survivalPressure;
-      biasSlider.value = currentPreset.momentumBias;
-      pressureVal.textContent = currentPreset.survivalPressure.toFixed(2);
-      biasVal.textContent = currentPreset.momentumBias.toFixed(2);
-      buildEngine();
-    });
-    presetSelect.value = currentPreset.id;
-
-    restartBtn.addEventListener('click', buildEngine);
-    gridSizeInput.addEventListener('change', buildEngine);
-    cellSizeInput.addEventListener('change', buildEngine);
-    gridSizeInput.addEventListener('input', () => { document.getElementById('gridSizeVal').textContent = gridSizeInput.value; });
-    cellSizeInput.addEventListener('input', () => { document.getElementById('cellSizeVal').textContent = cellSizeInput.value; });
-    document.getElementById('gridSizeVal').textContent = gridSizeInput.value;
-    document.getElementById('cellSizeVal').textContent = cellSizeInput.value;
-
-    pressureSlider.addEventListener('input', () => { pressureVal.textContent = parseFloat(pressureSlider.value).toFixed(2); applyOntologyLive(); });
-    biasSlider.addEventListener('input', () => { biasVal.textContent = parseFloat(biasSlider.value).toFixed(2); applyOntologyLive(); });
-
-    playBtn.addEventListener('click', () => {
-      running = !running;
-      playBtn.textContent = running ? 'Pause' : 'Play';
-    });
-
-    document.getElementById('copyFormulaBtn').addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText(document.getElementById('formulaText').textContent);
-      } catch (e) { /* clipboard permission denied — silently ignore, text is still visible/selectable */ }
-    });
-
-    function currentProvenance() {
-      return {
-        presetId: currentPreset.id,
-        presetName: currentPreset.name,
-        archetype: currentPreset.archetype,
-        survivalPressure: parseFloat(pressureSlider.value),
-        momentumBias: parseFloat(biasSlider.value),
-      };
-    }
-
-    function setStatus(el, message, kind) {
-      el.textContent = message;
-      el.classList.remove('ok', 'err');
-      if (kind) el.classList.add(kind);
-    }
-
-    const exportNameInput = document.getElementById('exportName');
-    const exportStateCheckbox = document.getElementById('exportIncludeState');
-    const exportStatusEl = document.getElementById('exportStatus');
-    const shareStatusEl = document.getElementById('shareStatus');
-
-    function assembleCard({ withField = true } = {}) {
-      return buildCardData({
-        engine,
-        name: exportNameInput.value.trim() || currentPreset.name,
-        provenance: currentProvenance(),
-        growthFrames: withField ? growthTape.frames : [],
-        fieldSnapshot: withField ? undefined : null,
-      });
-    }
-
-    bindShareControls({
-      assemble: assembleCard,
-      statusEl: shareStatusEl,
-      buttons: {
-        preview: document.getElementById('previewCardBtn'),
-        share: document.getElementById('shareCardBtn'),
-        copyText: document.getElementById('copyShareTextBtn'),
-        copyLink: document.getElementById('copyShareLinkBtn'),
-      },
-    });
-
-    function applySharedPayload(payload) {
-      if (payload.presetId) {
-        try {
-          currentPreset = getPreset(payload.presetId);
-          presetSelect.value = currentPreset.id;
-        } catch (e) { /* unknown preset — keep params from the token */ }
+    function tick() {
+      engine.step();
+      renderFrame(ctx, engine, layout, cell, { density: true, energyGlow: true, momentumArrows: true });
+      frameField();
+      const s = engine.lastStats;
+      const res = Math.round((s.resonance || 0) * 100);
+      const outcome = !s.aliveCells ? 'QUIET' : (s.resonance > 0.75 ? 'RESONANT' : 'LIVE');
+      document.getElementById('liveLine').textContent = `Resonant Bloom · GEN ${s.generation} · ${outcome}`;
+      if (performance.now() >= seedNoteUntil) {
+        document.getElementById('statusLeft').textContent = `${outcome} · ALIVE ${((s.aliveCells / engine.n) * 100).toFixed(1)}% · RES ${res}%`;
       }
-      if (typeof payload.survivalPressure === 'number') {
-        pressureSlider.value = payload.survivalPressure;
-        pressureVal.textContent = payload.survivalPressure.toFixed(2);
-      }
-      if (typeof payload.momentumBias === 'number') {
-        biasSlider.value = payload.momentumBias;
-        biasVal.textContent = payload.momentumBias.toFixed(2);
-      }
-      if (payload.gridWidth) {
-        gridSizeInput.value = payload.gridWidth;
-        document.getElementById('gridSizeVal').textContent = payload.gridWidth;
-      }
-      const size = parseInt(gridSizeInput.value, 10);
-      cellSize = parseInt(cellSizeInput.value, 10);
-      const params = payload.params || getPresetParams(currentPreset, {
-        survivalPressure: parseFloat(pressureSlider.value),
-        momentumBias: parseFloat(biasSlider.value),
-      });
-      engine = new Engine(size, size, params, getPresetSeedFn(currentPreset));
-      layout = computeLayout(size, size, cellSize);
-      canvas.width = layout.canvasWidth;
-      canvas.height = layout.canvasHeight;
-      particleSystem.clear();
-      descEl.textContent = currentPreset.description;
-      if (payload.title && !exportNameInput.value.trim()) exportNameInput.placeholder = payload.title;
-      growthTape.reset();
-      growthTape.capture(engine);
-      buildParamSliders();
-      updateFormulaView();
+      requestAnimationFrame(tick);
     }
-
-    function tryLoadShareHash() {
-      const payload = parseShareHash(location.hash);
-      if (!payload) return;
-      applySharedPayload(payload);
-      setStatus(
-        shareStatusEl,
-        `Loaded shared rules "${payload.title}"${payload.generation ? ` (was gen ${payload.generation})` : ''} — fresh seed.`,
-        'ok'
-      );
-    }
-
-    function buildExportKit() {
-      const name = exportNameInput.value.trim() || currentPreset.name;
-      return exportRuleKit(engine, {
-        name,
-        includeState: exportStateCheckbox.checked,
-        provenance: currentProvenance(),
-      });
-    }
-
-    document.getElementById('copyJsonBtn').addEventListener('click', async () => {
-      const json = ruleKitToJSON(buildExportKit());
-      try {
-        await navigator.clipboard.writeText(json);
-        setStatus(exportStatusEl, `Copied to clipboard (${(json.length / 1024).toFixed(1)} KB).`, 'ok');
-      } catch (e) {
-        setStatus(exportStatusEl, 'Clipboard permission denied — use Download instead.', 'err');
-      }
-    });
-
-    document.getElementById('downloadJsonBtn').addEventListener('click', () => {
-      const kit = buildExportKit();
-      downloadRuleKit(kit);
-      setStatus(exportStatusEl, `Downloaded (${kit.state ? 'with' : 'without'} canvas state).`, 'ok');
-    });
-
-    const importFileInput = document.getElementById('importFile');
-    const importTextEl = document.getElementById('importText');
-    const importStatusEl = document.getElementById('importStatus');
-
-    importFileInput.addEventListener('change', async () => {
-      const file = importFileInput.files[0];
-      if (!file) return;
-      importTextEl.value = await readFileAsText(file);
-    });
-
-    document.getElementById('loadKitBtn').addEventListener('click', () => {
-      try {
-        const kit = parseRuleKit(importTextEl.value);
-        const rebuilt = buildEngineFromRuleKit(kit, { fallbackSeedFn: getPresetSeedFn(currentPreset) });
-
-        engine = rebuilt;
-        layout = computeLayout(kit.grid.width, kit.grid.height, cellSize);
-        canvas.width = layout.canvasWidth;
-        canvas.height = layout.canvasHeight;
-        particleSystem.clear();
-        gridSizeInput.value = kit.grid.width;
-        document.getElementById('gridSizeVal').textContent = kit.grid.width;
-
-        if (kit.meta.presetId) {
-          try {
-            currentPreset = getPreset(kit.meta.presetId);
-            presetSelect.value = currentPreset.id;
-          } catch (e) { /* preset id not found locally — keep params, just no preset linkage */ }
-        }
-        if (typeof kit.meta.survivalPressure === 'number') {
-          pressureSlider.value = kit.meta.survivalPressure;
-          pressureVal.textContent = kit.meta.survivalPressure.toFixed(2);
-        }
-        if (typeof kit.meta.momentumBias === 'number') {
-          biasSlider.value = kit.meta.momentumBias;
-          biasVal.textContent = kit.meta.momentumBias.toFixed(2);
-        }
-        descEl.textContent = kit.meta.description || currentPreset.description;
-        growthTape.reset();
-        growthTape.capture(engine);
-        buildParamSliders();
-        updateFormulaView();
-
-        setStatus(
-          importStatusEl,
-          `Loaded "${kit.meta.name}"${kit.state ? ` — resumed at generation ${kit.state.generation}.` : ' — fresh seed from rules only.'}`,
-          'ok'
-        );
-      } catch (e) {
-        setStatus(importStatusEl, `Error: ${e.message}`, 'err');
-      }
-    });
-
-    function updateMeters(stats, params) {
-      const densityFrac = Math.max(0, Math.min(1, stats.totalDensity / engine.n));
-      const energyFrac = Math.max(0, Math.min(1, (stats.totalEnergy / engine.n - params.energyMin) / (params.energyMax - params.energyMin)));
-      const momentumFrac = Math.max(0, Math.min(1, stats.momentumCoherence));
-
-      document.getElementById('densityMeterFill').style.width = `${(densityFrac * 100).toFixed(0)}%`;
-      document.getElementById('densityMeterVal').textContent = `${(densityFrac * 100).toFixed(0)}%`;
-      document.getElementById('energyMeterFill').style.width = `${(energyFrac * 100).toFixed(0)}%`;
-      document.getElementById('energyMeterVal').textContent = (stats.totalEnergy / engine.n).toFixed(2);
-      document.getElementById('momentumMeterFill').style.width = `${(momentumFrac * 100).toFixed(0)}%`;
-      document.getElementById('momentumMeterVal').textContent = `${(momentumFrac * 100).toFixed(0)}%`;
-
-      const badge = document.getElementById('resonanceBadge');
-      const resonancePct = Math.round(stats.resonance * 100);
-      document.getElementById('resonanceVal').textContent = `${resonancePct}%`;
-      badge.classList.toggle('hot', stats.resonance > 0.75);
-    }
-
-    function loop() {
-      if (running) {
-        engine.step();
-        growthTape.maybeCapture(engine);
-        if (layerState.particles) {
-          particleSystem.spawn(engine, layout);
-          particleSystem.update();
-        } else if (particleSystem.particles.length) {
-          particleSystem.clear();
-        }
-        renderFrame(ctx, engine, layout, cellSize, {
-          density: layerState.density,
-          energyGlow: layerState.energyGlow,
-          momentumArrows: layerState.momentumArrows,
-          particleSystem: layerState.particles ? particleSystem : null,
-        });
-        frame++;
-      }
-
-      flowAnimT += 1;
-      if (engine) renderFlowDiagram(flowCtx, flowCanvas.width, flowCanvas.height, engine.lastStats, flowAnimT);
-
-      const now = performance.now();
-      if (now - lastFpsT > 300) {
-        fps = Math.round((frame * 1000) / (now - lastFpsT));
-        frame = 0; lastFpsT = now;
-        const s = engine.lastStats;
-        updateMeters(s, engine.params);
-        metricsEl.innerHTML = `
-          <div>FPS <span class="v">${fps}</span></div>
-          <div>Generation <span class="v">${s.generation}</span></div>
-          <div>Alive cells <span class="v">${s.aliveCells} / ${engine.n}</span></div>
-          <div>Alive % <span class="v">${((s.aliveCells / engine.n) * 100).toFixed(1)}%</span></div>
-          <div>Leak directionality <span class="v">${(s.leakDirectionality * 100).toFixed(0)}%</span></div>
-        `;
-      }
-      requestAnimationFrame(loop);
-    }
-
-    pressureSlider.value = currentPreset.survivalPressure;
-    biasSlider.value = currentPreset.momentumBias;
-    pressureVal.textContent = currentPreset.survivalPressure.toFixed(2);
-    biasVal.textContent = currentPreset.momentumBias.toFixed(2);
-    buildEngine();
-    tryLoadShareHash();
-    requestAnimationFrame(loop);
+    requestAnimationFrame(tick);
   </script>
 </body>
 </html>

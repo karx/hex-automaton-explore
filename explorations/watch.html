@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex" />
+<title>Watch — Hex Automaton Explorations</title>
+<script>
+  const dest = new URL('./workbench.html', location.href);
+  dest.search = location.search;
+  if (!dest.searchParams.get('mode')) dest.searchParams.set('mode', 'watch');
+  location.replace(dest);
+</script>
+</head>
+<body>
+  <p><a href="./workbench.html?mode=watch">Continue to workbench (Watch)</a></p>
+</body>
+</html>

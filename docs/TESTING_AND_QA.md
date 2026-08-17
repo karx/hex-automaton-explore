@@ -10,27 +10,31 @@ assurance.
 ## TL;DR
 
 - **No test framework.** No Jest, Vitest, Mocha, AVA, tap, or `node:test`. No coverage tool. No linter (no ESLint/Prettier config). Every check is a plain `.mjs` script run with `node`.
-- **`npm test` runs in CI on every push/PR and gates the GitHub Pages deploy** (`.github/workflows/ci.yml`) — but only **3 of the 5 scripts it chains can actually fail the build.** The other 2 compute pass/fail data, print it, and always exit 0 regardless of the result. See "The gap" below — this is the single most important thing to know before trusting a green CI run.
+- **`npm test` runs in CI on every push/PR and gates the GitHub Pages deploy** (`.github/workflows/ci.yml`). All seven chained scripts can fail the build (`check()` + `process.exit(1)`).
 - **Simulation correctness (math/invariants) is well covered** and CI-enforced: rule-kit export/import round-trips exactly, Langton's Ant is deterministic, hex direction ordering is verified, SEO metadata is checked line-by-line.
 - **All rendering — 2D canvas, 3D/WebGL, every UI interaction — has zero automated coverage.** It's checked only when a human (or an agent, mid-session, on request) manually starts a server and runs a Playwright script. Nothing re-runs this automatically, ever.
 
 ## What CI actually enforces
 
-`npm test` = `verify-seo.mjs && verify-rulekit.mjs && verify-langtons-ant.mjs && verify-presets.mjs && regress-presets.mjs`, run on every push and pull request, required to pass before the Pages deploy job runs (`needs: test` in `ci.yml`).
+`npm test` = `verify-seo.mjs && verify-rulekit.mjs && verify-share-card.mjs && verify-langtons-ant.mjs && verify-presets.mjs && verify-favorites.mjs && regress-presets.mjs`, run on every push and pull request, required to pass before the Pages deploy job runs (`needs: test` in `ci.yml`).
 
-**`verify-seo.mjs`** — 41 checks across `index.html`, `viewer3d.html`, `langtons-ant.html`: required assets exist and aren't empty, `og-image.png` stays under 300KB, titles/canonicals/JSON-LD/Open Graph/Twitter Card tags are present and correctly formed, title and description lengths stay in SEO-safe ranges, `robots.txt`/`sitemap.xml`/`site.webmanifest` are internally consistent. Real assertions via a `check(label, ok)` helper that increments a `failed` counter and calls `process.exit(1)` if anything failed.
+**`verify-seo.mjs`** — checks across `index.html` (reading landing), `explorer.html` (classic 2D), `viewer3d.html`, `langtons-ant.html`: required assets exist and aren't empty, `og-image.png` stays under 300KB, titles/canonicals/JSON-LD/Open Graph/Twitter Card tags are present and correctly formed, title and description lengths stay in SEO-safe ranges, `robots.txt`/`sitemap.xml`/`site.webmanifest` are internally consistent (sitemap includes library, workbench, and explorer). Real assertions via a `check(label, ok)` helper that increments a `failed` counter and calls `process.exit(1)` if anything failed.
 
 **`verify-rulekit.mjs`** — exports a running simulation both with and without canvas state, re-imports it, and asserts: resolved params round-trip exactly; a no-state import starts at generation 0 with a fresh seed; a with-state import restores generation count and all four field arrays (density/energy/momX/momY) to within float tolerance; **stepping the re-imported engine one more generation produces output identical to stepping the original** (the strongest test in the suite — it doesn't just check the data restored, it checks the restored engine *behaves* identically going forward); malformed JSON and size-mismatched state are both rejected with clear errors. Real assertions, exits 1 on failure.
 
 **`verify-langtons-ant.mjs`** — rule-string parsing and validation; **determinism** (two ants given the identical rule stay in exact lockstep — same position, heading, and visited-cell count — after 10,000 steps, which is what you'd want from a deterministic cellular automaton and is worth checking explicitly rather than assuming); the "no highway" finding is itself pinned as a regression check (displacement stays under a fixed bound at 50k steps, so if a future engine change accidentally made rule LR start drifting, this would catch it); Coral Echo's invariant that it shares Resonant Bloom's exact resolved parameters (only the seed shape differs) and survives 400 generations without dying or exploding. Real assertions, exits 1 on failure.
 
-## The gap: two scripts that can't fail
+**`verify-share-card.mjs`** — assembler, compact formula, 1200×630 SVG contract, HTML escaping, share-text twin, `#s=` encode/decode, and log-spaced growth-strip selection. Real assertions, exits 1 on failure.
 
-**`verify-presets.mjs`** and **`regress-presets.mjs`** — despite the names, despite being chained into `npm test`, despite printing a `[DIED]` / `[EXPLODED]` / `[ok]` status column that looks exactly like a test result — **contain no assertion, no `throw`, no `process.exit(1)` anywhere.** They compute `died`/`exploded` per preset (or per v1 variant) over 700 generations and just `console.log` the result. Node exits 0 by default unless something explicitly fails, so:
+**`verify-presets.mjs`** — runs all 14 presets for 700 generations and **fails the build** if any dies or explodes (`aliveCells === 0` or `alive > 92%` at a 200-gen checkpoint).
 
-> If a future change caused every single preset to die on generation 1, `npm test` would still exit 0, CI would still go green, and the site would still deploy. The only way anyone would notice is by actually reading the CI log output.
+**`verify-favorites.mjs`** — Pulsating Full is registered as a distinct kit (not stock Resonant Bloom params), its rule-kit JSON round-trips, and every favorite survives 700 generations without dying or exploding.
 
-This isn't a hypothetical gap — it's the exact mechanism that makes the rest of this document worth writing rather than just pointing at "CI is green." Closing it is a small, mechanical fix (add the same `check()`-and-`process.exit(1)` pattern the other three scripts already use) but it hasn't been done, so as of this writing it stands as a real, load-bearing hole in the safety net.
+**`regress-presets.mjs`** — same survival check against the original v1 variants.
+
+## The remaining gap
+
+Preset and variant survival is now CI-enforced. Browser UI is still not.
 
 ## What has zero automated coverage
 
@@ -64,20 +68,20 @@ A passing `npm test` / green CI check on this project currently tells you:
 
 1. SEO metadata and required static assets are intact across all three pages.
 2. Rule-kit export/import is byte-exact and round-trips a simulation's exact future behavior, not just its snapshot data.
-3. Langton's Ant is deterministic, the hex-grid "no highway" finding hasn't regressed, and Coral Echo's defining invariant (identical resolved params to Resonant Bloom) still holds.
+3. Share-card assembly, SVG contract, and `#s=` tokens round-trip; growth-strip picks are log-spaced.
+4. Langton's Ant is deterministic, the hex-grid "no highway" finding hasn't regressed, and Coral Echo's defining invariant still holds.
+5. All 14 presets, authored favorites (Pulsating Full), and the v1 variants survive 700 generations without dying or exploding.
 
 It does **not** currently tell you:
 
-4. That any preset still survives without dying or exploding (computed, silently unenforced).
-5. Anything at all about whether the 2D explorer, the 3D viewer, or the Langton's Ant page still render or function correctly in a browser.
+4. Anything at all about whether the 2D explorer, the 3D viewer, or the Langton's Ant page still render or function correctly in a browser.
 
-If you're deciding how much to trust a change based on CI going green, weight it accordingly — items 1–3 are real guarantees; items 4–5 require either reading the CI log by hand (for #4) or manually running the relevant `smoke-test-*.mjs` script against a local server (for #5).
+If you're deciding how much to trust a change based on CI going green, weight it accordingly — items 1–3 plus preset survival are real guarantees; item 4 requires manually running the relevant `smoke-test-*.mjs` script against a local server.
 
 ## If closing these gaps becomes a priority
 
 In rough order of effort-to-value:
 
-1. Add `check()` + `process.exit(1)` to `verify-presets.mjs` and `regress-presets.mjs` — mechanical, small, closes the most misleading gap (a script that already computes the right answer but doesn't act on it).
-2. Wire at least one `smoke-test-*.mjs` into CI: start a static server as a CI step, run the script, and make it `process.exit(1)` when `errors.length > 0`. Even one script (e.g. `smoke-test.mjs` for the 2D page) would catch the class of bug this project has actually hit before (a broken import, a runtime exception on load).
-3. Add a baseline visual-regression check (screenshot-diff against a committed reference image) for at least the default view of each of the three pages, so rendering regressions stop depending on a human noticing.
-4. Everything else in "What doesn't exist at all" is a reasonable next tier, roughly in the order listed there.
+1. Wire at least one `smoke-test-*.mjs` into CI: start a static server as a CI step, run the script, and make it `process.exit(1)` when `errors.length > 0`. Even one script (e.g. `smoke-test.mjs` for the 2D page) would catch the class of bug this project has actually hit before (a broken import, a runtime exception on load).
+2. Add a baseline visual-regression check (screenshot-diff against a committed reference image) for at least the default view of each of the three pages, so rendering regressions stop depending on a human noticing.
+3. Everything else in "What doesn't exist at all" is a reasonable next tier, roughly in the order listed there.

@@ -4,6 +4,11 @@ import { Engine } from '../src/engine.js';
 import { VARIANTS } from '../src/variants.js';
 
 const GRID = 60, GENS = 700;
+let failed = 0;
+function check(label, ok) {
+  console.log(`${ok ? 'ok' : 'FAIL'}  ${label}`);
+  if (!ok) failed += 1;
+}
 
 for (const v of VARIANTS) {
   const engine = new Engine(GRID, GRID, v.params, v.seed);
@@ -23,4 +28,11 @@ for (const v of VARIANTS) {
     `${v.id.padEnd(22)} died=${died} exploded=${exploded} traj%=[${trail.join(', ')}] ` +
     `resonance=${s.resonance.toFixed(2)} coherence=${s.momentumCoherence.toFixed(2)}`
   );
+  check(`${v.id} survives 700 gens`, !died && !exploded);
 }
+
+if (failed) {
+  console.error(`\nregress-presets: ${failed} check(s) failed`);
+  process.exit(1);
+}
+console.log('\nregress-presets: all checks passed');
