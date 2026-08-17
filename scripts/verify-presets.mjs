@@ -2,6 +2,11 @@ import { Engine } from '../src/engine.js';
 import { PRESETS, getPresetParams, getPresetSeedFn } from '../src/presets.js';
 
 const W = 60, H = 60, GENS = 700;
+let failed = 0;
+function check(label, ok) {
+  console.log(`${ok ? 'ok' : 'FAIL'}  ${label}`);
+  if (!ok) failed += 1;
+}
 
 for (const preset of PRESETS) {
   const params = getPresetParams(preset);
@@ -20,4 +25,11 @@ for (const preset of PRESETS) {
   }
   const status = died ? 'DIED' : exploded ? 'EXPLODED' : 'ok';
   console.log(`${preset.id.padEnd(20)} [${status.padEnd(8)}] ${trail.join(', ')}`);
+  check(`${preset.id} survives 700 gens`, !died && !exploded);
 }
+
+if (failed) {
+  console.error(`\nverify-presets: ${failed} check(s) failed`);
+  process.exit(1);
+}
+console.log('\nverify-presets: all checks passed');

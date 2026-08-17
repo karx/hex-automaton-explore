@@ -2,7 +2,7 @@
 <html lang="en" prefix="og: https://ogp.me/ns#">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Hex Automaton — 3D stacked field layers</title>
 <meta name="title" content="Hex Automaton — 3D stacked field layers" />
 <meta name="description" content="Orbit density, energy, and momentum as stacked layers. Same presets and sliders as 2D — beams track real production, leak, and reinforcement." />
@@ -112,22 +112,39 @@
   #exportStatus, #importStatus, #shareStatus { min-height: 1.2em; }
   #exportStatus.ok, #importStatus.ok, #shareStatus.ok { color: #8fe0ff; }
   #exportStatus.err, #importStatus.err, #shareStatus.err { color: #ff7a7a; }
+  #sceneWrap { min-width: 0; min-height: 0; }
+  @media (max-width: 800px) { #legend3d { display: none; } }
 </style>
+<link rel="stylesheet" href="./src/shell.css" />
 </head>
 <body>
-  <div id="sceneWrap">
-    <div id="legend3d">
-      <div><span class="swatch" style="background:#ffb545"></span>Density layer (height = amount)</div>
-      <div><span class="swatch" style="background:#ff8a3d"></span>Energy layer (glow orbs)</div>
-      <div><span class="swatch" style="background:#8fe0ff"></span>Momentum layer (arrows)</div>
-      <div><span class="swatch" style="background:#ffcf8a"></span>Beams: production/reinforcement</div>
-      <div><span class="swatch" style="background:#66aaff"></span>Beams: leak (blue=isotropic, orange=directional)</div>
-      <div style="margin-top:4px;color:#5b5f75">Drag to orbit · scroll to zoom</div>
+  <header id="topbar">
+    <button id="panelToggle" type="button" aria-expanded="false" aria-controls="panel">Panel</button>
+    <span class="brand">HEX AUTOMATON</span>
+    <span class="crumb">3D</span>
+    <span id="topStatus" class="top-status">GEN 0</span>
+    <button id="topPlayBtn" type="button">Pause</button>
+    <nav>
+      <a href="./index.html">2D</a>
+      <a href="./viewer3d.html" aria-current="page">3D</a>
+      <a href="./langtons-ant.html">Ant</a>
+    </nav>
+  </header>
+  <div id="workspace">
+    <div id="sceneWrap">
+      <div id="legend3d">
+        <div><span class="swatch" style="background:#ffb545"></span>Density layer (height = amount)</div>
+        <div><span class="swatch" style="background:#ff8a3d"></span>Energy layer (glow orbs)</div>
+        <div><span class="swatch" style="background:#8fe0ff"></span>Momentum layer (arrows)</div>
+        <div><span class="swatch" style="background:#ffcf8a"></span>Beams: production/reinforcement</div>
+        <div><span class="swatch" style="background:#66aaff"></span>Beams: leak (blue=isotropic, orange=directional)</div>
+        <div style="margin-top:4px;color:#5b5f75">Drag to orbit · scroll to zoom</div>
+      </div>
     </div>
-  </div>
-  <div id="panel">
+    <div id="panelBackdrop"></div>
+    <div id="panel">
     <h1>Multi-Field Hex Automaton — 3D</h1>
-    <div class="sub">Each field as its own layer · <a href="./index.html">2D view</a> · <a href="./langtons-ant.html">Langton's Ant</a></div>
+    <div class="sub">Each field as its own stacked layer.</div>
 
     <fieldset>
       <legend>Preset</legend>
@@ -156,6 +173,19 @@
     </fieldset>
 
     <fieldset>
+      <legend>Share this run</legend>
+      <div class="row">
+        <button id="previewCardBtn" type="button">Preview card</button>
+        <button id="shareCardBtn" type="button">Share card</button>
+      </div>
+      <div class="row" style="margin-top:6px">
+        <button id="copyShareTextBtn" type="button">Copy text</button>
+        <button id="copyShareLinkBtn" type="button">Copy link</button>
+      </div>
+      <div class="hint" id="shareStatus">A unique receipt of this grown field. JSON below is for exact resume.</div>
+    </fieldset>
+
+    <fieldset>
       <legend>Layers</legend>
       <label class="checkline"><input type="checkbox" id="layerDensity" checked /> Density</label>
       <label class="checkline"><input type="checkbox" id="layerEnergy" checked /> Energy</label>
@@ -173,19 +203,6 @@
     <fieldset>
       <legend>Metrics</legend>
       <div id="metrics"></div>
-    </fieldset>
-
-    <fieldset>
-      <legend>Share this run</legend>
-      <div class="row">
-        <button id="previewCardBtn" type="button">Preview card</button>
-        <button id="shareCardBtn" type="button">Share card</button>
-      </div>
-      <div class="row" style="margin-top:6px">
-        <button id="copyShareTextBtn" type="button">Copy text</button>
-        <button id="copyShareLinkBtn" type="button">Copy link</button>
-      </div>
-      <div class="hint" id="shareStatus">A unique 1200×630 receipt of this grown field. The only way to know generation N is to run N steps. JSON below is for exact resume.</div>
     </fieldset>
 
     <fieldset>
@@ -209,8 +226,13 @@
       <div class="hint" id="importStatus"></div>
     </fieldset>
 
-    <div class="hint">Scene: <code>src/three/viewer3d.js</code> · Engine/ontology shared with the 2D view. Raw-parameter tuning and the rule-set formula view live in the 2D view.</div>
+    <div class="hint">Space play/pause · P panel · drag to orbit</div>
+    </div>
   </div>
+  <footer id="statusbar">
+    <span id="statusLeft">GEN 0</span>
+    <span id="statusRight">SPACE PLAY/PAUSE</span>
+  </footer>
 
   <script type="module">
     import { Engine } from './src/engine.js';
@@ -223,6 +245,7 @@
     import { parseShareHash } from './src/share-url.js';
     import { bindShareControls } from './src/share-ui.js';
     import { GrowthTape } from './src/share-capture.js';
+    import { initShell } from './src/shell.js';
 
     const sceneWrap = document.getElementById('sceneWrap');
     const presetSelect = document.getElementById('presetSelect');
@@ -310,10 +333,23 @@
     pressureSlider.addEventListener('input', () => { pressureVal.textContent = parseFloat(pressureSlider.value).toFixed(2); applyOntologyLive(); });
     biasSlider.addEventListener('input', () => { biasVal.textContent = parseFloat(biasSlider.value).toFixed(2); applyOntologyLive(); });
 
+    const shell = initShell({
+      playButtons: [playBtn, document.getElementById('topPlayBtn')],
+      statusEls: [document.getElementById('topStatus'), document.getElementById('statusLeft')],
+      getStatus: () => {
+        if (!engine) return 'GEN 0';
+        const s = engine.lastStats;
+        const res = Math.round((s.resonance || 0) * 100);
+        const alive = ((s.aliveCells / engine.n) * 100).toFixed(1);
+        return `GEN ${s.generation} · ALIVE ${alive}% · RES ${res}%`;
+      },
+    });
+
     playBtn.addEventListener('click', () => {
       running = !running;
-      playBtn.textContent = running ? 'Pause' : 'Play';
+      shell.setPlayLabel(running);
     });
+    document.getElementById('topPlayBtn').addEventListener('click', () => playBtn.click());
 
     function setStatus(el, message, kind) {
       el.textContent = message;
@@ -491,6 +527,12 @@
           <div>Leak directionality <span class="v">${(s.leakDirectionality * 100).toFixed(0)}%</span></div>
           <div>Momentum coherence <span class="v">${(s.momentumCoherence * 100).toFixed(0)}%</span></div>
         `;
+        shell.updateStatus(running);
+        const badge = document.getElementById('statusRight');
+        if (badge) {
+          badge.textContent = s.resonance > 0.75 ? 'RESONANT' : 'SPACE PLAY/PAUSE';
+          badge.classList.toggle('hot', s.resonance > 0.75);
+        }
       }
       requestAnimationFrame(loop);
     }

@@ -66,7 +66,7 @@ jobs:
           cp index.html viewer3d.html langtons-ant.html _site/
           cp robots.txt sitemap.xml site.webmanifest og-image.png favicon.svg \
              favicon-32x32.png favicon-192.png favicon-512.png apple-touch-icon.png _site/
-          cp -r src docs gifs gifs-v2 _site/
+          cp -r src docs gifs gifs-v2 explorations _site/
           cp -r node_modules/three _site/node_modules/
 
       - name: Setup Pages

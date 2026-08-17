@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex" />
+<title>Workbench — Hex Automaton Explorations</title>
+<link rel="stylesheet" href="./explore.css" />
+</head>
+<body>
+  <header class="top">
+    <span class="brand">HEX AUTOMATON</span>
+    <span class="crumb">›</span>
+    <span class="crumb" id="presetCrumb">Resonant Bloom</span>
+    <span class="crumb">›</span>
+    <span class="here" id="modeCrumb">Watch</span>
+    <nav>
+      <a href="./library.html">Library</a>
+      <span style="color:#445544">2D | 3D</span>
+      <a href="../index.html">Live 2D</a>
+    </nav>
+  </header>
+  <div class="stage">
+    <div class="boot" id="boot">
+      connecting field
+      <div class="line" id="bootLine">seeding torus…</div>
+    </div>
+    <nav class="rail" id="rail">
+      <button type="button" data-mode="watch" aria-current="page">Watch</button>
+      <button type="button" data-mode="steer">Steer</button>
+      <button type="button" data-mode="read">Read</button>
+      <button type="button" data-mode="leave">Leave</button>
+    </nav>
+    <div class="wb-main" id="wbMain">
+      <div class="watch-canvas"><canvas id="cv"></canvas></div>
+      <div class="watch-hud" id="watchHud">
+        <div class="cap" id="outcome">LIVE</div>
+        <div class="gen" id="genHud">GEN 0</div>
+        <div class="cap">the only way to know the next state is to run it</div>
+      </div>
+      <div class="watch-actions" id="watchActions">
+        <button type="button" id="playBtn">Pause</button>
+        <button type="button" id="steerBtn">Steer</button>
+        <button type="button" class="primary" id="mintBtn">Mint card</button>
+      </div>
+      <aside class="drawer" id="drawer">
+        <div class="drawer-inner" id="drawerBody"></div>
+      </aside>
+    </div>
+  </div>
+  <footer class="status">
+    <span id="statusLeft">GEN 0</span>
+    <span>1 watch · 2 steer · 3 read · 4 leave · space pause · m mint</span>
+  </footer>
+  <script type="module">
+    import { Engine } from '../src/engine.js';
+    import { renderFrame, computeLayout } from '../src/render.js';
+    import { getPreset, getPresetParams, getPresetSeedFn } from '../src/presets.js';
+    import { generateFormula } from '../src/formula.js';
+    import { ONTOLOGY_AXES } from '../src/ontology.js';
+    import { PARAM_META, PARAM_GROUPS } from '../src/paramMeta.js';
+    import { seedCluster } from '../src/seeds.js';
+    import { ParticleSystem } from '../src/particles.js';
+    import { GrowthTape } from '../src/share-capture.js';
+    import { buildCardData } from '../src/share-data.js';
+    import { generateShareCardSVG, previewCard } from '../src/share-card.js';
+    import { buildShareText } from '../src/share-text.js';
+    import { generateShareUrl } from '../src/share-url.js';
+    import { exportRuleKit, ruleKitToJSON, parseRuleKit, buildEngineFromRuleKit, downloadRuleKit, readFileAsText } from '../src/ruleKit.js';
+
+    const PARAM_RANGES = {
+      birthLow: [0, 5, 0.05], birthHigh: [0, 6, 0.05], birthDensity: [0, 1, 0.01],
+      birthEnergyMin: [-1, 1, 0.01], surviveLow: [0, 5, 0.05], surviveHigh: [0, 6, 0.05],
+      surviveDecay: [0.9, 1, 0.001], deathDecay: [0, 1, 0.01], deadDecay: [0, 1, 0.01],
+      energyBirthCoupling: [0, 3, 0.05], energyToDensity: [0, 0.2, 0.002],
+      densityToEnergy: [0, 0.3, 0.002], activityCost: [0, 2, 0.02],
+      energyLeakRate: [0, 0.6, 0.01], energyDecay: [0, 0.1, 0.002],
+      momentumSmoothing: [0, 1, 0.01], leakConcentration: [0, 1, 0.01],
+    };
+
+    const q = new URLSearchParams(location.search);
+    let preset;
+    try { preset = getPreset(q.get('preset') || 'resonant-bloom'); }
+    catch { preset = getPreset('resonant-bloom'); }
+
+    const canvas = document.getElementById('cv');
+    const ctx = canvas.getContext('2d');
+    let gridSize = 56;
+    let cell = 6;
+    let pressure = preset.survivalPressure;
+    let bias = preset.momentumBias;
+    let engine = new Engine(gridSize, gridSize, getPresetParams(preset, { survivalPressure: pressure, momentumBias: bias }), getPresetSeedFn(preset));
+    let layout = computeLayout(gridSize, gridSize, cell);
+    canvas.width = layout.canvasWidth;
+    canvas.height = layout.canvasHeight;
+
+    const tape = new GrowthTape({ every: 24 });
+    tape.capture(engine);
+    const particles = new ParticleSystem();
+
+    let running = true;
+    let mode = 'watch';
+    let kitName = '';
+    let includeState = false;
+    const layers = { density: true, energyGlow: true, momentumArrows: true, particles: true };
+
+    function applyOntology() {
+      Object.assign(engine.params, getPresetParams(preset, { survivalPressure: pressure, momentumBias: bias }));
+      syncAdvSliders();
+    }
+
+    function rebuildGrid() {
+      engine = new Engine(gridSize, gridSize, { ...engine.params }, getPresetSeedFn(preset));
+      layout = computeLayout(gridSize, gridSize, cell);
+      canvas.width = layout.canvasWidth;
+      canvas.height = layout.canvasHeight;
+      particles.clear();
+      tape.reset();
+      tape.capture(engine);
+    }
+
+    function setMode(next) {
+      mode = next;
+      document.getElementById('modeCrumb').textContent = next;
+      for (const b of document.querySelectorAll('#rail [data-mode]')) {
+        b.setAttribute('aria-current', b.dataset.mode === next ? 'page' : 'false');
+      }
+      const open = next !== 'watch';
+      document.getElementById('drawer').classList.toggle('open', open);
+      document.getElementById('wbMain').classList.toggle('is-panel', open);
+      renderDrawer();
+    }
+
+    function xe(s) {
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function renderDrawer() {
+      const el = document.getElementById('drawerBody');
+      if (mode === 'watch') { el.innerHTML = ''; return; }
+      if (mode === 'steer') {
+        const groups = {};
+        for (const [key, range] of Object.entries(PARAM_RANGES)) {
+          const g = PARAM_META[key]?.group || 'other';
+          if (!groups[g]) groups[g] = [];
+          groups[g].push({ key, range, meta: PARAM_META[key] });
+        }
+        const groupHtml = Object.entries(groups).map(([g, items]) => `
+          <div class="adv">
+            <h2>${xe(PARAM_GROUPS[g] || g)}</h2>
+            ${items.map(({ key, range, meta }) => `
+              <div class="row-param">
+                <label>${xe(meta?.label || key)} <span class="val" data-adv="${key}">${Number(engine.params[key]).toFixed(3)}</span></label>
+                <input type="range" data-param="${key}" min="${range[0]}" max="${range[1]}" step="${range[2]}" value="${engine.params[key]}" />
+                <div class="meta">${xe(meta?.meaning || '')}</div>
+              </div>`).join('')}
+          </div>`).join('');
+        el.innerHTML = `
+          <h2>Steer</h2>
+          <label>Survival Pressure <span class="val" id="pVal">${pressure.toFixed(2)}</span></label>
+          <input type="range" id="pSl" min="0" max="1" step="0.01" value="${pressure}" />
+          <div class="meta">${xe(ONTOLOGY_AXES.survivalPressure.description)}</div>
+          <label>Momentum Bias <span class="val" id="bVal">${bias.toFixed(2)}</span></label>
+          <input type="range" id="bSl" min="0" max="1" step="0.01" value="${bias}" />
+          <div class="meta">${xe(ONTOLOGY_AXES.momentumBias.description)}</div>
+          <h2 style="margin-top:16px">Layers</h2>
+          <label><input type="checkbox" id="ld" ${layers.density ? 'checked' : ''}/> Density</label>
+          <label><input type="checkbox" id="le" ${layers.energyGlow ? 'checked' : ''}/> Energy</label>
+          <label><input type="checkbox" id="lm" ${layers.momentumArrows ? 'checked' : ''}/> Momentum</label>
+          <label><input type="checkbox" id="lp" ${layers.particles ? 'checked' : ''}/> Particles</label>
+          <p class="meta">Click the field to drop a seed cluster.</p>
+          <h2 style="margin-top:16px">Grid</h2>
+          <label>Size <span class="val" id="gVal">${gridSize}</span></label>
+          <input type="range" id="gSl" min="30" max="90" step="2" value="${gridSize}" />
+          <label>Cell px <span class="val" id="cVal">${cell}</span></label>
+          <input type="range" id="cSl" min="4" max="12" step="1" value="${cell}" />
+          <p class="meta">Changing size reseeds the torus (cell size does not).</p>
+          ${groupHtml}
+        `;
+        el.querySelector('#pSl').addEventListener('input', (e) => {
+          pressure = parseFloat(e.target.value);
+          el.querySelector('#pVal').textContent = pressure.toFixed(2);
+          applyOntology();
+        });
+        el.querySelector('#bSl').addEventListener('input', (e) => {
+          bias = parseFloat(e.target.value);
+          el.querySelector('#bVal').textContent = bias.toFixed(2);
+          applyOntology();
+        });
+        el.querySelector('#ld').addEventListener('change', (e) => { layers.density = e.target.checked; });
+        el.querySelector('#le').addEventListener('change', (e) => { layers.energyGlow = e.target.checked; });
+        el.querySelector('#lm').addEventListener('change', (e) => { layers.momentumArrows = e.target.checked; });
+        el.querySelector('#lp').addEventListener('change', (e) => { layers.particles = e.target.checked; });
+        el.querySelector('#gSl').addEventListener('change', (e) => {
+          gridSize = parseInt(e.target.value, 10);
+          el.querySelector('#gVal').textContent = gridSize;
+          rebuildGrid();
+        });
+        el.querySelector('#gSl').addEventListener('input', (e) => {
+          el.querySelector('#gVal').textContent = e.target.value;
+        });
+        el.querySelector('#cSl').addEventListener('input', (e) => {
+          cell = parseInt(e.target.value, 10);
+          el.querySelector('#cVal').textContent = cell;
+          layout = computeLayout(engine.width, engine.height, cell);
+          canvas.width = layout.canvasWidth;
+          canvas.height = layout.canvasHeight;
+        });
+        for (const input of el.querySelectorAll('[data-param]')) {
+          input.addEventListener('input', () => {
+            const key = input.dataset.param;
+            engine.params[key] = parseFloat(input.value);
+            const lab = el.querySelector(`[data-adv="${key}"]`);
+            if (lab) lab.textContent = parseFloat(input.value).toFixed(3);
+          });
+        }
+        return;
+      }
+      if (mode === 'read') {
+        const formula = generateFormula(engine.params, {
+          title: preset.name,
+          ontology: { survivalPressure: pressure, momentumBias: bias },
+          provenance: { presetName: preset.name, archetype: preset.archetype },
+        });
+        el.innerHTML = `
+          <h2>Read</h2>
+          <label>Density <span class="val" id="dv"></span></label>
+          <div class="meter"><i id="dm"></i></div>
+          <label>Energy <span class="val" id="ev"></span></label>
+          <div class="meter"><i id="em"></i></div>
+          <label>Momentum <span class="val" id="mv"></span></label>
+          <div class="meter"><i id="mm"></i></div>
+          <label>Resonance <span class="val" id="rv"></span></label>
+          <div class="meter"><i id="rm"></i></div>
+          <h2 style="margin-top:16px">Formula</h2>
+          <pre>${xe(formula)}</pre>
+        `;
+        return;
+      }
+      if (mode === 'leave') {
+        el.innerHTML = `
+          <h2>Leave</h2>
+          <p style="color:#ccccaa;margin:0 0 12px">Mint a receipt of this computed field, or take the rule kit — rules only, or rules + canvas for an exact resume.</p>
+          <button type="button" class="primary" id="mint">Mint card</button>
+          <div class="row" style="margin-top:8px">
+            <button type="button" id="copyText">Copy text</button>
+            <button type="button" id="copyLink">Copy link</button>
+          </div>
+          <p class="meta" id="leaveStatus">Tape frames: ${tape.frames.length}.</p>
+
+          <h2 style="margin-top:18px">Export rule kit</h2>
+          <label>Name</label>
+          <input type="text" id="exportName" value="${xe(kitName)}" placeholder="${xe(preset.name)}" />
+          <label><input type="checkbox" id="exportIncludeState" ${includeState ? 'checked' : ''}/> Include canvas state (exact resume, larger file)</label>
+          <div class="row" style="margin-top:8px">
+            <button type="button" id="copyJson">Copy JSON</button>
+            <button type="button" id="downloadJson">Download</button>
+          </div>
+          <p class="meta" id="exportStatus"></p>
+
+          <h2 style="margin-top:18px">Import rule kit</h2>
+          <input type="file" id="importFile" accept="application/json,.json" />
+          <textarea id="importText" placeholder="…or paste rule kit JSON here"></textarea>
+          <button type="button" id="loadKit" style="margin-top:8px">Load</button>
+          <p class="meta" id="importStatus"></p>
+        `;
+        el.querySelector('#mint').addEventListener('click', mintCard);
+        el.querySelector('#copyText').addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(buildShareText(assemble()));
+            setLeaveNote('leaveStatus', 'Share text copied.', false);
+          } catch {
+            setLeaveNote('leaveStatus', 'Clipboard denied.', true);
+          }
+        });
+        el.querySelector('#copyLink').addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(generateShareUrl(assemble()));
+            setLeaveNote('leaveStatus', 'Link copied. Recipient starts at generation 0 unless they import a kit with state.', false);
+          } catch {
+            setLeaveNote('leaveStatus', 'Clipboard denied.', true);
+          }
+        });
+        el.querySelector('#exportName').addEventListener('input', (e) => { kitName = e.target.value; });
+        el.querySelector('#exportIncludeState').addEventListener('change', (e) => { includeState = e.target.checked; });
+        el.querySelector('#copyJson').addEventListener('click', async () => {
+          const json = ruleKitToJSON(buildExportKit());
+          try {
+            await navigator.clipboard.writeText(json);
+            setLeaveNote('exportStatus', `Copied (${(json.length / 1024).toFixed(1)} KB).`, false);
+          } catch {
+            setLeaveNote('exportStatus', 'Clipboard denied — use Download.', true);
+          }
+        });
+        el.querySelector('#downloadJson').addEventListener('click', () => {
+          const kit = buildExportKit();
+          downloadRuleKit(kit);
+          setLeaveNote('exportStatus', `Downloaded (${kit.state ? 'with' : 'without'} canvas state).`, false);
+        });
+        el.querySelector('#importFile').addEventListener('change', async (e) => {
+          const file = e.target.files && e.target.files[0];
+          if (!file) return;
+          el.querySelector('#importText').value = await readFileAsText(file);
+        });
+        el.querySelector('#loadKit').addEventListener('click', () => {
+          try {
+            const hadState = applyKit(parseRuleKit(el.querySelector('#importText').value));
+            setLeaveNote('importStatus', `Loaded "${kitName || preset.name}"${hadState ? ` — resumed at generation ${engine.generation}.` : ' — fresh seed from rules only.'}`, false);
+          } catch (err) {
+            setLeaveNote('importStatus', `Error: ${err.message}`, true);
+          }
+        });
+      }
+    }
+
+    function syncAdvSliders() {
+      const el = document.getElementById('drawerBody');
+      for (const input of el.querySelectorAll('[data-param]')) {
+        const key = input.dataset.param;
+        if (engine.params[key] == null) continue;
+        input.value = engine.params[key];
+        const lab = el.querySelector(`[data-adv="${key}"]`);
+        if (lab) lab.textContent = Number(engine.params[key]).toFixed(3);
+      }
+    }
+
+    function provenance() {
+      return {
+        presetId: preset.id,
+        presetName: preset.name,
+        archetype: preset.archetype,
+        survivalPressure: pressure,
+        momentumBias: bias,
+      };
+    }
+
+    function assemble() {
+      tape.capture(engine);
+      return buildCardData({
+        engine,
+        name: kitName.trim() || preset.name,
+        provenance: provenance(),
+        growthFrames: tape.frames,
+      });
+    }
+
+    function buildExportKit() {
+      return exportRuleKit(engine, {
+        name: kitName.trim() || preset.name,
+        includeState,
+        provenance: provenance(),
+      });
+    }
+
+    function applyKit(kit) {
+      engine = buildEngineFromRuleKit(kit, { fallbackSeedFn: getPresetSeedFn(preset) });
+      gridSize = kit.grid.width;
+      layout = computeLayout(engine.width, engine.height, cell);
+      canvas.width = layout.canvasWidth;
+      canvas.height = layout.canvasHeight;
+      particles.clear();
+      if (kit.meta.presetId) {
+        try { preset = getPreset(kit.meta.presetId); } catch { /* keep current preset label */ }
+      }
+      if (typeof kit.meta.survivalPressure === 'number') pressure = kit.meta.survivalPressure;
+      if (typeof kit.meta.momentumBias === 'number') bias = kit.meta.momentumBias;
+      if (kit.meta.name) kitName = kit.meta.name;
+      document.getElementById('presetCrumb').textContent = preset.name;
+      tape.reset();
+      tape.capture(engine);
+      return !!kit.state;
+    }
+
+    function setLeaveNote(id, message, err) {
+      const node = document.getElementById(id);
+      if (!node) return;
+      node.textContent = message;
+      node.classList.toggle('ok', !err);
+      node.classList.toggle('err', !!err);
+    }
+
+    function mintCard() {
+      previewCard(generateShareCardSVG(assemble()));
+    }
+
+    document.getElementById('rail').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-mode]');
+      if (b) setMode(b.dataset.mode);
+    });
+    document.getElementById('steerBtn').addEventListener('click', () => setMode('steer'));
+    document.getElementById('playBtn').addEventListener('click', () => {
+      running = !running;
+      document.getElementById('playBtn').textContent = running ? 'Pause' : 'Play';
+    });
+    document.getElementById('mintBtn').addEventListener('click', mintCard);
+
+    canvas.addEventListener('click', (ev) => {
+      if (mode !== 'steer') { setMode('steer'); return; }
+      const rect = canvas.getBoundingClientRect();
+      const sx = canvas.width / rect.width;
+      const sy = canvas.height / rect.height;
+      const x = (ev.clientX - rect.left) * sx - layout.offsetX;
+      const y = (ev.clientY - rect.top) * sy - layout.offsetY;
+      const r = Math.round(y / (1.5 * cell));
+      const q0 = Math.round(x / (Math.sqrt(3) * cell) - r / 2);
+      seedCluster(engine, q0, r, 2, 0.9, 0.6);
+    });
+
+    document.addEventListener('keydown', (ev) => {
+      if (ev.target && /^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName)) return;
+      if (ev.code === 'Space') { ev.preventDefault(); document.getElementById('playBtn').click(); }
+      if (ev.key === 'm' || ev.key === 'M') mintCard();
+      const map = { 1: 'watch', 2: 'steer', 3: 'read', 4: 'leave', w: 'watch', s: 'steer', r: 'read', e: 'leave' };
+      if (map[ev.key]) setMode(map[ev.key]);
+    });
+
+    document.getElementById('presetCrumb').textContent = preset.name;
+
+    const boot = document.getElementById('boot');
+    const bootLine = document.getElementById('bootLine');
+    const bootLines = ['seeding torus…', `preset ${preset.name.toLowerCase()}`, 'no closed form'];
+    let li = 0;
+    const bootTimer = setInterval(() => {
+      li += 1;
+      if (li < bootLines.length) bootLine.textContent = bootLines[li];
+      else {
+        clearInterval(bootTimer);
+        boot.classList.add('hide');
+      }
+    }, 200);
+
+    const startMode = ['watch', 'steer', 'read', 'leave'].includes(q.get('mode')) ? q.get('mode') : 'watch';
+    setMode(startMode);
+
+    function tick() {
+      if (running) {
+        engine.step();
+        tape.maybeCapture(engine);
+        if (layers.particles) {
+          particles.spawn(engine, layout);
+          particles.update();
+        } else if (particles.particles.length) {
+          particles.clear();
+        }
+      }
+      renderFrame(ctx, engine, layout, cell, {
+        density: layers.density,
+        energyGlow: layers.energyGlow,
+        momentumArrows: layers.momentumArrows,
+        particleSystem: layers.particles ? particles : null,
+      });
+      const s = engine.lastStats;
+      const res = Math.round((s.resonance || 0) * 100);
+      const alive = ((s.aliveCells / engine.n) * 100).toFixed(1);
+      const outcome = !s.aliveCells ? 'QUIET' : (s.resonance > 0.75 ? 'RESONANT' : 'LIVE');
+      document.getElementById('statusLeft').textContent = `GEN ${s.generation} · ${outcome} · ALIVE ${alive}% · RES ${res}%`;
+      document.getElementById('genHud').textContent = `GEN ${s.generation}`;
+      document.getElementById('outcome').textContent = outcome;
+      if (mode === 'read') {
+        const dm = document.getElementById('dm');
+        if (dm) {
+          document.getElementById('dv').textContent = `${alive}%`;
+          dm.style.width = `${Math.min(100, Number(alive))}%`;
+          document.getElementById('ev').textContent = (s.totalEnergy / engine.n).toFixed(2);
+          document.getElementById('em').style.width = `${Math.min(100, Math.max(0, ((s.totalEnergy / engine.n) + 1) / 4 * 100))}%`;
+          const mom = Math.round((s.momentumCoherence || 0) * 100);
+          document.getElementById('mv').textContent = `${mom}%`;
+          document.getElementById('mm').style.width = `${mom}%`;
+          document.getElementById('rv').textContent = `${res}%`;
+          document.getElementById('rm').style.width = `${res}%`;
+        }
+      }
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  </script>
+</body>
+</html>

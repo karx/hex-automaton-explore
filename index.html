@@ -2,7 +2,7 @@
 <html lang="en" prefix="og: https://ogp.me/ns#">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Hex Automaton — Live 2D field explorer</title>
 <meta name="title" content="Hex Automaton — Live 2D field explorer" />
 <meta name="description" content="Grow living patterns on a hex torus. Three fields, two sliders, fourteen presets, and a portable rule kit you can export or resume mid-run." />
@@ -143,13 +143,29 @@
   #exportStatus.err, #importStatus.err, #shareStatus.err { color: #ff7a7a; }
   .param-label { display: flex; flex-direction: column; }
   .param-label .key { font-size: 9px; color: #5b5f75; font-family: monospace; }
+  #canvasWrap { min-width: 0; min-height: 0; }
 </style>
+<link rel="stylesheet" href="./src/shell.css" />
 </head>
 <body>
-  <div id="canvasWrap"><canvas id="cv"></canvas></div>
-  <div id="panel">
+  <header id="topbar">
+    <button id="panelToggle" type="button" aria-expanded="false" aria-controls="panel">Panel</button>
+    <span class="brand">HEX AUTOMATON</span>
+    <span class="crumb">2D</span>
+    <span id="topStatus" class="top-status">GEN 0</span>
+    <button id="topPlayBtn" type="button">Pause</button>
+    <nav>
+      <a href="./index.html" aria-current="page">2D</a>
+      <a href="./viewer3d.html">3D</a>
+      <a href="./langtons-ant.html">Ant</a>
+    </nav>
+  </header>
+  <div id="workspace">
+    <div id="canvasWrap"><canvas id="cv"></canvas></div>
+    <div id="panelBackdrop"></div>
+    <div id="panel">
     <h1>Multi-Field Hex Automaton</h1>
-    <div class="sub">Density · Energy · Momentum — click the grid to seed a cluster · <a href="./viewer3d.html" style="color:#7ecbff">3D view</a> · <a href="./langtons-ant.html" style="color:#7ecbff">Langton's Ant</a></div>
+    <div class="sub">Density · Energy · Momentum — tap the grid to seed a cluster.</div>
 
     <fieldset>
       <legend>Preset</legend>
@@ -174,6 +190,19 @@
       </label>
       <div class="axis-endpoints"><span>Isotropic</span><span>Directional</span></div>
       <div class="axis-desc" id="biasDesc"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Share this run</legend>
+      <div class="row">
+        <button id="previewCardBtn" type="button">Preview card</button>
+        <button id="shareCardBtn" type="button">Share card</button>
+      </div>
+      <div class="row" style="margin-top:6px">
+        <button id="copyShareTextBtn" type="button">Copy text</button>
+        <button id="copyShareLinkBtn" type="button">Copy link</button>
+      </div>
+      <div class="hint" id="shareStatus">A unique receipt of this grown field. JSON below is for exact resume.</div>
     </fieldset>
 
     <fieldset>
@@ -224,31 +253,18 @@
       </label>
     </fieldset>
 
-    <details open>
+    <details>
       <summary>Advanced: raw parameters</summary>
       <div id="paramSliders" style="margin-top:8px"></div>
       <div class="hint">Editing these directly overrides the ontology sliders above for this preset until you touch Survival Pressure or Momentum Bias again.</div>
     </details>
 
-    <details open>
+    <details>
       <summary>Rule set formula</summary>
       <pre id="formulaText" class="formula-pre"></pre>
       <button id="copyFormulaBtn" style="margin-top:6px">Copy formula</button>
       <div class="hint">The exact rule set currently running, spelled out with real numbers — see <code>docs/ATTRIBUTE_GLOSSARY.md</code> for what each term means.</div>
     </details>
-
-    <fieldset>
-      <legend>Share this run</legend>
-      <div class="row">
-        <button id="previewCardBtn" type="button">Preview card</button>
-        <button id="shareCardBtn" type="button">Share card</button>
-      </div>
-      <div class="row" style="margin-top:6px">
-        <button id="copyShareTextBtn" type="button">Copy text</button>
-        <button id="copyShareLinkBtn" type="button">Copy link</button>
-      </div>
-      <div class="hint" id="shareStatus">A unique 1200×630 receipt of this grown field. The only way to know generation N is to run N steps. JSON below is for exact resume.</div>
-    </fieldset>
 
     <fieldset>
       <legend>Export rule kit</legend>
@@ -271,8 +287,13 @@
       <div class="hint" id="importStatus"></div>
     </fieldset>
 
-    <div class="hint">Engine: <code>src/engine.js</code> · Ontology: <code>src/ontology.js</code> · Rendering: <code>src/render.js</code></div>
+    <div class="hint">Space play/pause · P panel · tap grid to seed</div>
+    </div>
   </div>
+  <footer id="statusbar">
+    <span id="statusLeft">GEN 0</span>
+    <span id="statusRight">SPACE PLAY/PAUSE</span>
+  </footer>
 
   <script type="module">
     import { Engine } from './src/engine.js';
@@ -289,6 +310,7 @@
     import { parseShareHash } from './src/share-url.js';
     import { bindShareControls } from './src/share-ui.js';
     import { GrowthTape } from './src/share-capture.js';
+    import { initShell } from './src/shell.js';
 
     const canvas = document.getElementById('cv');
     const ctx = canvas.getContext('2d');
@@ -448,10 +470,23 @@
     pressureSlider.addEventListener('input', () => { pressureVal.textContent = parseFloat(pressureSlider.value).toFixed(2); applyOntologyLive(); });
     biasSlider.addEventListener('input', () => { biasVal.textContent = parseFloat(biasSlider.value).toFixed(2); applyOntologyLive(); });
 
+    const shell = initShell({
+      playButtons: [playBtn, document.getElementById('topPlayBtn')],
+      statusEls: [document.getElementById('topStatus'), document.getElementById('statusLeft')],
+      getStatus: () => {
+        if (!engine) return 'GEN 0';
+        const s = engine.lastStats;
+        const res = Math.round((s.resonance || 0) * 100);
+        const alive = ((s.aliveCells / engine.n) * 100).toFixed(1);
+        return `GEN ${s.generation} · ALIVE ${alive}% · RES ${res}%`;
+      },
+    });
+
     playBtn.addEventListener('click', () => {
       running = !running;
-      playBtn.textContent = running ? 'Pause' : 'Play';
+      shell.setPlayLabel(running);
     });
+    document.getElementById('topPlayBtn').addEventListener('click', () => playBtn.click());
 
     document.getElementById('copyFormulaBtn').addEventListener('click', async () => {
       try {
@@ -681,6 +716,12 @@
           <div>Alive % <span class="v">${((s.aliveCells / engine.n) * 100).toFixed(1)}%</span></div>
           <div>Leak directionality <span class="v">${(s.leakDirectionality * 100).toFixed(0)}%</span></div>
         `;
+        shell.updateStatus(running);
+        const badge = document.getElementById('statusRight');
+        if (badge) {
+          badge.textContent = s.resonance > 0.75 ? 'RESONANT' : 'SPACE PLAY/PAUSE';
+          badge.classList.toggle('hot', s.resonance > 0.75);
+        }
       }
       requestAnimationFrame(loop);
     }

@@ -20,7 +20,7 @@ const pages = [
   },
   {
     file: 'langtons-ant.html',
-    title: "Langton's Ant — Hex ant, no highway",
+    title: "Langton's Ant — hex grid, no highway",
     canonical: 'https://karx.github.io/hex-automaton-explore/langtons-ant.html',
   },
 ];
