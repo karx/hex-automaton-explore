@@ -54,7 +54,7 @@ async function testPage(url, label) {
   await page.close();
 }
 
-await testPage('http://localhost:4177/index.html', '2d');
+await testPage('http://localhost:4177/explorer.html', '2d');
 await testPage('http://localhost:4177/viewer3d.html', '3d');
 
 await browser.close();

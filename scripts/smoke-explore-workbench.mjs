@@ -8,8 +8,19 @@ page.on('pageerror', (e) => errors.push(String(e)));
 await page.goto('http://localhost:4177/explorations/library.html', { waitUntil: 'load' });
 const cards = await page.locator('.card').count();
 const scripts = await page.locator('script').count();
-console.log('library cards', cards, 'script tags', scripts);
+const crystalHref = await page.locator('.card[href*="preset=stable-crystal"]').getAttribute('href');
+console.log('library cards', cards, 'script tags', scripts, 'crystal href', crystalHref);
+await page.locator('.card[href*="preset=stable-crystal"]').click();
+await page.waitForTimeout(1200);
+const fromLibUrl = page.url();
+const fromLibCrumb = await page.locator('#presetCrumb').innerText();
+console.log('library click', fromLibUrl, fromLibCrumb);
 await page.screenshot({ path: 'scripts/explore-library.png' });
+if (!/stable-crystal/.test(fromLibUrl) || !/STABLE CRYSTAL/i.test(fromLibCrumb)) {
+  console.error('library did not open Stable Crystal');
+  await browser.close();
+  process.exit(1);
+}
 
 await page.goto('http://localhost:4177/explorations/workbench.html?preset=resonant-bloom&mode=watch', { waitUntil: 'load' });
 await page.waitForTimeout(2800);

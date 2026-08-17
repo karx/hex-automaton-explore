@@ -1,7 +1,8 @@
 // Writes explorations/library.html once from the preset library + on-disk
-// GIFs/stills. Re-run after adding a preset or a showcase GIF.
+// GIFs/stills. Re-run after adding a preset, a favorite, or a showcase GIF.
 import { writeFileSync, existsSync } from 'fs';
 import { PRESETS } from '../src/presets.js';
+import { FAVORITES } from '../src/favorites.js';
 
 const GIFS_V2 = {
   'stable-crystal': '../gifs-v2/stable-crystal.gif',
@@ -42,21 +43,37 @@ function firstLine(desc) {
   return line.endsWith('.') ? line : `${line}.`;
 }
 
-const cards = PRESETS.map((p) => {
-  const src = thumbFor(p);
-  const kind = p.discovered ? 'Discovered' : 'Classic';
+function card(href, kind, seedType, name, desc, src) {
   const media = src
-    ? `<img src="${xe(src)}" alt="${xe(p.name)}">`
-    : `<span class="ph">${xe(p.seedType.toUpperCase())}</span>`;
-  return `      <a class="card" href="./workbench.html?preset=${xe(p.id)}&mode=watch">
+    ? `<img src="${xe(src)}" alt="${xe(name)}">`
+    : `<span class="ph">${xe(seedType.toUpperCase())}</span>`;
+  return `      <a class="card" href="${xe(href)}">
         <div class="thumb">${media}</div>
         <div class="body">
-          <div class="k">${kind} · ${xe(p.seedType)}</div>
-          <div class="n">${xe(p.name)}</div>
-          <div class="d">${xe(firstLine(p.description))}</div>
+          <div class="k">${xe(kind)} · ${xe(seedType)}</div>
+          <div class="n">${xe(name)}</div>
+          <div class="d">${xe(firstLine(desc))}</div>
         </div>
       </a>`;
-}).join('\n');
+}
+
+const favCards = FAVORITES.map((f) => card(
+  `./workbench.html?favorite=${f.id}&mode=watch#favorite=${f.id}`,
+  'Favorite',
+  f.seedType,
+  f.name,
+  f.description,
+  null,
+)).join('\n');
+
+const cards = PRESETS.map((p) => card(
+  `./workbench.html?preset=${p.id}&mode=watch#preset=${p.id}`,
+  p.discovered ? 'Discovered' : 'Classic',
+  p.seedType,
+  p.name,
+  p.description,
+  thumbFor(p),
+)).join('\n');
 
 const html = `<!doctype html>
 <html lang="en">
@@ -73,25 +90,31 @@ const html = `<!doctype html>
     <span class="crumb">›</span>
     <span class="here">Library</span>
     <nav>
-      <a href="./index.html">Hub</a>
+      <a href="../index.html">Home</a>
+      <a href="./library.html" aria-current="page">Library</a>
       <a href="./workbench.html">Workbench</a>
-      <a href="../index.html">Live 2D</a>
+      <a href="../explorer.html">2D</a>
     </nav>
   </header>
   <div class="scroll">
     <h1>Library</h1>
-    <p class="lede">Pick a field by seeing it. Generated once from the preset list — re-run <code>node scripts/generate-library.mjs</code> after a new preset or GIF. Click enters Watch on the workbench (same field, no remount when you Steer).</p>
+    <p class="lede">Pick a field by seeing it. Generated once from favorites + the preset list — re-run <code>node scripts/generate-library.mjs</code> after a new favorite, preset, or GIF. Click enters Watch on the workbench (same field, no remount when you Steer).</p>
+    <h2>Favorites</h2>
+    <div class="grid">
+${favCards}
+    </div>
+    <h2>Presets</h2>
     <div class="grid">
 ${cards}
     </div>
   </div>
   <footer class="status">
     <span>Browse → Watch → Steer</span>
-    <span>Static · ${PRESETS.length} presets</span>
+    <span>Static · ${FAVORITES.length} favorite${FAVORITES.length === 1 ? '' : 's'} · ${PRESETS.length} presets</span>
   </footer>
 </body>
 </html>
 `;
 
 writeFileSync('explorations/library.html', html);
-console.log(`wrote explorations/library.html (${PRESETS.length} cards)`);
+console.log(`wrote explorations/library.html (${FAVORITES.length} favorites, ${PRESETS.length} presets)`);

@@ -13,16 +13,29 @@
     <span class="crumb">›</span>
     <span class="here">Library</span>
     <nav>
-      <a href="./index.html">Hub</a>
+      <a href="../index.html">Home</a>
+      <a href="./library.html" aria-current="page">Library</a>
       <a href="./workbench.html">Workbench</a>
-      <a href="../index.html">Live 2D</a>
+      <a href="../explorer.html">2D</a>
     </nav>
   </header>
   <div class="scroll">
     <h1>Library</h1>
-    <p class="lede">Pick a field by seeing it. Generated once from the preset list — re-run <code>node scripts/generate-library.mjs</code> after a new preset or GIF. Click enters Watch on the workbench (same field, no remount when you Steer).</p>
+    <p class="lede">Pick a field by seeing it. Generated once from favorites + the preset list — re-run <code>node scripts/generate-library.mjs</code> after a new favorite, preset, or GIF. Click enters Watch on the workbench (same field, no remount when you Steer).</p>
+    <h2>Favorites</h2>
     <div class="grid">
-      <a class="card" href="./workbench.html?preset=stable-crystal&mode=watch">
+      <a class="card" href="./workbench.html?favorite=pulsating-full&amp;mode=watch#favorite=pulsating-full">
+        <div class="thumb"><span class="ph">RING</span></div>
+        <div class="body">
+          <div class="k">Favorite · ring</div>
+          <div class="n">Pulsating Full</div>
+          <div class="d">Hand-tuned from Resonant Bloom: a wide, easy birth window that fills the torus by generation 100, then holds a ~56% living mass that breathes a few percent instead of locking.</div>
+        </div>
+      </a>
+    </div>
+    <h2>Presets</h2>
+    <div class="grid">
+      <a class="card" href="./workbench.html?preset=stable-crystal&amp;mode=watch#preset=stable-crystal">
         <div class="thumb"><img src="../gifs-v2/stable-crystal.gif" alt="Stable Crystal"></div>
         <div class="body">
           <div class="k">Classic · cluster</div>
@@ -30,7 +43,7 @@
           <div class="d">Overshoots to ~61% alive by generation 300, then locks into a stable ~58% plateau it holds for the rest of the run.</div>
         </div>
       </a>
-      <a class="card" href="./workbench.html?preset=coral-reef&mode=watch">
+      <a class="card" href="./workbench.html?preset=coral-reef&amp;mode=watch#preset=coral-reef">
         <div class="thumb"><img src="../gifs/dense-coral.gif" alt="Coral Reef"></div>
         <div class="body">
           <div class="k">Classic · cluster</div>
@@ -38,7 +51,7 @@
           <div class="d">Grows slowly for 300 generations, bursts to a 67% overshoot by generation 500, then relaxes to a ~58% dynamic equilibrium.</div>
         </div>
       </a>
-      <a class="card" href="./workbench.html?preset=drifting-vortex&mode=watch">
+      <a class="card" href="./workbench.html?preset=drifting-vortex&amp;mode=watch#preset=drifting-vortex">
         <div class="thumb"><img src="../gifs-v2/drifting-vortex.gif" alt="Drifting Vortex"></div>
         <div class="body">
           <div class="k">Classic · asymmetric</div>
@@ -46,7 +59,7 @@
           <div class="d">The highest base energy-leak rate in the library, seeded off-center so momentum has a real direction to work with from the start.</div>
         </div>
       </a>
-      <a class="card" href="./workbench.html?preset=storm-field&mode=watch">
+      <a class="card" href="./workbench.html?preset=storm-field&amp;mode=watch#preset=storm-field">
         <div class="thumb"><img src="../gifs/storm-field.gif" alt="Storm Field"></div>
         <div class="body">
           <div class="k">Classic · cluster</div>
@@ -54,7 +67,7 @@
           <div class="d">Marginal survival reinforcement means patches die and reignite constantly.</div>
         </div>
       </a>
-      <a class="card" href="./workbench.html?preset=pulsing-heart&mode=watch">
+      <a class="card" href="./workbench.html?preset=pulsing-heart&amp;mode=watch#preset=pulsing-heart">
         <div class="thumb"><img src="../gifs-v2/pulsing-heart.gif" alt="Pulsing Heart"></div>
         <div class="body">
           <div class="k">Classic · asymmetric</div>
@@ -62,7 +75,7 @@
           <div class="d">Energy builds up faster than it leaks, then dumps all at once.</div>
         </div>
       </a>
-      <a class="card" href="./workbench.html?preset=sparse-ember&mode=watch">
+      <a class="card" href="./workbench.html?preset=sparse-ember&amp;mode=watch#preset=sparse-ember">
         <div class="thumb"><img src="../gifs/ember-ring.gif" alt="Sparse Ember"></div>
         <div class="body">
           <div class="k">Classic · ring</div>
@@ -70,7 +83,7 @@
           <div class="d">A narrow, high birth window closer to a classic Life-like sweet spot.</div>
         </div>
       </a>
-      <a class="card" href="./workbench.html?preset=spreading-front&mode=watch">
+      <a class="card" href="./workbench.html?preset=spreading-front&amp;mode=watch#preset=spreading-front">
         <div class="thumb"><img src="../gifs/spreading-front-ring.gif" alt="Spreading Front"></div>
         <div class="body">
           <div class="k">Classic · ring</div>
@@ -78,7 +91,7 @@
           <div class="d">The clearest textbook &quot;still growing&quot; preset at neutral sliders: steady, accelerating growth advancing outward from its ring seed as a genuine wavefront, with no plateau in sight by generation 720.</div>
         </div>
       </a>
-      <a class="card" href="./workbench.html?preset=fault-line&mode=watch">
+      <a class="card" href="./workbench.html?preset=fault-line&amp;mode=watch#preset=fault-line">
         <div class="thumb"><img src="../gifs/fault-line.gif" alt="Fault Line"></div>
         <div class="body">
           <div class="k">Classic · line</div>
@@ -86,7 +99,7 @@
           <div class="d">A straight-line seed that nearly dies on arrival.</div>
         </div>
       </a>
-      <a class="card" href="./workbench.html?preset=resonant-vortex&mode=watch">
+      <a class="card" href="./workbench.html?preset=resonant-vortex&amp;mode=watch#preset=resonant-vortex">
         <div class="thumb"><img src="../gifs/vortex-drift.gif" alt="Resonant Vortex"></div>
         <div class="body">
           <div class="k">Discovered · asymmetric</div>
@@ -94,7 +107,7 @@
           <div class="d">Drifting Vortex pushed toward robust + directional.</div>
         </div>
       </a>
-      <a class="card" href="./workbench.html?preset=charged-current&mode=watch">
+      <a class="card" href="./workbench.html?preset=charged-current&amp;mode=watch#preset=charged-current">
         <div class="thumb"><img src="../gifs-v2/charged-current.gif" alt="Charged Current"></div>
         <div class="body">
           <div class="k">Discovered · cluster</div>
@@ -102,7 +115,7 @@
           <div class="d">Storm Field tamed by strong directional bias: the same base rules that produced open-ended turbulence at neutral sliders instead concentrate into a directed current and settle into a ~59% plateau with resonance climbing steadily to 0.</div>
         </div>
       </a>
-      <a class="card" href="./workbench.html?preset=resonant-bloom&mode=watch">
+      <a class="card" href="./workbench.html?preset=resonant-bloom&amp;mode=watch#preset=resonant-bloom">
         <div class="thumb"><img src="../gifs-v2/resonant-bloom.gif" alt="Resonant Bloom"></div>
         <div class="body">
           <div class="k">Discovered · ring</div>
@@ -110,7 +123,7 @@
           <div class="d">The strongest resonance-plus-growth combination the discovery sweep found: still expanding at generation 1000 (3% -&gt; 41% and climbing) while sustaining resonance mostly between 0.</div>
         </div>
       </a>
-      <a class="card" href="./workbench.html?preset=ember-bloom&mode=watch">
+      <a class="card" href="./workbench.html?preset=ember-bloom&amp;mode=watch#preset=ember-bloom">
         <div class="thumb"><img src="../gifs-v2/ember-bloom.gif" alt="Ember Bloom"></div>
         <div class="body">
           <div class="k">Discovered · ring</div>
@@ -118,7 +131,7 @@
           <div class="d">The starkest transformation in the library: the same Sparse Ember rules, with leak spread isotropically instead of directionally, turn a preset that sustains ~4-7% of the grid into one that grows steadily to a 63% plateau by generation 600.</div>
         </div>
       </a>
-      <a class="card" href="./workbench.html?preset=pulse-current&mode=watch">
+      <a class="card" href="./workbench.html?preset=pulse-current&amp;mode=watch#preset=pulse-current">
         <div class="thumb"><img src="../gifs/storm-field.gif" alt="Pulse Current"></div>
         <div class="body">
           <div class="k">Discovered · cluster</div>
@@ -126,7 +139,7 @@
           <div class="d">Storm Field with strong directional bias but neutral survival pressure: climbs unevenly through several surges (27% -&gt; 44% -&gt; 41% -&gt; 62%) with resonance frequently exceeding 0.</div>
         </div>
       </a>
-      <a class="card" href="./workbench.html?preset=coral-echo&mode=watch">
+      <a class="card" href="./workbench.html?preset=coral-echo&amp;mode=watch#preset=coral-echo">
         <div class="thumb"><span class="ph">CLUSTER</span></div>
         <div class="body">
           <div class="k">Discovered · cluster</div>
@@ -138,7 +151,7 @@
   </div>
   <footer class="status">
     <span>Browse → Watch → Steer</span>
-    <span>Static · 14 presets</span>
+    <span>Static · 1 favorite · 14 presets</span>
   </footer>
 </body>
 </html>

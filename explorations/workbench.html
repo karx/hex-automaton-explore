@@ -15,9 +15,11 @@
     <span class="crumb">›</span>
     <span class="here" id="modeCrumb">Watch</span>
     <nav>
+      <a href="../index.html">Home</a>
       <a href="./library.html">Library</a>
-      <span style="color:#445544">2D | 3D</span>
-      <a href="../index.html">Live 2D</a>
+      <a href="./workbench.html" aria-current="page">Workbench</a>
+      <a href="../explorer.html">2D</a>
+      <a href="../viewer3d.html">3D</a>
     </nav>
   </header>
   <div class="stage">
@@ -40,6 +42,7 @@
       </div>
       <div class="watch-actions" id="watchActions">
         <button type="button" id="playBtn">Pause</button>
+        <button type="button" id="restartHud">Restart</button>
         <button type="button" id="steerBtn">Steer</button>
         <button type="button" class="primary" id="mintBtn">Mint card</button>
       </div>
@@ -50,22 +53,24 @@
   </div>
   <footer class="status">
     <span id="statusLeft">GEN 0</span>
-    <span>1 watch · 2 steer · 3 read · 4 leave · space pause · m mint</span>
+    <span>1–4 modes · [ ] preset · space pause · m mint</span>
   </footer>
   <script type="module">
     import { Engine } from '../src/engine.js';
     import { renderFrame, computeLayout } from '../src/render.js';
-    import { getPreset, getPresetParams, getPresetSeedFn } from '../src/presets.js';
+    import { PRESETS, getPreset, getPresetParams, getPresetSeedFn } from '../src/presets.js';
+    import { FAVORITES, getFavorite, getFavoriteSeedFn } from '../src/favorites.js';
     import { generateFormula } from '../src/formula.js';
-    import { ONTOLOGY_AXES } from '../src/ontology.js';
+    import { ONTOLOGY_AXES, applyOntology as applyOntologyAxes } from '../src/ontology.js';
     import { PARAM_META, PARAM_GROUPS } from '../src/paramMeta.js';
     import { seedCluster } from '../src/seeds.js';
     import { ParticleSystem } from '../src/particles.js';
+    import { renderFlowDiagram } from '../src/flowDiagram.js';
     import { GrowthTape } from '../src/share-capture.js';
     import { buildCardData } from '../src/share-data.js';
-    import { generateShareCardSVG, previewCard } from '../src/share-card.js';
+    import { generateShareCardSVG, previewCard, shareCard, slugFilename } from '../src/share-card.js';
     import { buildShareText } from '../src/share-text.js';
-    import { generateShareUrl } from '../src/share-url.js';
+    import { generateShareUrl, parseShareHash } from '../src/share-url.js';
     import { exportRuleKit, ruleKitToJSON, parseRuleKit, buildEngineFromRuleKit, downloadRuleKit, readFileAsText } from '../src/ruleKit.js';
 
     const PARAM_RANGES = {
@@ -78,18 +83,35 @@
       momentumSmoothing: [0, 1, 0.01], leakConcentration: [0, 1, 0.01],
     };
 
-    const q = new URLSearchParams(location.search);
+    const search = new URLSearchParams(location.search);
+    const hashRaw = location.hash.startsWith('#') ? location.hash.slice(1) : '';
+    const hashQ = (!hashRaw.startsWith('s=') && hashRaw.includes('='))
+      ? new URLSearchParams(hashRaw)
+      : new URLSearchParams();
+    const q = {
+      get(key) { return search.get(key) || hashQ.get(key); },
+    };
+    let favorite = null;
     let preset;
-    try { preset = getPreset(q.get('preset') || 'resonant-bloom'); }
+    if (q.get('favorite')) {
+      try { favorite = getFavorite(q.get('favorite')); } catch { favorite = null; }
+    }
+    try { preset = getPreset((favorite && favorite.sourcePresetId) || q.get('preset') || 'resonant-bloom'); }
     catch { preset = getPreset('resonant-bloom'); }
 
     const canvas = document.getElementById('cv');
     const ctx = canvas.getContext('2d');
-    let gridSize = 56;
+    let gridSize = favorite ? favorite.grid.width : 56;
     let cell = 6;
-    let pressure = preset.survivalPressure;
-    let bias = preset.momentumBias;
-    let engine = new Engine(gridSize, gridSize, getPresetParams(preset, { survivalPressure: pressure, momentumBias: bias }), getPresetSeedFn(preset));
+    // Favorites are exact resolved kits: sliders start neutral so they modulate
+    // this kit, not the source preset. Presets keep their authored slider seat.
+    let pressure = favorite ? 0.5 : preset.survivalPressure;
+    let bias = favorite ? 0.5 : preset.momentumBias;
+    const startParams = favorite
+      ? { ...favorite.params }
+      : getPresetParams(preset, { survivalPressure: pressure, momentumBias: bias });
+    const startSeed = favorite ? getFavoriteSeedFn(favorite) : getPresetSeedFn(preset);
+    let engine = new Engine(gridSize, gridSize, startParams, startSeed);
     let layout = computeLayout(gridSize, gridSize, cell);
     canvas.width = layout.canvasWidth;
     canvas.height = layout.canvasHeight;
@@ -100,23 +122,86 @@
 
     let running = true;
     let mode = 'watch';
-    let kitName = '';
+    let kitName = favorite ? favorite.name : '';
     let includeState = false;
+    let flowAnimT = 0;
+    let frame = 0;
+    let lastFpsT = performance.now();
+    let fps = 0;
     const layers = { density: true, energyGlow: true, momentumArrows: true, particles: true };
 
+    function sessionName() {
+      return favorite ? favorite.name : preset.name;
+    }
+
     function applyOntology() {
-      Object.assign(engine.params, getPresetParams(preset, { survivalPressure: pressure, momentumBias: bias }));
+      const next = favorite
+        ? applyOntologyAxes(favorite.params, { survivalPressure: pressure, momentumBias: bias })
+        : getPresetParams(preset, { survivalPressure: pressure, momentumBias: bias });
+      Object.assign(engine.params, next);
       syncAdvSliders();
     }
 
     function rebuildGrid() {
-      engine = new Engine(gridSize, gridSize, { ...engine.params }, getPresetSeedFn(preset));
+      const seedFn = favorite ? getFavoriteSeedFn(favorite) : getPresetSeedFn(preset);
+      engine = new Engine(gridSize, gridSize, { ...engine.params }, seedFn);
       layout = computeLayout(gridSize, gridSize, cell);
       canvas.width = layout.canvasWidth;
       canvas.height = layout.canvasHeight;
       particles.clear();
       tape.reset();
       tape.capture(engine);
+    }
+
+    function remount(params, seedFn, name) {
+      engine = new Engine(gridSize, gridSize, params, seedFn);
+      layout = computeLayout(gridSize, gridSize, cell);
+      canvas.width = layout.canvasWidth;
+      canvas.height = layout.canvasHeight;
+      particles.clear();
+      tape.reset();
+      tape.capture(engine);
+      document.getElementById('presetCrumb').textContent = name;
+      if (mode !== 'watch') renderDrawer();
+    }
+
+    function loadPreset(id) {
+      favorite = null;
+      preset = getPreset(id);
+      pressure = preset.survivalPressure;
+      bias = preset.momentumBias;
+      kitName = '';
+      remount(getPresetParams(preset, { survivalPressure: pressure, momentumBias: bias }), getPresetSeedFn(preset), preset.name);
+    }
+
+    function loadFavorite(id) {
+      favorite = getFavorite(id);
+      try { preset = getPreset(favorite.sourcePresetId || 'resonant-bloom'); } catch { /* keep */ }
+      pressure = 0.5;
+      bias = 0.5;
+      kitName = favorite.name;
+      gridSize = favorite.grid.width;
+      remount({ ...favorite.params }, getFavoriteSeedFn(favorite), favorite.name);
+    }
+
+    function applySharePayload(payload) {
+      if (payload.presetId) {
+        try { preset = getPreset(payload.presetId); } catch { /* keep */ }
+      }
+      if (typeof payload.survivalPressure === 'number') pressure = payload.survivalPressure;
+      if (typeof payload.momentumBias === 'number') bias = payload.momentumBias;
+      if (payload.gridWidth) gridSize = payload.gridWidth;
+      const params = payload.params || getPresetParams(preset, { survivalPressure: pressure, momentumBias: bias });
+      engine = new Engine(gridSize, gridSize, params, getPresetSeedFn(preset));
+      layout = computeLayout(gridSize, gridSize, cell);
+      canvas.width = layout.canvasWidth;
+      canvas.height = layout.canvasHeight;
+      particles.clear();
+      tape.reset();
+      tape.capture(engine);
+      if (payload.title) kitName = payload.title;
+      favorite = null;
+      document.getElementById('presetCrumb').textContent = sessionName();
     }
 
     function setMode(next) {
@@ -133,6 +218,38 @@
 
     function xe(s) {
       return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function bindKitPanel(root) {
+      root.querySelector('#exportName').addEventListener('input', (e) => { kitName = e.target.value; });
+      root.querySelector('#exportIncludeState').addEventListener('change', (e) => { includeState = e.target.checked; });
+      root.querySelector('#copyJson').addEventListener('click', async () => {
+        const json = ruleKitToJSON(buildExportKit());
+        try {
+          await navigator.clipboard.writeText(json);
+          setLeaveNote('exportStatus', `Copied (${(json.length / 1024).toFixed(1)} KB).`, false);
+        } catch {
+          setLeaveNote('exportStatus', 'Clipboard denied — use Download.', true);
+        }
+      });
+      root.querySelector('#downloadJson').addEventListener('click', () => {
+        const kit = buildExportKit();
+        downloadRuleKit(kit);
+        setLeaveNote('exportStatus', `Downloaded (${kit.state ? 'with' : 'without'} canvas state).`, false);
+      });
+      root.querySelector('#importFile').addEventListener('change', async (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        root.querySelector('#importText').value = await readFileAsText(file);
+      });
+      root.querySelector('#loadKit').addEventListener('click', () => {
+        try {
+          const hadState = applyKit(parseRuleKit(root.querySelector('#importText').value));
+          setLeaveNote('importStatus', `Loaded "${kitName || preset.name}"${hadState ? ` — resumed at generation ${engine.generation}.` : ' — fresh seed from rules only.'}`, false);
+        } catch (err) {
+          setLeaveNote('importStatus', `Error: ${err.message}`, true);
+        }
+      });
     }
 
     function renderDrawer() {
@@ -155,8 +272,17 @@
                 <div class="meta">${xe(meta?.meaning || '')}</div>
               </div>`).join('')}
           </div>`).join('');
+        const favOpts = FAVORITES.map((f) => `<option value="fav:${xe(f.id)}"${favorite && favorite.id === f.id ? ' selected' : ''}>${xe(f.name)}</option>`).join('');
+        const presetOpts = PRESETS.map((p) => `<option value="${xe(p.id)}"${!favorite && p.id === preset.id ? ' selected' : ''}>${xe(p.name)}</option>`).join('');
         el.innerHTML = `
           <h2>Steer</h2>
+          <label>Preset</label>
+          <select id="presetSel">
+            <optgroup label="Favorites">${favOpts}</optgroup>
+            <optgroup label="Presets">${presetOpts}</optgroup>
+          </select>
+          <p class="meta" id="presetDesc">${xe(favorite ? favorite.description : preset.description)}</p>
+          <div class="row" style="margin-bottom:12px"><button type="button" id="restartBtn">Restart</button></div>
           <label>Survival Pressure <span class="val" id="pVal">${pressure.toFixed(2)}</span></label>
           <input type="range" id="pSl" min="0" max="1" step="0.01" value="${pressure}" />
           <div class="meta">${xe(ONTOLOGY_AXES.survivalPressure.description)}</div>
@@ -171,12 +297,36 @@
           <p class="meta">Click the field to drop a seed cluster.</p>
           <h2 style="margin-top:16px">Grid</h2>
           <label>Size <span class="val" id="gVal">${gridSize}</span></label>
-          <input type="range" id="gSl" min="30" max="90" step="2" value="${gridSize}" />
+          <input type="range" id="gSl" min="30" max="120" step="10" value="${gridSize}" />
           <label>Cell px <span class="val" id="cVal">${cell}</span></label>
-          <input type="range" id="cSl" min="4" max="12" step="1" value="${cell}" />
+          <input type="range" id="cSl" min="4" max="16" step="1" value="${cell}" />
           <p class="meta">Changing size reseeds the torus (cell size does not).</p>
           ${groupHtml}
+          <details class="adv-kit">
+            <summary>Advanced · rule kit</summary>
+            <p class="meta">Exact resume. Share cards and links do not carry canvas state.</p>
+            <label>Name</label>
+            <input type="text" id="exportName" value="${xe(kitName)}" placeholder="${xe(sessionName())}" />
+            <label><input type="checkbox" id="exportIncludeState" ${includeState ? 'checked' : ''}/> Include canvas state (exact resume, larger file)</label>
+            <div class="row" style="margin-top:8px">
+              <button type="button" id="copyJson">Copy JSON</button>
+              <button type="button" id="downloadJson">Download</button>
+            </div>
+            <p class="meta" id="exportStatus"></p>
+            <h2 style="margin-top:14px">Import</h2>
+            <input type="file" id="importFile" accept="application/json,.json" />
+            <textarea id="importText" placeholder="…or paste rule kit JSON here"></textarea>
+            <button type="button" id="loadKit" style="margin-top:8px">Load</button>
+            <p class="meta" id="importStatus"></p>
+          </details>
         `;
+        bindKitPanel(el);
+        el.querySelector('#presetSel').addEventListener('change', (e) => {
+          const v = e.target.value;
+          if (v.startsWith('fav:')) loadFavorite(v.slice(4));
+          else loadPreset(v);
+        });
+        el.querySelector('#restartBtn').addEventListener('click', rebuildGrid);
         el.querySelector('#pSl').addEventListener('input', (e) => {
           pressure = parseFloat(e.target.value);
           el.querySelector('#pVal').textContent = pressure.toFixed(2);
@@ -218,9 +368,9 @@
       }
       if (mode === 'read') {
         const formula = generateFormula(engine.params, {
-          title: preset.name,
+          title: sessionName(),
           ontology: { survivalPressure: pressure, momentumBias: bias },
-          provenance: { presetName: preset.name, archetype: preset.archetype },
+          provenance: { presetName: sessionName(), archetype: (favorite && favorite.archetype) || preset.archetype },
         });
         el.innerHTML = `
           <h2>Read</h2>
@@ -232,39 +382,38 @@
           <div class="meter"><i id="mm"></i></div>
           <label>Resonance <span class="val" id="rv"></span></label>
           <div class="meter"><i id="rm"></i></div>
+          <h2 style="margin-top:16px">Flow</h2>
+          <canvas id="flowCanvas" width="276" height="130" style="width:100%;height:130px;background:#000;border:1px solid #1e1e00"></canvas>
+          <h2 style="margin-top:16px">Metrics</h2>
+          <div id="metrics" class="meta"></div>
           <h2 style="margin-top:16px">Formula</h2>
-          <pre>${xe(formula)}</pre>
+          <pre id="formulaPre">${xe(formula)}</pre>
+          <button type="button" id="copyFormula" style="margin-top:8px">Copy formula</button>
         `;
+        el.querySelector('#copyFormula').addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(document.getElementById('formulaPre').textContent);
+            el.querySelector('#copyFormula').textContent = 'Copied';
+          } catch { /* keep label */ }
+        });
         return;
       }
       if (mode === 'leave') {
         el.innerHTML = `
           <h2>Leave</h2>
-          <p style="color:#ccccaa;margin:0 0 12px">Mint a receipt of this computed field, or take the rule kit — rules only, or rules + canvas for an exact resume.</p>
-          <button type="button" class="primary" id="mint">Mint card</button>
+          <p style="color:#ccccaa;margin:0 0 12px">Leave with this run: a unique card, share text, or a link. Rule-kit JSON (exact resume) is under Steer → Advanced.</p>
+          <div class="row">
+            <button type="button" class="primary" id="mint">Preview card</button>
+            <button type="button" id="sharePng">Share card</button>
+          </div>
           <div class="row" style="margin-top:8px">
             <button type="button" id="copyText">Copy text</button>
             <button type="button" id="copyLink">Copy link</button>
           </div>
           <p class="meta" id="leaveStatus">Tape frames: ${tape.frames.length}.</p>
-
-          <h2 style="margin-top:18px">Export rule kit</h2>
-          <label>Name</label>
-          <input type="text" id="exportName" value="${xe(kitName)}" placeholder="${xe(preset.name)}" />
-          <label><input type="checkbox" id="exportIncludeState" ${includeState ? 'checked' : ''}/> Include canvas state (exact resume, larger file)</label>
-          <div class="row" style="margin-top:8px">
-            <button type="button" id="copyJson">Copy JSON</button>
-            <button type="button" id="downloadJson">Download</button>
-          </div>
-          <p class="meta" id="exportStatus"></p>
-
-          <h2 style="margin-top:18px">Import rule kit</h2>
-          <input type="file" id="importFile" accept="application/json,.json" />
-          <textarea id="importText" placeholder="…or paste rule kit JSON here"></textarea>
-          <button type="button" id="loadKit" style="margin-top:8px">Load</button>
-          <p class="meta" id="importStatus"></p>
         `;
         el.querySelector('#mint').addEventListener('click', mintCard);
+        el.querySelector('#sharePng').addEventListener('click', sharePng);
         el.querySelector('#copyText').addEventListener('click', async () => {
           try {
             await navigator.clipboard.writeText(buildShareText(assemble()));
@@ -276,38 +425,9 @@
         el.querySelector('#copyLink').addEventListener('click', async () => {
           try {
             await navigator.clipboard.writeText(generateShareUrl(assemble()));
-            setLeaveNote('leaveStatus', 'Link copied. Recipient starts at generation 0 unless they import a kit with state.', false);
+            setLeaveNote('leaveStatus', 'Link copied. Recipient starts at generation 0 unless they load a kit from Advanced.', false);
           } catch {
             setLeaveNote('leaveStatus', 'Clipboard denied.', true);
-          }
-        });
-        el.querySelector('#exportName').addEventListener('input', (e) => { kitName = e.target.value; });
-        el.querySelector('#exportIncludeState').addEventListener('change', (e) => { includeState = e.target.checked; });
-        el.querySelector('#copyJson').addEventListener('click', async () => {
-          const json = ruleKitToJSON(buildExportKit());
-          try {
-            await navigator.clipboard.writeText(json);
-            setLeaveNote('exportStatus', `Copied (${(json.length / 1024).toFixed(1)} KB).`, false);
-          } catch {
-            setLeaveNote('exportStatus', 'Clipboard denied — use Download.', true);
-          }
-        });
-        el.querySelector('#downloadJson').addEventListener('click', () => {
-          const kit = buildExportKit();
-          downloadRuleKit(kit);
-          setLeaveNote('exportStatus', `Downloaded (${kit.state ? 'with' : 'without'} canvas state).`, false);
-        });
-        el.querySelector('#importFile').addEventListener('change', async (e) => {
-          const file = e.target.files && e.target.files[0];
-          if (!file) return;
-          el.querySelector('#importText').value = await readFileAsText(file);
-        });
-        el.querySelector('#loadKit').addEventListener('click', () => {
-          try {
-            const hadState = applyKit(parseRuleKit(el.querySelector('#importText').value));
-            setLeaveNote('importStatus', `Loaded "${kitName || preset.name}"${hadState ? ` — resumed at generation ${engine.generation}.` : ' — fresh seed from rules only.'}`, false);
-          } catch (err) {
-            setLeaveNote('importStatus', `Error: ${err.message}`, true);
           }
         });
       }
@@ -325,20 +445,22 @@
     }
 
     function provenance() {
-      return {
-        presetId: preset.id,
-        presetName: preset.name,
-        archetype: preset.archetype,
+      const p = {
+        presetId: favorite ? favorite.id : preset.id,
+        presetName: sessionName(),
+        archetype: (favorite && favorite.archetype) || preset.archetype,
         survivalPressure: pressure,
         momentumBias: bias,
       };
+      if (favorite) p.favoriteId = favorite.id;
+      return p;
     }
 
     function assemble() {
       tape.capture(engine);
       return buildCardData({
         engine,
-        name: kitName.trim() || preset.name,
+        name: kitName.trim() || sessionName(),
         provenance: provenance(),
         growthFrames: tape.frames,
       });
@@ -346,7 +468,7 @@
 
     function buildExportKit() {
       return exportRuleKit(engine, {
-        name: kitName.trim() || preset.name,
+        name: kitName.trim() || sessionName(),
         includeState,
         provenance: provenance(),
       });
@@ -365,7 +487,11 @@
       if (typeof kit.meta.survivalPressure === 'number') pressure = kit.meta.survivalPressure;
       if (typeof kit.meta.momentumBias === 'number') bias = kit.meta.momentumBias;
       if (kit.meta.name) kitName = kit.meta.name;
-      document.getElementById('presetCrumb').textContent = preset.name;
+      favorite = null;
+      if (kit.meta.favoriteId) {
+        try { favorite = getFavorite(kit.meta.favoriteId); } catch { /* keep null */ }
+      }
+      document.getElementById('presetCrumb').textContent = sessionName();
       tape.reset();
       tape.capture(engine);
       return !!kit.state;
@@ -380,7 +506,24 @@
     }
 
     function mintCard() {
-      previewCard(generateShareCardSVG(assemble()));
+      try {
+        previewCard(generateShareCardSVG(assemble()));
+        setLeaveNote('leaveStatus', 'Card ready — click the preview to dismiss.', false);
+      } catch (e) {
+        setLeaveNote('leaveStatus', e.message, true);
+      }
+    }
+
+    async function sharePng() {
+      try {
+        const data = assemble();
+        const svg = generateShareCardSVG(data);
+        const outcome = await shareCard(svg, data.title || 'Hex Automaton', buildShareText(data), slugFilename(data));
+        if (outcome === 'downloaded') setLeaveNote('leaveStatus', 'Card downloaded.', false);
+        else if (outcome === 'shared') setLeaveNote('leaveStatus', 'Shared.', false);
+      } catch (e) {
+        setLeaveNote('leaveStatus', `Could not share: ${e.message}`, true);
+      }
     }
 
     document.getElementById('rail').addEventListener('click', (e) => {
@@ -388,6 +531,7 @@
       if (b) setMode(b.dataset.mode);
     });
     document.getElementById('steerBtn').addEventListener('click', () => setMode('steer'));
+    document.getElementById('restartHud').addEventListener('click', rebuildGrid);
     document.getElementById('playBtn').addEventListener('click', () => {
       running = !running;
       document.getElementById('playBtn').textContent = running ? 'Pause' : 'Play';
@@ -410,15 +554,25 @@
       if (ev.target && /^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName)) return;
       if (ev.code === 'Space') { ev.preventDefault(); document.getElementById('playBtn').click(); }
       if (ev.key === 'm' || ev.key === 'M') mintCard();
+      if (ev.key === '[') {
+        const i = PRESETS.findIndex((p) => p.id === preset.id);
+        loadPreset(PRESETS[(i - 1 + PRESETS.length) % PRESETS.length].id);
+      }
+      if (ev.key === ']') {
+        const i = PRESETS.findIndex((p) => p.id === preset.id);
+        loadPreset(PRESETS[(i + 1) % PRESETS.length].id);
+      }
       const map = { 1: 'watch', 2: 'steer', 3: 'read', 4: 'leave', w: 'watch', s: 'steer', r: 'read', e: 'leave' };
       if (map[ev.key]) setMode(map[ev.key]);
     });
 
-    document.getElementById('presetCrumb').textContent = preset.name;
+    const shared = parseShareHash(location.hash);
+    if (shared) applySharePayload(shared);
+    document.getElementById('presetCrumb').textContent = sessionName();
 
     const boot = document.getElementById('boot');
     const bootLine = document.getElementById('bootLine');
-    const bootLines = ['seeding torus…', `preset ${preset.name.toLowerCase()}`, 'no closed form'];
+    const bootLines = ['seeding torus…', `${favorite ? 'favorite' : 'preset'} ${sessionName().toLowerCase()}`, 'no closed form'];
     let li = 0;
     const bootTimer = setInterval(() => {
       li += 1;
@@ -442,6 +596,7 @@
         } else if (particles.particles.length) {
           particles.clear();
         }
+        frame += 1;
       }
       renderFrame(ctx, engine, layout, cell, {
         density: layers.density,
@@ -456,6 +611,12 @@
       document.getElementById('statusLeft').textContent = `GEN ${s.generation} · ${outcome} · ALIVE ${alive}% · RES ${res}%`;
       document.getElementById('genHud').textContent = `GEN ${s.generation}`;
       document.getElementById('outcome').textContent = outcome;
+      const now = performance.now();
+      if (now - lastFpsT > 300) {
+        fps = Math.round((frame * 1000) / (now - lastFpsT));
+        frame = 0;
+        lastFpsT = now;
+      }
       if (mode === 'read') {
         const dm = document.getElementById('dm');
         if (dm) {
@@ -468,6 +629,15 @@
           document.getElementById('mm').style.width = `${mom}%`;
           document.getElementById('rv').textContent = `${res}%`;
           document.getElementById('rm').style.width = `${res}%`;
+        }
+        const flow = document.getElementById('flowCanvas');
+        if (flow) {
+          flowAnimT += 1;
+          renderFlowDiagram(flow.getContext('2d'), flow.width, flow.height, s, flowAnimT);
+        }
+        const metrics = document.getElementById('metrics');
+        if (metrics) {
+          metrics.innerHTML = `FPS ${fps} · GEN ${s.generation} · ALIVE ${s.aliveCells} / ${engine.n} (${alive}%) · LEAK DIR ${(s.leakDirectionality * 100).toFixed(0)}%`;
         }
       }
       requestAnimationFrame(tick);

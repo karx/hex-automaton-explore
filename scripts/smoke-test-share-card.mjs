@@ -14,7 +14,7 @@ const errors = [];
 page.on('console', (msg) => { if (msg.type() === 'error') errors.push(msg.text()); });
 page.on('pageerror', (err) => errors.push(String(err)));
 
-await page.goto('http://localhost:4177/index.html', { waitUntil: 'load' });
+await page.goto('http://localhost:4177/explorer.html', { waitUntil: 'load' });
 await page.waitForSelector('#previewCardBtn');
 await page.waitForTimeout(5000);
 
@@ -44,7 +44,7 @@ console.log('2d copy link status:', linkStatus);
 console.log('2d share link:', copiedLink.slice(0, 80) + '…');
 
 const hash = copiedLink.includes('#') ? copiedLink.slice(copiedLink.indexOf('#')) : '';
-await page.goto(`http://localhost:4177/index.html${hash}`, { waitUntil: 'load' });
+await page.goto(`http://localhost:4177/explorer.html${hash}`, { waitUntil: 'load' });
 await page.waitForTimeout(800);
 const loadStatus = await page.locator('#shareStatus').innerText();
 console.log('2d hash load status:', loadStatus);

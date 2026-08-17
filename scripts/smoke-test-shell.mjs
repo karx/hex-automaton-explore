@@ -39,8 +39,8 @@ async function checkPage(url, label, mobile) {
   await page.close();
 }
 
-await checkPage('http://localhost:4177/index.html', '2d-desktop', false);
-await checkPage('http://localhost:4177/index.html', '2d-mobile', true);
+await checkPage('http://localhost:4177/explorer.html', '2d-desktop', false);
+await checkPage('http://localhost:4177/explorer.html', '2d-mobile', true);
 await checkPage('http://localhost:4177/viewer3d.html', '3d-desktop', false);
 await checkPage('http://localhost:4177/viewer3d.html', '3d-mobile', true);
 await checkPage('http://localhost:4177/langtons-ant.html', 'ant-desktop', false);

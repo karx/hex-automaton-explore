@@ -106,6 +106,14 @@ button.primary { color: var(--accent); border-color: var(--accent); }
   margin: 0 0 8px;
 }
 .lede { color: var(--dim); max-width: 64ch; margin: 0 0 28px; }
+.scroll h2 {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--label);
+  margin: 0 0 12px;
+}
+.scroll h2 + .grid + h2 { margin-top: 28px; }
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -204,10 +212,26 @@ button.primary { color: var(--accent); border-color: var(--accent); }
   color: var(--label);
 }
 .drawer .meta { color: var(--dim); font-size: 10px; letter-spacing: 0.04em; text-transform: none; margin: 4px 0 10px; }
+.drawer details.adv-kit {
+  margin-top: 18px;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+.drawer details.adv-kit summary {
+  cursor: pointer;
+  color: var(--label);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 10px;
+  list-style: none;
+}
+.drawer details.adv-kit summary::-webkit-details-marker { display: none; }
+.drawer details.adv-kit summary::before { content: '> '; color: var(--dim); }
 .drawer .ok { color: var(--select); }
 .drawer .err { color: #ff5555; }
 .drawer .row { display: flex; gap: 8px; }
 .drawer .row > * { flex: 1; }
+.drawer select,
 .drawer textarea,
 .drawer input[type=text] {
   width: 100%;

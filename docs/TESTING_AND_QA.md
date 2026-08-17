@@ -10,15 +10,15 @@ assurance.
 ## TL;DR
 
 - **No test framework.** No Jest, Vitest, Mocha, AVA, tap, or `node:test`. No coverage tool. No linter (no ESLint/Prettier config). Every check is a plain `.mjs` script run with `node`.
-- **`npm test` runs in CI on every push/PR and gates the GitHub Pages deploy** (`.github/workflows/ci.yml`). All six chained scripts can fail the build (`check()` + `process.exit(1)`).
+- **`npm test` runs in CI on every push/PR and gates the GitHub Pages deploy** (`.github/workflows/ci.yml`). All seven chained scripts can fail the build (`check()` + `process.exit(1)`).
 - **Simulation correctness (math/invariants) is well covered** and CI-enforced: rule-kit export/import round-trips exactly, Langton's Ant is deterministic, hex direction ordering is verified, SEO metadata is checked line-by-line.
 - **All rendering — 2D canvas, 3D/WebGL, every UI interaction — has zero automated coverage.** It's checked only when a human (or an agent, mid-session, on request) manually starts a server and runs a Playwright script. Nothing re-runs this automatically, ever.
 
 ## What CI actually enforces
 
-`npm test` = `verify-seo.mjs && verify-rulekit.mjs && verify-share-card.mjs && verify-langtons-ant.mjs && verify-presets.mjs && regress-presets.mjs`, run on every push and pull request, required to pass before the Pages deploy job runs (`needs: test` in `ci.yml`).
+`npm test` = `verify-seo.mjs && verify-rulekit.mjs && verify-share-card.mjs && verify-langtons-ant.mjs && verify-presets.mjs && verify-favorites.mjs && regress-presets.mjs`, run on every push and pull request, required to pass before the Pages deploy job runs (`needs: test` in `ci.yml`).
 
-**`verify-seo.mjs`** — 41 checks across `index.html`, `viewer3d.html`, `langtons-ant.html`: required assets exist and aren't empty, `og-image.png` stays under 300KB, titles/canonicals/JSON-LD/Open Graph/Twitter Card tags are present and correctly formed, title and description lengths stay in SEO-safe ranges, `robots.txt`/`sitemap.xml`/`site.webmanifest` are internally consistent. Real assertions via a `check(label, ok)` helper that increments a `failed` counter and calls `process.exit(1)` if anything failed.
+**`verify-seo.mjs`** — checks across `index.html` (reading landing), `explorer.html` (classic 2D), `viewer3d.html`, `langtons-ant.html`: required assets exist and aren't empty, `og-image.png` stays under 300KB, titles/canonicals/JSON-LD/Open Graph/Twitter Card tags are present and correctly formed, title and description lengths stay in SEO-safe ranges, `robots.txt`/`sitemap.xml`/`site.webmanifest` are internally consistent (sitemap includes library, workbench, and explorer). Real assertions via a `check(label, ok)` helper that increments a `failed` counter and calls `process.exit(1)` if anything failed.
 
 **`verify-rulekit.mjs`** — exports a running simulation both with and without canvas state, re-imports it, and asserts: resolved params round-trip exactly; a no-state import starts at generation 0 with a fresh seed; a with-state import restores generation count and all four field arrays (density/energy/momX/momY) to within float tolerance; **stepping the re-imported engine one more generation produces output identical to stepping the original** (the strongest test in the suite — it doesn't just check the data restored, it checks the restored engine *behaves* identically going forward); malformed JSON and size-mismatched state are both rejected with clear errors. Real assertions, exits 1 on failure.
 
@@ -27,6 +27,8 @@ assurance.
 **`verify-share-card.mjs`** — assembler, compact formula, 1200×630 SVG contract, HTML escaping, share-text twin, `#s=` encode/decode, and log-spaced growth-strip selection. Real assertions, exits 1 on failure.
 
 **`verify-presets.mjs`** — runs all 14 presets for 700 generations and **fails the build** if any dies or explodes (`aliveCells === 0` or `alive > 92%` at a 200-gen checkpoint).
+
+**`verify-favorites.mjs`** — Pulsating Full is registered as a distinct kit (not stock Resonant Bloom params), its rule-kit JSON round-trips, and every favorite survives 700 generations without dying or exploding.
 
 **`regress-presets.mjs`** — same survival check against the original v1 variants.
 
@@ -68,7 +70,7 @@ A passing `npm test` / green CI check on this project currently tells you:
 2. Rule-kit export/import is byte-exact and round-trips a simulation's exact future behavior, not just its snapshot data.
 3. Share-card assembly, SVG contract, and `#s=` tokens round-trip; growth-strip picks are log-spaced.
 4. Langton's Ant is deterministic, the hex-grid "no highway" finding hasn't regressed, and Coral Echo's defining invariant still holds.
-5. All 14 presets and the v1 variants survive 700 generations without dying or exploding.
+5. All 14 presets, authored favorites (Pulsating Full), and the v1 variants survive 700 generations without dying or exploding.
 
 It does **not** currently tell you:
 

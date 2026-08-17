@@ -12,9 +12,9 @@ v2 layers density, energy glow, momentum arrows, and leak particles, and replace
 
 Also in the repo, unrelated to the field engine but sharing its hex-grid math: **[Langton's Ant](langtons-ant.html)**, a hex-generalized Langton's Ant. Rule LR turns out *not* to build the classic highway on this grid — instead it grows a mirror-symmetric fractal shell pattern, stable out to 10M+ steps. A follow-up sweep tried to evoke that character in the field engine itself; genuine nested rings never emerged, but the attempt produced **Coral Echo** (preset #14) — Resonant Bloom's exact rules, point-seeded into a compact branching fractal instead. See [`docs/LANGTONS_ANT.md`](docs/LANGTONS_ANT.md) for the full, honest writeup of what was tried and what didn't work.
 
-**Live:** [2D explorer](https://karx.github.io/hex-automaton-explore/) · [3D viewer](https://karx.github.io/hex-automaton-explore/viewer3d.html) · [Langton's Ant](https://karx.github.io/hex-automaton-explore/langtons-ant.html)
+**Live:** [Home](https://karx.github.io/hex-automaton-explore/) · [Library](https://karx.github.io/hex-automaton-explore/explorations/library.html) · [Workbench](https://karx.github.io/hex-automaton-explore/explorations/workbench.html) · [2D instrument](https://karx.github.io/hex-automaton-explore/explorer.html) · [3D](https://karx.github.io/hex-automaton-explore/viewer3d.html) · [Langton's Ant](https://karx.github.io/hex-automaton-explore/langtons-ant.html)
 
-**Run it locally:** [`index.html`](index.html) (2D) · [`viewer3d.html`](viewer3d.html) (3D) · [`langtons-ant.html`](langtons-ant.html) — needs a static server, see [Quick start](#quick-start).
+**Run it locally:** [`index.html`](index.html) (landing) · [`explorations/workbench.html`](explorations/workbench.html) · [`explorer.html`](explorer.html) (classic 2D) · [`viewer3d.html`](viewer3d.html) · [`langtons-ant.html`](langtons-ant.html) — needs a static server, see [Quick start](#quick-start).
 
 **Write-ups:** [`docs/VARIANT_REPORT.md`](docs/VARIANT_REPORT.md) (v1 engine + original 8 variants) · [`docs/VISUALIZATION_STYLE_GUIDE.md`](docs/VISUALIZATION_STYLE_GUIDE.md) (v2 visual language, ontology, presets, 3D) · [`docs/ATTRIBUTE_GLOSSARY.md`](docs/ATTRIBUTE_GLOSSARY.md) (v4 — what every parameter and slider means, mental model) · [`docs/LANGTONS_ANT.md`](docs/LANGTONS_ANT.md) (hex Langton's Ant findings) · [`docs/SHARE_CARD.md`](docs/SHARE_CARD.md) (share-card assembly: irreducible field, growth tape, `#s=` link) · [`docs/EXPLORATIONS.md`](docs/EXPLORATIONS.md) (usability audit + playground IA sketches) · [`docs/TESTING_AND_QA.md`](docs/TESTING_AND_QA.md) (what's actually tested vs. not — read before trusting a green CI run) · [`docs/PHYSICS_DISCLAIMER.md`](docs/PHYSICS_DISCLAIMER.md) (this is not a physics simulation — what "energy," "momentum," and "force" do and don't mean here)
 
@@ -96,7 +96,7 @@ The 3D viewer (`viewer3d.html`) stacks those same fields in space and draws inte
 
 ## CI
 
-Push and pull request both run `npm test` (rule-kit round-trip, Langton/Coral Echo checks, all 14 presets, v1 variant regression). A passing test job on `master` deploys the static site to GitHub Pages. Set **Settings → Pages → Source: GitHub Actions** once.
+Push and pull request both run `npm test` (rule-kit round-trip, Langton/Coral Echo checks, all 14 presets, favorites, v1 variant regression). A passing test job on `master` deploys the static site to GitHub Pages. Set **Settings → Pages → Source: GitHub Actions** once.
 
 ```bash
 npm test
@@ -111,9 +111,11 @@ npm install
 npx serve .          # or: python -m http.server
 ```
 
-Open the printed URL for **`index.html`** (2D) or **`viewer3d.html`** (3D) — each links to the other. Both share the same simulation engine, presets, and ontology sliders.
+Open the printed URL. **`index.html`** is the reading landing — a live Resonant Bloom and two jumps: **Library** or **Workbench**. Shared `#s=` links on the root redirect into the workbench.
 
-**2D:** pick a preset (sliders jump to its authored position); click the grid to drop seed clusters. Ontology sliders and the four visual-layer checkboxes update live. Raw engine parameters are under Advanced, each with a hover tooltip explaining what it does. "Rule set formula" prints the live rule set as real numbers. "Export rule kit" / "Import rule kit" share or resume it.
+**Workbench:** Watch / Steer / Read / Leave on one field. **Library:** pick a preset by seeing it. **Classic 2D** (`explorer.html`): the original instrument — sliders, formula, rule kit.
+
+**2D instrument:** pick a preset (sliders jump to its authored position); click the grid to drop seed clusters. Ontology sliders and the four visual-layer checkboxes update live. Raw engine parameters are under Advanced. "Rule set formula" prints the live rule set as real numbers. "Export rule kit" / "Import rule kit" share or resume it.
 
 **3D:** density as extruded hex height, energy as glowing orbs, momentum as oriented arrows. Drag to orbit, scroll to zoom, toggle any layer or the beams. Export/import rule kits here too. No raw-parameter panel or formula view here — use 2D for that.
 
@@ -257,7 +259,8 @@ src/formula.js           live rule set -> human-readable formula text
 src/ruleKit.js           rule kit export/import (params + optional canvas state)
 src/langtonsAnt.js       hex-generalized Langton's Ant (sparse infinite grid; unrelated to Engine)
 src/langtonsAntRender.js auto-fitting canvas rendering for the ant's growing pattern
-index.html               interactive 2D browser demo
+index.html               reading landing (live field → library / workbench)
+explorer.html            classic 2D instrument
 viewer3d.html            interactive 3D browser demo
 langtons-ant.html        interactive Langton's Ant demo
 og-image.png             Open Graph / Twitter card (1200x630)

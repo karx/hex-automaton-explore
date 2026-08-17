@@ -1,9 +1,10 @@
 # Explorations — IA, usability, and playground patterns
 
-Working notes. Not a shipping spec. The live explorers (`index.html`,
-`viewer3d.html`, `langtons-ant.html`) stay as they are until a pattern is
-chosen. The dedicated pages under `explorations/` are **feature views**:
-clickable sketches of one idea each.
+Working notes. The site root is now a reading + live-field landing
+(`index.html`) that jumps to Library or Workbench. The classic 2D
+instrument lives at `explorer.html`. `viewer3d.html` and
+`langtons-ant.html` stay as sibling cameras. Pages under `explorations/`
+are the feature views that won that IA.
 
 **Register:** A (financial terminal). This is a data-dense visualization
 tool whose *content is the UI*. First paint should still invite — see
@@ -14,10 +15,12 @@ canvas-first. Do not mix Register B CRT green into the playground.
 
 | Page | Pattern |
 |---|---|
+| [`index.html`](../index.html) | **Site landing** — reading overlay on a live Resonant Bloom; CTAs to Library / Workbench. `#s=` on root redirects into the workbench. |
 | [`explorations/index.html`](../explorations/index.html) | Hub / catalogue of the sketches |
 | [`explorations/library.html`](../explorations/library.html) | Browse before you run — **static HTML**, regenerate with `npm run library` |
 | [`explorations/watch.html`](../explorations/watch.html) | Redirects into the workbench in Watch mode (same field, no remount) |
 | [`explorations/workbench.html`](../explorations/workbench.html) | Winner: Watch HUD + Steer (all advanced knobs) + Read + Leave |
+| [`explorer.html`](../explorer.html) | Classic 2D instrument (preserved, not the homepage) |
 
 ---
 
@@ -190,8 +193,13 @@ a thin caption only.
 
 **Question:** Can someone pick a field by *seeing* it?
 
-Grid of the 14 presets. Showcase six use `gifs-v2/`. Others use a one-line
-character + seed type. Clicking a card goes to Watch with `?preset=`.
+Grid of authored **favorites** (exact rule kits, `?favorite=`) then the 14
+presets. Showcase six use `gifs-v2/`. Others use a one-line character +
+seed type. Clicking a card goes to Watch.
+
+**Pulsating Full** is the first favorite — a hand-tuned Resonant Bloom kit
+(wide birth window, filled ~56% field that breathes) loaded as resolved
+params, not as the stock slider pair.
 
 **Pass if:** a stranger can choose Resonant Bloom vs Pulsing Heart without
 reading a paragraph.
@@ -219,6 +227,25 @@ contract as the live 2D explorer, including optional canvas state).
 **Pass if:** switching Watch → Steer does not remount the field; a mint
 after ~80 gens shows SEED plus later frames, not a single NOW crop.
 
+### Parity with live `explorer.html`
+
+| Live 2D | Workbench |
+|---|---|
+| Preset select + description + Restart | Steer: select + desc + Restart; `[` `]` cycle |
+| Pressure / Bias | Steer |
+| Layers + particles | Steer |
+| Grid 30–120 / cell 4–16 | Steer (same range) |
+| Raw parameters | Steer (all grouped sliders) |
+| Field meters + resonance | Read |
+| Interaction flow | Read |
+| Metrics (FPS, alive, leak) | Read |
+| Formula + copy | Read |
+| Preview / Share card / Copy text / Copy link | Leave |
+| Export kit (copy + download, optional state) | Steer → Advanced · rule kit |
+| Import kit (file + paste) | Steer → Advanced · rule kit |
+| `#s=` hash load | Yes |
+| Click-to-seed | Yes (opens Steer) |
+
 ### Hub — `explorations/index.html`
 
 Index of the sketches plus a short read of this doc. Not a fourth pattern.
@@ -229,13 +256,11 @@ Index of the sketches plus a short read of this doc. Not a fourth pattern.
 
 - Seeded PRNG + `#s=` fast-forward (still the highest-impact *engine*
   follow-up; Watch is the UI that feature would land in).
-- Reskinning production to Register A.
+- Reskinning the classic 2D instrument (`explorer.html`) to Register A.
 - Merging Langton’s Ant into the rail.
-- Shipping these pages as the homepage.
 
-Promotion path, if a sketch wins: port the shell into `index.html`, keep
-`viewer3d.html` as the 3D camera route or an iframe/toggle, leave Ant
-alone.
+The homepage *is* the reading landing now. Workbench / Library are the
+primary jumps. `explorer.html` stays until we retire the old instrument.
 
 ---
 
@@ -257,6 +282,6 @@ alone.
 
 ## 7. How to look at the POCs
 
-Open `explorations/index.html` via a static server (same as the rest of
-the repo). They are not in `sitemap.xml` on purpose — they are not the
-product.
+Open `/` for the landing, then Library or Workbench. The exploration hub
+is still at `explorations/index.html`. Library and Workbench are in
+`sitemap.xml`; the hub itself is not.
