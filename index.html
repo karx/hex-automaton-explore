@@ -174,13 +174,20 @@
   }
 </style>
 <script>
-  function redirectShareHash() {
-    if (location.hash.indexOf('#s=') === 0) {
-      location.replace('./explorations/workbench.html' + location.search + location.hash);
+  function redirectShare() {
+    var q = new URLSearchParams(location.search);
+    var token = q.get('s');
+    if (!token && location.hash.indexOf('#s=') === 0) {
+      try { token = decodeURIComponent(location.hash.slice(3).split('&')[0]); }
+      catch (e) { token = location.hash.slice(3).split('&')[0]; }
     }
+    if (!token) return;
+    var base = location.pathname.replace(/index\.html$/i, '');
+    if (base.slice(-1) !== '/') base += '/';
+    location.replace(base + 'explorations/workbench.html?s=' + encodeURIComponent(token));
   }
-  redirectShareHash();
-  window.addEventListener('hashchange', redirectShareHash);
+  redirectShare();
+  window.addEventListener('hashchange', redirectShare);
 </script>
 </head>
 <body>
