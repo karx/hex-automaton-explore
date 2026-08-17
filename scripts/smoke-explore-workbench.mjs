@@ -1,4 +1,8 @@
 import { chromium } from 'playwright';
+import { Engine } from '../src/engine.js';
+import { getPreset, getPresetParams, getPresetSeedFn } from '../src/presets.js';
+import { buildCardData } from '../src/share-data.js';
+import { generateShareUrl } from '../src/share-url.js';
 
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1400, height: 860 } });
@@ -55,6 +59,43 @@ if (src?.startsWith('blob:')) {
 console.log('mint svg has GROWTH', svg.includes('GROWTH'), 'has SEED', svg.includes('SEED'), 'has THIS FIELD', svg.includes('THIS FIELD'), 'len', svg.length);
 await page.screenshot({ path: 'scripts/explore-mint.png' });
 
+const reef = getPreset('coral-reef');
+const shareData = buildCardData({
+  engine: new Engine(40, 40, getPresetParams(reef), getPresetSeedFn(reef)),
+  name: reef.name,
+  provenance: {
+    presetId: reef.id,
+    presetName: reef.name,
+    archetype: reef.archetype,
+    survivalPressure: reef.survivalPressure,
+    momentumBias: reef.momentumBias,
+  },
+  fieldSnapshot: null,
+  growthFrames: [],
+});
+const shareUrl = generateShareUrl(shareData);
+const shareToken = new URL(shareUrl).searchParams.get('s');
+console.log('share url uses query', shareUrl.includes('workbench.html?s='), 'no hash', !shareUrl.includes('#s='));
+await page.goto(`http://localhost:4177/explorations/workbench.html?s=${encodeURIComponent(shareToken)}`, { waitUntil: 'load' });
+await page.waitForTimeout(900);
+const shareCrumb = await page.locator('#presetCrumb').innerText();
+console.log('?s= crumb', shareCrumb);
+await page.goto('about:blank');
+await page.goto(`http://localhost:4177/#s=${shareToken}`, { waitUntil: 'domcontentloaded' });
+await page.waitForURL((url) => url.href.includes('workbench'), { timeout: 4000 });
+const fromRoot = page.url();
+await page.waitForTimeout(900);
+const fromRootCrumb = await page.locator('#presetCrumb').innerText();
+console.log('root #s= redirected', fromRoot, fromRootCrumb);
+
 console.log('errors', errors.length ? errors : 'none');
 await browser.close();
-if (errors.length || adv < 10 || nAfter < nBefore || !svg.includes('GROWTH')) process.exit(1);
+if (
+  errors.length
+  || adv < 10
+  || nAfter < nBefore
+  || !svg.includes('GROWTH')
+  || !/CORAL REEF/i.test(shareCrumb)
+  || !fromRoot.includes('?s=')
+  || !/CORAL REEF/i.test(fromRootCrumb)
+) process.exit(1);

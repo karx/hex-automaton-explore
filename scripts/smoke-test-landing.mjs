@@ -38,6 +38,10 @@ await page.goto('about:blank');
 await page.goto(`${BASE}/#s=test`, { waitUntil: 'domcontentloaded' });
 await page.waitForURL((url) => url.href.includes('/explorations/workbench'), { timeout: 4000 });
 const hashUrl = page.url();
+await page.goto('about:blank');
+await page.goto(`${BASE}/?s=legacytoken`, { waitUntil: 'domcontentloaded' });
+await page.waitForURL((url) => url.href.includes('/explorations/workbench'), { timeout: 4000 });
+const queryUrl = page.url();
 
 await page.goto(`${BASE}/`, { waitUntil: 'load' });
 await page.click('text=Enter library');
@@ -50,7 +54,8 @@ await page.waitForTimeout(500);
 const wbUrl = page.url();
 
 const okJumps = jumps.includes('./explorations/library.html') && jumps.includes('./explorations/workbench.html');
-const okHash = hashUrl.includes('/explorations/workbench') && hashUrl.includes('#s=test');
+const okHash = hashUrl.includes('/explorations/workbench') && hashUrl.includes('s=test');
+const okQuery = queryUrl.includes('/explorations/workbench') && queryUrl.includes('s=legacytoken');
 const okLib = libUrl.includes('/explorations/library');
 const okWb = wbUrl.includes('/explorations/workbench');
 const okLive = /Resonant Bloom · GEN \d+/.test(live);
@@ -58,7 +63,7 @@ const navUp = nav.map((t) => t.toUpperCase());
 const okNav = !navUp.includes('HOME') && navUp.includes('LIBRARY') && navUp.includes('WORKBENCH');
 const okSeed = seedStatus.toUpperCase().startsWith('SEEDED');
 
-console.log(JSON.stringify({ title, h1, nav, mobNav, jumps, live, seedStatus, aliveBefore, hashUrl, libUrl, wbUrl, errors }, null, 2));
+console.log(JSON.stringify({ title, h1, nav, mobNav, jumps, live, seedStatus, aliveBefore, hashUrl, queryUrl, libUrl, wbUrl, errors }, null, 2));
 
 let failed = 0;
 function check(label, pass) {
@@ -68,7 +73,8 @@ function check(label, pass) {
 check('title is landing', title.includes('watch a living hex field'));
 check('h1 is reading copy', h1.toUpperCase().includes('NO CLOSED FORM'));
 check('CTAs point at library + workbench', okJumps);
-check('#s= redirects to workbench', okHash);
+check('#s= redirects to workbench ?s=', okHash);
+check('?s= redirects to workbench', okQuery);
 check('Enter library lands on library', okLib);
 check('Open workbench lands on workbench', okWb);
 check('live line ticks generation', okLive);
