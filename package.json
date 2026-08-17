@@ -10,7 +10,8 @@
   "scripts": {
     "start": "npx --yes serve .",
     "library": "node scripts/generate-library.mjs",
-    "test": "node scripts/verify-seo.mjs && node scripts/verify-rulekit.mjs && node scripts/verify-share-card.mjs && node scripts/verify-langtons-ant.mjs && node scripts/verify-presets.mjs && node scripts/verify-favorites.mjs && node scripts/regress-presets.mjs"
+    "gifs": "node scripts/generate-gifs-v2.mjs",
+    "test": "node scripts/verify-seo.mjs && node scripts/verify-library.mjs && node scripts/verify-rulekit.mjs && node scripts/verify-share-card.mjs && node scripts/verify-langtons-ant.mjs && node scripts/verify-presets.mjs && node scripts/verify-favorites.mjs && node scripts/regress-presets.mjs"
   },
   "keywords": [
     "cellular-automaton",

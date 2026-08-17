@@ -12,7 +12,7 @@ each parameter *does*) — this document is about what the names *don't mean*.
 ## Why this document exists
 
 Every field and metric in this project (`src/engine.js`, `src/formula.js`,
-the UI labels in `index.html`/`viewer3d.html`) was named for what felt
+the UI labels in `explorer.html`/`viewer3d.html`/the workbench) was named for what felt
 intuitive and visually evocative while building an interactive toy, by
 someone without formal physics training, tuned by empirical trial-and-error
 (parameter sweeps scored on visual complexity and stability — see

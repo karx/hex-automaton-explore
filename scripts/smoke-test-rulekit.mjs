@@ -1,4 +1,4 @@
-// Browser regression test for the export/import/formula UI on both index.html
+// Browser regression test for the export/import/formula UI on explorer.html
 // (2D) and viewer3d.html (3D). Requires a static server at :4177 (see README).
 import { chromium } from 'playwright';
 

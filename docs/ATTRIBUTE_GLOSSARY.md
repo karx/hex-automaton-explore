@@ -39,8 +39,8 @@ momentum is what makes that growth lean in a direction.**
 
 Every parameter below plugs into one of these four decisions. Read this
 section once and the individual glossary entries will make more sense in
-context — this is also exactly what the Rule Set Formula view (`index.html`
-→ "Rule set formula") prints with your current numbers substituted in.
+context — this is also exactly what the Rule Set Formula view (`explorer.html`
+and workbench Read → "Rule set formula") prints with your current numbers substituted in.
 
 1. **Is this cell dead or alive?** (`density > aliveThreshold`)
 2. **If dead:** sum this cell's 6 neighbors' density. Is that sum inside a
@@ -158,7 +158,7 @@ currently selected.
 
 ## Reading the Rule Set Formula view
 
-`index.html`'s "Rule set formula" panel (`src/formula.js`) prints the exact
+The "Rule set formula" panel on `explorer.html` and the workbench Read mode (`src/formula.js`) prints the exact
 four rules above with your current numbers substituted in — it's generated
 from the same live `engine.params` object the simulation is actually
 running on, not from the preset's original authored values, so if you've
@@ -216,4 +216,4 @@ exactly where you left it.
 
 Full detail for each (meaning, higher/lower effect) lives in
 `src/paramMeta.js` and surfaces as a hover tooltip on every Advanced slider
-in `index.html`.
+in `explorer.html` and the workbench.

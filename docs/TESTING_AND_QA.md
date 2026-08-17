@@ -16,9 +16,11 @@ assurance.
 
 ## What CI actually enforces
 
-`npm test` = `verify-seo.mjs && verify-rulekit.mjs && verify-share-card.mjs && verify-langtons-ant.mjs && verify-presets.mjs && verify-favorites.mjs && regress-presets.mjs`, run on every push and pull request, required to pass before the Pages deploy job runs (`needs: test` in `ci.yml`).
+`npm test` = `verify-seo.mjs && verify-library.mjs && verify-rulekit.mjs && verify-share-card.mjs && verify-langtons-ant.mjs && verify-presets.mjs && verify-favorites.mjs && regress-presets.mjs`, run on every push and pull request, required to pass before the Pages deploy job runs (`needs: test` in `ci.yml`).
 
 **`verify-seo.mjs`** — checks across `index.html` (reading landing), `explorer.html` (classic 2D), `viewer3d.html`, `langtons-ant.html`: required assets exist and aren't empty, `og-image.png` stays under 300KB, titles/canonicals/JSON-LD/Open Graph/Twitter Card tags are present and correctly formed, title and description lengths stay in SEO-safe ranges, `robots.txt`/`sitemap.xml`/`site.webmanifest` are internally consistent (sitemap includes library, workbench, and explorer). Real assertions via a `check(label, ok)` helper that increments a `failed` counter and calls `process.exit(1)` if anything failed.
+
+**`verify-library.mjs`** — `explorations/library.html` must match `scripts/generate-library.mjs` byte-for-byte (after newline normalize). Every favorite and preset must have a `gifs-v2/{id}.gif` and the card must point at it. Also pins `pageQuery`: `?preset=` wins, leftover `#preset=` still works, `#s=` is not parsed as a query.
 
 **`verify-rulekit.mjs`** — exports a running simulation both with and without canvas state, re-imports it, and asserts: resolved params round-trip exactly; a no-state import starts at generation 0 with a fresh seed; a with-state import restores generation count and all four field arrays (density/energy/momX/momY) to within float tolerance; **stepping the re-imported engine one more generation produces output identical to stepping the original** (the strongest test in the suite — it doesn't just check the data restored, it checks the restored engine *behaves* identically going forward); malformed JSON and size-mismatched state are both rejected with clear errors. Real assertions, exits 1 on failure.
 
@@ -38,9 +40,9 @@ Preset and variant survival is now CI-enforced. Browser UI is still not.
 
 ## What has zero automated coverage
 
-Six Playwright scripts exist — `smoke-test.mjs`, `smoke-test-v2.mjs`, `smoke-test-3d.mjs`, `smoke-test-rulekit.mjs`, `smoke-test-langtons-ant.mjs`, `smoke-test-coral-echo.mjs` — covering the 2D explorer, layered rendering, the 3D viewer (with software-GL flags since headless Chromium has no real GPU), rule-kit export/import through the actual UI, and the Langton's Ant page. Each launches headless Chromium, navigates the page, exercises some interactions (preset switching, slider drags, layer toggles, camera orbit, export/import round-trips), and takes screenshots.
+Playwright smokes exist for the classic explorer (`smoke-test.mjs`, `smoke-test-v2.mjs`, `smoke-test-rulekit.mjs`, `smoke-test-shell.mjs`, `smoke-test-coral-echo.mjs`), the 3D viewer, Langton's Ant, plus newer IA pages: `smoke-test-landing.mjs` (seed click, Library/Workbench jumps, `#s=` redirect) and `smoke-explore-workbench.mjs` (library card → crumb, Watch→Steer, mint tape). They need a static server (`npx serve .` reads `serve.json`, which turns off clean URLs so `?preset=` is not stripped).
 
-None of this runs in CI, and none of it is wired to fail on error even when run manually:
+`smoke-test-landing.mjs` and `smoke-explore-workbench.mjs` call `process.exit(1)` on failure. The older explorer smokes still mostly log errors and exit 0. None of the Playwright scripts run in CI:
 
 - They require a static file server already running on a specific `localhost` port — nothing in CI starts one, and the scripts aren't invoked from `ci.yml` at all.
 - Every one of them ends with `console.log('...errors:', errors.length ? errors : 'none')` — a report, not an assertion. A script that logs 5 console errors and one that logs `none` both exit 0.
@@ -72,11 +74,7 @@ A passing `npm test` / green CI check on this project currently tells you:
 4. Langton's Ant is deterministic, the hex-grid "no highway" finding hasn't regressed, and Coral Echo's defining invariant still holds.
 5. All 14 presets, authored favorites (Pulsating Full), and the v1 variants survive 700 generations without dying or exploding.
 
-It does **not** currently tell you:
-
-4. Anything at all about whether the 2D explorer, the 3D viewer, or the Langton's Ant page still render or function correctly in a browser.
-
-If you're deciding how much to trust a change based on CI going green, weight it accordingly — items 1–3 plus preset survival are real guarantees; item 4 requires manually running the relevant `smoke-test-*.mjs` script against a local server.
+It does **not** currently tell you whether the landing, workbench, 2D explorer, 3D viewer, or Langton's Ant page still render or function correctly in a browser. Run `scripts/smoke-test-landing.mjs` and `scripts/smoke-explore-workbench.mjs` against a local server for that.
 
 ## If closing these gaps becomes a priority
 

@@ -194,8 +194,8 @@ a thin caption only.
 **Question:** Can someone pick a field by *seeing* it?
 
 Grid of authored **favorites** (exact rule kits, `?favorite=`) then the 14
-presets. Showcase six use `gifs-v2/`. Others use a one-line character +
-seed type. Clicking a card goes to Watch.
+presets. Every card uses a `gifs-v2/` thumb (`npm run gifs`). Clicking a
+card goes to Watch.
 
 **Pulsating Full** is the first favorite — a hand-tuned Resonant Bloom kit
 (wide birth window, filled ~56% field that breathes) loaded as resolved
@@ -252,15 +252,19 @@ Index of the sketches plus a short read of this doc. Not a fourth pattern.
 
 ---
 
-## 5. What we are *not* deciding here
+## 5. Still open
 
-- Seeded PRNG + `#s=` fast-forward (still the highest-impact *engine*
-  follow-up; Watch is the UI that feature would land in).
-- Reskinning the classic 2D instrument (`explorer.html`) to Register A.
+- Seeded PRNG + `#s=` fast-forward (highest-impact *engine* follow-up;
+  the card still opens generation 0).
+- Reskinning the frozen 2D instrument (`explorer.html`) to Register A —
+  or retiring it from nav once workbench is enough.
 - Merging Langton’s Ant into the rail.
+- Wiring a Playwright smoke (landing seed + library → workbench crumb)
+  into CI. `serve.json` disables clean URLs so `?preset=` survives locally.
 
 The homepage *is* the reading landing now. Workbench / Library are the
-primary jumps. `explorer.html` stays until we retire the old instrument.
+primary jumps. `explorer.html` is frozen: no new features; port them to
+the workbench.
 
 ---
 
@@ -273,7 +277,7 @@ primary jumps. `explorer.html` stays until we retire the old instrument.
 | U3 junk drawer | Workbench modes |
 | U4 fake peer apps | Workbench camera slot (labeled); Ant stays sibling |
 | U5 no breadcrumb | All three sketches |
-| U6 share link is gen 0 | Not in these POCs (engine) |
+| U6 share link is gen 0 | Still open (engine) |
 | U8 seed affordance | Watch caption + Workbench Steer |
 | U9 formula as essay | Workbench Read |
 | U10 desktop disclosure | Workbench + Watch |

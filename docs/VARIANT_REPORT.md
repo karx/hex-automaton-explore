@@ -4,7 +4,7 @@ Built against the Aug 9, 2026 intent doc: a multi-field cellular automaton on a
 non-square grid, with three interacting fields (density, energy, momentum),
 producing emergent, self-sustaining growth on a hex grid.
 
-- **Live demo:** `index.html` (open via a static file server, not `file://` — it uses ES modules)
+- **Live demo:** `explorer.html` (classic 2D) or `/` (landing). Open via a static file server, not `file://` — it uses ES modules.
 - **Engine:** `src/engine.js` — grid, fields, rule/leakage/coupling logic
 - **Rendering:** `src/render.js` — shared by the browser demo and headless GIF capture
 - **Variant definitions:** `src/variants.js`
@@ -140,7 +140,7 @@ tested directly against several rule sets (`scripts/verify-line.mjs`):
   60×60 grid over 600 generations ran in well under a second in Node; the
   70×70/720-generation runs used for the final GIFs took 1.2–8.7s each
   (`gifs/summary.json`, `tookMs`), dominated by rendering + GIF encoding, not
-  the simulation step itself. The `index.html` demo holds 60 FPS on a 70×70
+  the simulation step itself. The 2D explorer holds 60 FPS on a 70×70
   grid with headroom to spare — the bottleneck at interactive scale is
   `renderFrame`'s per-cell hexagon path, not `Engine.step()`.
 - **GIF generation was the actual bottleneck the spec's risk section
