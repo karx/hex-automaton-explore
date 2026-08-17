@@ -69,6 +69,18 @@ export function generateFormula(params, { ontology, title, provenance } = {}) {
   return lines.join('\n');
 }
 
+// Four short lines for a share card. Same numbers as generateFormula, truncated
+// so a 1200×630 layout never wraps. Not a screenshot of the formula panel.
+export function generateCompactFormula(params) {
+  const p = { ...DEFAULT_PARAMS, ...params };
+  return [
+    `BIRTH    [${fmt(p.birthLow)}, ${fmt(p.birthHigh)}]  E > ${fmt(p.birthEnergyMin)}`,
+    `SURVIVE  [${fmt(p.surviveLow)}, ${fmt(p.surviveHigh)}]`,
+    `ENERGY   +${fmt(p.densityToEnergy)}·d  leak ${pct(p.energyLeakRate)}  decay ${pct(p.energyDecay)}`,
+    `MOMENTUM reorient ${pct(p.momentumSmoothing)}  leak-bias ${pct(p.leakConcentration)}`,
+  ];
+}
+
 // A compact one-line-per-param dump, grouped, for contexts that want every
 // value visible (e.g. a diff between two rule kits) rather than the narrative
 // formula above.

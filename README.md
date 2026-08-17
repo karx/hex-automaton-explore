@@ -146,6 +146,12 @@ set formula** panel (2D view) shows the same rule set as a human-readable
 formula sheet — grouped birth/survival/energy/momentum equations with your
 current numbers substituted in, not a raw parameter dump.
 
+**Share this run** (2D and 3D) mints a unique 1200×630 card of the compact
+rule formula plus the current density / energy / momentum / resonance
+reading. Preview, share (Web Share PNG or download), copy text, or copy a
+`#s=` link that reloads the same rules on a fresh seed — not the canvas.
+Use the JSON kit when you need a bit-identical resume.
+
 ## Preset library
 
 The first eight are the original v1 variants at neutral sliders `(0.5, 0.5)`. The next five were found by `scripts/discover.mjs` and verified to 1000 generations. The last was found by `scripts/discover-shell.mjs`, a sweep aimed at evoking Langton's Ant's fractal character (see [`docs/LANGTONS_ANT.md`](docs/LANGTONS_ANT.md)).

@@ -109,9 +109,9 @@
   #metrics span.v { color: #d8dae2; font-variant-numeric: tabular-nums; }
   #legend3d { position: absolute; left: 12px; bottom: 12px; font-size: 11px; color: #9ea3ba; background: rgba(16,18,26,0.75); border: 1px solid #23263a; border-radius: 6px; padding: 8px 10px; line-height: 1.7; }
   #legend3d .swatch { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 6px; }
-  #exportStatus, #importStatus { min-height: 1.2em; }
-  #exportStatus.ok, #importStatus.ok { color: #8fe0ff; }
-  #exportStatus.err, #importStatus.err { color: #ff7a7a; }
+  #exportStatus, #importStatus, #shareStatus { min-height: 1.2em; }
+  #exportStatus.ok, #importStatus.ok, #shareStatus.ok { color: #8fe0ff; }
+  #exportStatus.err, #importStatus.err, #shareStatus.err { color: #ff7a7a; }
 </style>
 </head>
 <body>
@@ -176,6 +176,19 @@
     </fieldset>
 
     <fieldset>
+      <legend>Share this run</legend>
+      <div class="row">
+        <button id="previewCardBtn" type="button">Preview card</button>
+        <button id="shareCardBtn" type="button">Share card</button>
+      </div>
+      <div class="row" style="margin-top:6px">
+        <button id="copyShareTextBtn" type="button">Copy text</button>
+        <button id="copyShareLinkBtn" type="button">Copy link</button>
+      </div>
+      <div class="hint" id="shareStatus">A unique 1200×630 receipt of this formula and field reading. JSON below is for exact resume.</div>
+    </fieldset>
+
+    <fieldset>
       <legend>Export rule kit</legend>
       <label>Name
         <input type="text" id="exportName" placeholder="(preset name)" style="flex:1;background:#191c28;color:#d8dae2;border:1px solid #2c2f42;border-radius:6px;padding:6px 8px;font-size:12px" />
@@ -206,6 +219,9 @@
     import { ONTOLOGY_AXES } from './src/ontology.js';
     import { seedCluster } from './src/seeds.js';
     import { exportRuleKit, ruleKitToJSON, parseRuleKit, buildEngineFromRuleKit, downloadRuleKit, readFileAsText } from './src/ruleKit.js';
+    import { buildCardData } from './src/share-data.js';
+    import { parseShareHash } from './src/share-url.js';
+    import { bindShareControls } from './src/share-ui.js';
 
     const sceneWrap = document.getElementById('sceneWrap');
     const presetSelect = document.getElementById('presetSelect');
@@ -304,19 +320,83 @@
     const exportNameInput = document.getElementById('exportName');
     const exportStateCheckbox = document.getElementById('exportIncludeState');
     const exportStatusEl = document.getElementById('exportStatus');
+    const shareStatusEl = document.getElementById('shareStatus');
+
+    function currentProvenance() {
+      return {
+        presetId: currentPreset.id,
+        presetName: currentPreset.name,
+        archetype: currentPreset.archetype,
+        survivalPressure: parseFloat(pressureSlider.value),
+        momentumBias: parseFloat(biasSlider.value),
+      };
+    }
+
+    function assembleCard() {
+      return buildCardData({
+        engine,
+        name: exportNameInput.value.trim() || currentPreset.name,
+        provenance: currentProvenance(),
+      });
+    }
+
+    bindShareControls({
+      assemble: assembleCard,
+      statusEl: shareStatusEl,
+      buttons: {
+        preview: document.getElementById('previewCardBtn'),
+        share: document.getElementById('shareCardBtn'),
+        copyText: document.getElementById('copyShareTextBtn'),
+        copyLink: document.getElementById('copyShareLinkBtn'),
+      },
+    });
+
+    function applySharedPayload(payload) {
+      if (payload.presetId) {
+        try {
+          currentPreset = getPreset(payload.presetId);
+          presetSelect.value = currentPreset.id;
+        } catch (e) { /* unknown preset — keep params from the token */ }
+      }
+      if (typeof payload.survivalPressure === 'number') {
+        pressureSlider.value = payload.survivalPressure;
+        pressureVal.textContent = payload.survivalPressure.toFixed(2);
+      }
+      if (typeof payload.momentumBias === 'number') {
+        biasSlider.value = payload.momentumBias;
+        biasVal.textContent = payload.momentumBias.toFixed(2);
+      }
+      if (payload.gridWidth) {
+        gridSizeInput.value = payload.gridWidth;
+        document.getElementById('gridSizeVal').textContent = payload.gridWidth;
+      }
+      const size = parseInt(gridSizeInput.value, 10);
+      const params = payload.params || getPresetParams(currentPreset, {
+        survivalPressure: parseFloat(pressureSlider.value),
+        momentumBias: parseFloat(biasSlider.value),
+      });
+      engine = new Engine(size, size, params, getPresetSeedFn(currentPreset));
+      descEl.textContent = currentPreset.description;
+      if (payload.title && !exportNameInput.value.trim()) exportNameInput.placeholder = payload.title;
+    }
+
+    function tryLoadShareHash() {
+      const payload = parseShareHash(location.hash);
+      if (!payload) return;
+      applySharedPayload(payload);
+      setStatus(
+        shareStatusEl,
+        `Loaded shared rules "${payload.title}"${payload.generation ? ` (was gen ${payload.generation})` : ''} — fresh seed.`,
+        'ok'
+      );
+    }
 
     function buildExportKit() {
       const name = exportNameInput.value.trim() || currentPreset.name;
       return exportRuleKit(engine, {
         name,
         includeState: exportStateCheckbox.checked,
-        provenance: {
-          presetId: currentPreset.id,
-          presetName: currentPreset.name,
-          archetype: currentPreset.archetype,
-          survivalPressure: parseFloat(pressureSlider.value),
-          momentumBias: parseFloat(biasSlider.value),
-        },
+        provenance: currentProvenance(),
       });
     }
 
@@ -409,6 +489,7 @@
     pressureVal.textContent = currentPreset.survivalPressure.toFixed(2);
     biasVal.textContent = currentPreset.momentumBias.toFixed(2);
     buildEngine();
+    tryLoadShareHash();
     requestAnimationFrame(loop);
   </script>
 </body>
