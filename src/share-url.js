@@ -92,16 +92,32 @@ export function decodeSharePayload(token) {
   }
 }
 
-export function parseShareHash(hash) {
-  const m = String(hash || '').match(/^#s=([^&]+)/);
-  if (!m) return null;
+export function parseShareToken(token) {
+  if (!token) return null;
   try {
-    return decodeSharePayload(decodeURIComponent(m[1]));
+    return decodeSharePayload(String(token));
   } catch {
     return null;
   }
 }
 
+export function parseShareHash(hash) {
+  const m = String(hash || '').match(/^#s=([^&]+)/);
+  if (!m) return null;
+  try {
+    return parseShareToken(decodeURIComponent(m[1]));
+  } catch {
+    return parseShareToken(m[1]);
+  }
+}
+
+export function parseShareLocation(loc = typeof location !== 'undefined' ? location : { search: '', hash: '' }) {
+  const fromQuery = new URLSearchParams(loc.search || '').get('s');
+  if (fromQuery) return parseShareToken(fromQuery);
+  return parseShareHash(loc.hash || '');
+}
+
 export function generateShareUrl(data) {
-  return `${SITE_URL}#s=${encodeSharePayload(data)}`;
+  const token = encodeSharePayload(data);
+  return `${SITE_URL}explorations/workbench.html?s=${encodeURIComponent(token)}`;
 }

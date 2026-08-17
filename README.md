@@ -111,7 +111,7 @@ npm install
 npx serve .          # or: python -m http.server
 ```
 
-`serve.json` turns off clean URLs so `workbench.html?preset=…` keeps its query (and still serves `/` as the landing). Open the printed URL. **`index.html`** is the reading landing — a live Resonant Bloom and two jumps: **Library** or **Workbench**. Shared `#s=` links on the root redirect into the workbench.
+`serve.json` turns off clean URLs so `workbench.html?preset=…` keeps its query (and still serves `/` as the landing). Open the printed URL. **`index.html`** is the reading landing — a live Resonant Bloom and two jumps: **Library** or **Workbench**. Shared `?s=` links open the workbench; leftover `#s=` links on the root still redirect there.
 
 **Workbench:** Watch / Steer / Read / Leave on one field. **Library:** pick a preset by seeing it. **Classic 2D** (`explorer.html`): the original instrument — sliders, formula, rule kit.
 
