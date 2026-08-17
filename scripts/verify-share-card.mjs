@@ -1,10 +1,12 @@
+import { createCanvas } from '@napi-rs/canvas';
 import { Engine } from '../src/engine.js';
 import { getPreset, getPresetParams, getPresetSeedFn } from '../src/presets.js';
 import { generateCompactFormula } from '../src/formula.js';
-import { buildCardData, classifyOutcome } from '../src/share-data.js';
+import { buildCardData, classifyOutcome, irreducibleCaption, formatSteps } from '../src/share-data.js';
 import { generateShareCardSVG } from '../src/share-card.js';
 import { buildShareText } from '../src/share-text.js';
 import { encodeSharePayload, decodeSharePayload, parseShareHash, generateShareUrl } from '../src/share-url.js';
+import { GrowthTape, snapshotField, isSafeImage } from '../src/share-capture.js';
 
 let failed = 0;
 function check(label, ok) {
@@ -15,7 +17,14 @@ function check(label, ok) {
 const preset = getPreset('resonant-bloom');
 const params = getPresetParams(preset);
 const engine = new Engine(40, 40, params, getPresetSeedFn(preset));
-for (let i = 0; i < 80; i++) engine.step();
+const canvasFactory = (w, h) => createCanvas(w, h);
+const tape = new GrowthTape({ maxFrames: 4, every: 20, canvasFactory });
+tape.capture(engine);
+for (let i = 0; i < 80; i++) {
+  engine.step();
+  tape.maybeCapture(engine);
+}
+tape.capture(engine);
 
 const data = buildCardData({
   engine,
@@ -28,6 +37,8 @@ const data = buildCardData({
     momentumBias: preset.momentumBias,
   },
   date: '2026-08-18',
+  growthFrames: tape.frames,
+  canvasFactory,
 });
 
 check('assembler has compact formula (4 lines)', Array.isArray(data.formulaLines) && data.formulaLines.length === 4);
@@ -49,33 +60,59 @@ check('classify QUIET when empty', classifyOutcome({ aliveCells: 0, alivePct: 0,
 check('classify RESONANT when hot', classifyOutcome({ aliveCells: 100, alivePct: 20, resonance: 0.94 }) === 'RESONANT');
 check('classify LIVE otherwise', classifyOutcome({ aliveCells: 100, alivePct: 20, resonance: 0.4 }) === 'LIVE');
 
+check('field snapshot is an image data url', isSafeImage(data.fieldSnapshot));
+const noSnap = buildCardData({
+  engine,
+  name: 'Resonant Bloom',
+  provenance: { presetId: preset.id },
+  date: '2026-08-18',
+  fieldSnapshot: null,
+});
+check('fieldSnapshot null skips capture', noSnap.fieldSnapshot === null);
+check('growth tape kept seed + later frames', tape.frames.length >= 2 && tape.frames[0].generation === 0 && tape.frames[tape.frames.length - 1].generation === 80);
+check('irreducible caption names the step count', data.irreducible.kicker === 'COMPUTED' && data.irreducible.steps === '80' && data.irreducible.unit === 'STEPS');
+check('formatSteps groups thousands', formatSteps(10247) === '10,247');
+check('irreducible seed copy differs', irreducibleCaption(0).lines[0].includes('Seed only'));
+
+const snap = snapshotField(engine, { cellSize: 3, canvasFactory });
+check('snapshotField returns a png', isSafeImage(snap));
+
 const svg = generateShareCardSVG(data);
 check('svg is 1200×630', svg.includes('width="1200"') && svg.includes('height="630"'));
-check('svg features the formula', svg.includes('RULE FORMULA') && svg.includes('BIRTH'));
+check('svg features the grown field', svg.includes('THIS FIELD') && /data:image\/(png|jpeg);base64,/.test(svg));
+check('svg states irreducibility', svg.includes('IRREDUCIBLE FIELD') && svg.includes('COMPUTED') && svg.includes('THE ONLY WAY TO KNOW STEP N+1 IS TO RUN IT'));
+check('svg shows compact formula', svg.includes('BIRTH') && svg.includes('SURVIVE'));
 check('svg shows field stats', svg.includes('DENSITY') && svg.includes('ENERGY') && svg.includes('MOMENTUM') && svg.includes('RESONANCE'));
 check('svg shows product name', svg.includes('HEX AUTOMATON'));
 check('svg includes the public host', svg.includes('karx.github.io/hex-automaton-explore'));
 check('svg includes the date', svg.includes('2026-08-18'));
+check('svg growth strip present', svg.includes('GROWTH · HAD TO BE RUN') && svg.includes('SEED'));
 
 const dirty = buildCardData({
   engine,
   name: '<script>alert(1)</script>',
   provenance: { presetName: 'x&y', archetype: 'a<b' },
   date: '2026-08-18',
+  fieldSnapshot: null,
 });
 const dirtySvg = generateShareCardSVG(dirty);
 check('user title is escaped', dirtySvg.includes('&lt;script&gt;') && !dirtySvg.includes('<script>alert'));
-check('archetype ampersand is escaped', generateShareCardSVG({
+check('title ampersand is escaped', generateShareCardSVG({
   ...data,
-  archetype: 'foo&bar',
-  formulaLines: data.formulaLines,
+  title: 'foo&bar',
+  fieldSnapshot: null,
+  growthFrames: [],
 }).includes('foo&amp;bar'));
 
 const text = buildShareText(data);
 check('share text names the run', text.includes('HEX AUTOMATON — Resonant Bloom'));
-check('share text includes gen and outcome', text.includes('GEN 80') && text.includes(data.outcome));
+check('share text includes computed steps', text.includes('COMPUTED 80 STEPS') && text.includes(data.outcome));
+check('share text includes irreducibility', text.includes('No closed form'));
 check('share text includes a deep link', text.includes('https://karx.github.io/hex-automaton-explore/#s='));
 check('share text includes birth line', text.includes(data.formulaLines[0]));
+
+const noImg = generateShareCardSVG({ ...data, fieldSnapshot: 'javascript:alert(1)', growthFrames: [{ generation: 0, image: 'http://evil.example/x.png' }] });
+check('unsafe images are not embedded', !noImg.includes('javascript:') && !noImg.includes('http://evil.example'));
 
 const token = encodeSharePayload(data);
 const decoded = decodeSharePayload(token);

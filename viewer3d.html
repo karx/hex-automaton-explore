@@ -185,7 +185,7 @@
         <button id="copyShareTextBtn" type="button">Copy text</button>
         <button id="copyShareLinkBtn" type="button">Copy link</button>
       </div>
-      <div class="hint" id="shareStatus">A unique 1200×630 receipt of this formula and field reading. JSON below is for exact resume.</div>
+      <div class="hint" id="shareStatus">A unique 1200×630 receipt of this grown field. The only way to know generation N is to run N steps. JSON below is for exact resume.</div>
     </fieldset>
 
     <fieldset>
@@ -222,6 +222,7 @@
     import { buildCardData } from './src/share-data.js';
     import { parseShareHash } from './src/share-url.js';
     import { bindShareControls } from './src/share-ui.js';
+    import { GrowthTape } from './src/share-capture.js';
 
     const sceneWrap = document.getElementById('sceneWrap');
     const presetSelect = document.getElementById('presetSelect');
@@ -253,6 +254,7 @@
 
     let engine, running = true, frame = 0, lastFpsT = performance.now(), fps = 0;
     let currentPreset = getPreset('resonant-bloom');
+    const growthTape = new GrowthTape({ maxFrames: 4, every: 40 });
 
     const viewer = new Viewer3D(sceneWrap);
 
@@ -271,6 +273,8 @@
       const seedFn = getPresetSeedFn(currentPreset);
       engine = new Engine(size, size, params, seedFn);
       descEl.textContent = currentPreset.description;
+      growthTape.reset();
+      growthTape.capture(engine);
     }
 
     function applyOntologyLive() {
@@ -332,11 +336,13 @@
       };
     }
 
-    function assembleCard() {
+    function assembleCard({ withField = true } = {}) {
       return buildCardData({
         engine,
         name: exportNameInput.value.trim() || currentPreset.name,
         provenance: currentProvenance(),
+        growthFrames: withField ? growthTape.frames : [],
+        fieldSnapshot: withField ? undefined : null,
       });
     }
 
@@ -378,6 +384,8 @@
       engine = new Engine(size, size, params, getPresetSeedFn(currentPreset));
       descEl.textContent = currentPreset.description;
       if (payload.title && !exportNameInput.value.trim()) exportNameInput.placeholder = payload.title;
+      growthTape.reset();
+      growthTape.capture(engine);
     }
 
     function tryLoadShareHash() {
@@ -448,6 +456,8 @@
           biasVal.textContent = kit.meta.momentumBias.toFixed(2);
         }
         descEl.textContent = kit.meta.description || currentPreset.description;
+        growthTape.reset();
+        growthTape.capture(engine);
 
         setStatus(
           importStatusEl,
@@ -462,6 +472,7 @@
     function loop() {
       if (running) {
         engine.step();
+        growthTape.maybeCapture(engine);
         frame++;
       }
       viewer.update(engine);

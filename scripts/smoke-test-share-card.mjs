@@ -16,12 +16,12 @@ page.on('pageerror', (err) => errors.push(String(err)));
 
 await page.goto('http://localhost:4177/index.html', { waitUntil: 'load' });
 await page.waitForSelector('#previewCardBtn');
-await page.waitForTimeout(1800);
+await page.waitForTimeout(5000);
 
 await page.click('#previewCardBtn');
 await page.waitForSelector('[data-share-preview="1"] img');
 const previewSrc = await page.locator('[data-share-preview="1"] img').getAttribute('src');
-console.log('2d preview opened, svg data url:', previewSrc?.startsWith('data:image/svg+xml'));
+console.log('2d preview opened, blob url:', previewSrc?.startsWith('blob:'));
 await page.screenshot({ path: 'scripts/share-card-preview-2d.png' });
 await page.click('[data-share-preview="1"]');
 await page.waitForTimeout(200);
@@ -34,6 +34,7 @@ const textStatus = await page.locator('#shareStatus').innerText();
 const copiedText = await page.evaluate(() => navigator.clipboard.readText());
 console.log('2d copy text status:', textStatus);
 console.log('2d share text has deep link:', copiedText.includes('#s='), 'has HEX AUTOMATON:', copiedText.includes('HEX AUTOMATON'));
+console.log('2d share text irreducible:', copiedText.includes('COMPUTED'), copiedText.includes('No closed form'));
 
 await page.click('#copyShareLinkBtn');
 await page.waitForTimeout(200);
@@ -50,7 +51,7 @@ console.log('2d hash load status:', loadStatus);
 
 await page.goto('http://localhost:4177/viewer3d.html', { waitUntil: 'load' });
 await page.waitForSelector('#previewCardBtn');
-await page.waitForTimeout(1500);
+await page.waitForTimeout(3500);
 await page.click('#previewCardBtn');
 await page.waitForSelector('[data-share-preview="1"] img');
 console.log('3d preview opened');

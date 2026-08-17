@@ -146,11 +146,13 @@ set formula** panel (2D view) shows the same rule set as a human-readable
 formula sheet — grouped birth/survival/energy/momentum equations with your
 current numbers substituted in, not a raw parameter dump.
 
-**Share this run** (2D and 3D) mints a unique 1200×630 card of the compact
-rule formula plus the current density / energy / momentum / resonance
-reading. Preview, share (Web Share PNG or download), copy text, or copy a
-`#s=` link that reloads the same rules on a fresh seed — not the canvas.
-Use the JSON kit when you need a bit-identical resume.
+**Share this run** (2D and 3D) mints a unique 1200×630 card of *this grown
+field* — the same layered renderer as the showcase GIFs, plus a 4-frame
+growth strip and the generation count as an irreducibility claim: the only
+way to know the state at step N is to compute those N steps. Preview, share
+(Web Share PNG or download), copy text, or copy a `#s=` link that reloads
+the same rules on a fresh seed. The card embeds the snapshot; the link does
+not (too large). Use the JSON kit when you need a bit-identical resume.
 
 ## Preset library
 

@@ -247,7 +247,7 @@
         <button id="copyShareTextBtn" type="button">Copy text</button>
         <button id="copyShareLinkBtn" type="button">Copy link</button>
       </div>
-      <div class="hint" id="shareStatus">A unique 1200×630 receipt of this formula and field reading. JSON below is for exact resume.</div>
+      <div class="hint" id="shareStatus">A unique 1200×630 receipt of this grown field. The only way to know generation N is to run N steps. JSON below is for exact resume.</div>
     </fieldset>
 
     <fieldset>
@@ -288,6 +288,7 @@
     import { buildCardData } from './src/share-data.js';
     import { parseShareHash } from './src/share-url.js';
     import { bindShareControls } from './src/share-ui.js';
+    import { GrowthTape } from './src/share-capture.js';
 
     const canvas = document.getElementById('cv');
     const ctx = canvas.getContext('2d');
@@ -336,6 +337,7 @@
     let particleSystem = new ParticleSystem();
     let currentPreset = getPreset('resonant-bloom');
     let flowAnimT = 0;
+    const growthTape = new GrowthTape({ maxFrames: 4, every: 40 });
 
     const layerState = { density: true, energyGlow: true, momentumArrows: true, particles: true };
     for (const [id, key] of [['layerDensity', 'density'], ['layerEnergy', 'energyGlow'], ['layerMomentum', 'momentumArrows'], ['layerParticles', 'particles']]) {
@@ -356,6 +358,8 @@
       canvas.height = layout.canvasHeight;
       descEl.textContent = currentPreset.description;
       particleSystem.clear();
+      growthTape.reset();
+      growthTape.capture(engine);
       buildParamSliders();
       updateFormulaView();
     }
@@ -476,11 +480,13 @@
     const exportStatusEl = document.getElementById('exportStatus');
     const shareStatusEl = document.getElementById('shareStatus');
 
-    function assembleCard() {
+    function assembleCard({ withField = true } = {}) {
       return buildCardData({
         engine,
         name: exportNameInput.value.trim() || currentPreset.name,
         provenance: currentProvenance(),
+        growthFrames: withField ? growthTape.frames : [],
+        fieldSnapshot: withField ? undefined : null,
       });
     }
 
@@ -527,6 +533,8 @@
       particleSystem.clear();
       descEl.textContent = currentPreset.description;
       if (payload.title && !exportNameInput.value.trim()) exportNameInput.placeholder = payload.title;
+      growthTape.reset();
+      growthTape.capture(engine);
       buildParamSliders();
       updateFormulaView();
     }
@@ -605,6 +613,8 @@
           biasVal.textContent = kit.meta.momentumBias.toFixed(2);
         }
         descEl.textContent = kit.meta.description || currentPreset.description;
+        growthTape.reset();
+        growthTape.capture(engine);
         buildParamSliders();
         updateFormulaView();
 
@@ -639,6 +649,7 @@
     function loop() {
       if (running) {
         engine.step();
+        growthTape.maybeCapture(engine);
         if (layerState.particles) {
           particleSystem.spawn(engine, layout);
           particleSystem.update();
