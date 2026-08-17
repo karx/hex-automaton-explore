@@ -1,6 +1,6 @@
 // Single source of truth for what each raw engine parameter means. Consumed by:
 //   - src/formula.js (the human-readable rule-set formula view)
-//   - index.html's Advanced panel (slider tooltips)
+//   - explorer.html / workbench Advanced panel (slider tooltips)
 //   - docs/ATTRIBUTE_GLOSSARY.md (hand-authored companion; keep both in sync
 //     when a param's behavior changes — this file is the runtime source,
 //     the doc is the expanded prose explanation)

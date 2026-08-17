@@ -111,7 +111,7 @@ npm install
 npx serve .          # or: python -m http.server
 ```
 
-Open the printed URL. **`index.html`** is the reading landing — a live Resonant Bloom and two jumps: **Library** or **Workbench**. Shared `#s=` links on the root redirect into the workbench.
+`serve.json` turns off clean URLs so `workbench.html?preset=…` keeps its query (and still serves `/` as the landing). Open the printed URL. **`index.html`** is the reading landing — a live Resonant Bloom and two jumps: **Library** or **Workbench**. Shared `#s=` links on the root redirect into the workbench.
 
 **Workbench:** Watch / Steer / Read / Leave on one field. **Library:** pick a preset by seeing it. **Classic 2D** (`explorer.html`): the original instrument — sliders, formula, rule kit.
 
@@ -209,7 +209,7 @@ node scripts/discover.mjs              # sweep Survival Pressure x Momentum Bias
 node scripts/verify-discoveries.mjs    # 1000-gen stability check on discovery-sweep winners
 node scripts/discover-shell.mjs        # sweep aimed at Langton's-Arm-style shell/lace character
 node scripts/verify-presets.mjs        # confirm all 14 presets.js entries survive end-to-end
-node scripts/generate-gifs-v2.mjs      # renders showcase presets with full v2 layers -> gifs-v2/
+node scripts/generate-gifs-v2.mjs      # renders every library item (presets + favorites) -> gifs-v2/
 
 # README stills (late-generation PNGs — GIFs start at gen 0, which is a tiny seed)
 node scripts/render-readme-shots.mjs   # -> docs/shots/2d-*.png and layer-*.png
@@ -226,7 +226,7 @@ node scripts/smoke-test-3d.mjs         # headless Chromium + software-GL
 # v4 (rule kit export/import)
 node scripts/verify-rulekit.mjs        # headless round-trip: export -> parse -> resume -> step, bit-identical
 npx serve -l 4177 .                    # then, for the browser UI path:
-node scripts/smoke-test-rulekit.mjs    # export/import/formula on both index.html and viewer3d.html
+node scripts/smoke-test-rulekit.mjs    # export/import/formula on explorer.html and viewer3d.html
 
 # SEO assets (OG card + favicon PNGs)
 node scripts/generate-seo-assets.mjs
@@ -269,7 +269,7 @@ site.webmanifest         PWA manifest (project Pages paths)
 robots.txt sitemap.xml   crawl hints
 scripts/                 sweep, discovery, verification, GIF + still capture
 gifs/                    v1 GIFs (one per original variant)
-gifs-v2/                 v2 GIFs (layered rendering, showcase presets)
+gifs-v2/                 v2 GIFs (layered rendering, every library item)
 docs/shots/              README stills, layer breakdown, UI screenshots
 docs/VARIANT_REPORT.md   v1 write-up
 docs/VISUALIZATION_STYLE_GUIDE.md    v2 + v3 write-up

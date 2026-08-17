@@ -63,6 +63,573 @@
     "tookMs": 12816
   },
   {
+    "id": "coral-reef",
+    "name": "Coral Reef",
+    "outPath": "gifs-v2/coral-reef.gif",
+    "sizeKB": 2502,
+    "frames": 82,
+    "generationsSimulated": 650,
+    "died": false,
+    "exploded": false,
+    "finalFracAlive": 0.5869,
+    "finalResonance": 0.896,
+    "metricsLog": [
+      {
+        "generation": 0,
+        "aliveCells": 38,
+        "fracAlive": 0.0106,
+        "resonance": 0.261
+      },
+      {
+        "generation": 100,
+        "aliveCells": 322,
+        "fracAlive": 0.0894,
+        "resonance": 0.931
+      },
+      {
+        "generation": 200,
+        "aliveCells": 883,
+        "fracAlive": 0.2453,
+        "resonance": 0.935
+      },
+      {
+        "generation": 300,
+        "aliveCells": 1750,
+        "fracAlive": 0.4861,
+        "resonance": 0.797
+      },
+      {
+        "generation": 400,
+        "aliveCells": 2422,
+        "fracAlive": 0.6728,
+        "resonance": 0.803
+      },
+      {
+        "generation": 500,
+        "aliveCells": 2153,
+        "fracAlive": 0.5981,
+        "resonance": 0.82
+      },
+      {
+        "generation": 600,
+        "aliveCells": 2115,
+        "fracAlive": 0.5875,
+        "resonance": 0.879
+      },
+      {
+        "generation": 649,
+        "aliveCells": 2113,
+        "fracAlive": 0.5869,
+        "resonance": 0.896
+      }
+    ],
+    "tookMs": 14447
+  },
+  {
+    "id": "drifting-vortex",
+    "name": "Drifting Vortex",
+    "outPath": "gifs-v2/drifting-vortex.gif",
+    "sizeKB": 1890,
+    "frames": 82,
+    "generationsSimulated": 650,
+    "died": false,
+    "exploded": false,
+    "finalFracAlive": 0.6047,
+    "finalResonance": 0.85,
+    "metricsLog": [
+      {
+        "generation": 0,
+        "aliveCells": 34,
+        "fracAlive": 0.0094,
+        "resonance": 0.128
+      },
+      {
+        "generation": 100,
+        "aliveCells": 213,
+        "fracAlive": 0.0592,
+        "resonance": 0.766
+      },
+      {
+        "generation": 200,
+        "aliveCells": 313,
+        "fracAlive": 0.0869,
+        "resonance": 0.898
+      },
+      {
+        "generation": 300,
+        "aliveCells": 945,
+        "fracAlive": 0.2625,
+        "resonance": 0.974
+      },
+      {
+        "generation": 400,
+        "aliveCells": 1353,
+        "fracAlive": 0.3758,
+        "resonance": 0.984
+      },
+      {
+        "generation": 500,
+        "aliveCells": 2008,
+        "fracAlive": 0.5578,
+        "resonance": 0.861
+      },
+      {
+        "generation": 600,
+        "aliveCells": 2232,
+        "fracAlive": 0.62,
+        "resonance": 0.83
+      },
+      {
+        "generation": 649,
+        "aliveCells": 2177,
+        "fracAlive": 0.6047,
+        "resonance": 0.85
+      }
+    ],
+    "tookMs": 18710
+  },
+  {
+    "id": "storm-field",
+    "name": "Storm Field",
+    "outPath": "gifs-v2/storm-field.gif",
+    "sizeKB": 1126,
+    "frames": 82,
+    "generationsSimulated": 650,
+    "died": false,
+    "exploded": false,
+    "finalFracAlive": 0.4633,
+    "finalResonance": 0.941,
+    "metricsLog": [
+      {
+        "generation": 0,
+        "aliveCells": 39,
+        "fracAlive": 0.0108,
+        "resonance": 0.311
+      },
+      {
+        "generation": 100,
+        "aliveCells": 95,
+        "fracAlive": 0.0264,
+        "resonance": 0.975
+      },
+      {
+        "generation": 200,
+        "aliveCells": 238,
+        "fracAlive": 0.0661,
+        "resonance": 0.897
+      },
+      {
+        "generation": 300,
+        "aliveCells": 517,
+        "fracAlive": 0.1436,
+        "resonance": 0.849
+      },
+      {
+        "generation": 400,
+        "aliveCells": 576,
+        "fracAlive": 0.16,
+        "resonance": 0.916
+      },
+      {
+        "generation": 500,
+        "aliveCells": 1170,
+        "fracAlive": 0.325,
+        "resonance": 0.98
+      },
+      {
+        "generation": 600,
+        "aliveCells": 1776,
+        "fracAlive": 0.4933,
+        "resonance": 0.975
+      },
+      {
+        "generation": 649,
+        "aliveCells": 1668,
+        "fracAlive": 0.4633,
+        "resonance": 0.941
+      }
+    ],
+    "tookMs": 8620
+  },
+  {
+    "id": "pulsing-heart",
+    "name": "Pulsing Heart",
+    "outPath": "gifs-v2/pulsing-heart.gif",
+    "sizeKB": 1565,
+    "frames": 82,
+    "generationsSimulated": 650,
+    "died": false,
+    "exploded": false,
+    "finalFracAlive": 0.65,
+    "finalResonance": 0.926,
+    "metricsLog": [
+      {
+        "generation": 0,
+        "aliveCells": 35,
+        "fracAlive": 0.0097,
+        "resonance": 0.167
+      },
+      {
+        "generation": 100,
+        "aliveCells": 84,
+        "fracAlive": 0.0233,
+        "resonance": 0.888
+      },
+      {
+        "generation": 200,
+        "aliveCells": 163,
+        "fracAlive": 0.0453,
+        "resonance": 0.715
+      },
+      {
+        "generation": 300,
+        "aliveCells": 511,
+        "fracAlive": 0.1419,
+        "resonance": 0.948
+      },
+      {
+        "generation": 400,
+        "aliveCells": 1812,
+        "fracAlive": 0.5033,
+        "resonance": 0.883
+      },
+      {
+        "generation": 500,
+        "aliveCells": 1890,
+        "fracAlive": 0.525,
+        "resonance": 0.932
+      },
+      {
+        "generation": 600,
+        "aliveCells": 1849,
+        "fracAlive": 0.5136,
+        "resonance": 0.895
+      },
+      {
+        "generation": 649,
+        "aliveCells": 2340,
+        "fracAlive": 0.65,
+        "resonance": 0.926
+      }
+    ],
+    "tookMs": 15550
+  },
+  {
+    "id": "sparse-ember",
+    "name": "Sparse Ember",
+    "outPath": "gifs-v2/sparse-ember.gif",
+    "sizeKB": 483,
+    "frames": 82,
+    "generationsSimulated": 650,
+    "died": false,
+    "exploded": false,
+    "finalFracAlive": 0.0464,
+    "finalResonance": 0.434,
+    "metricsLog": [
+      {
+        "generation": 0,
+        "aliveCells": 36,
+        "fracAlive": 0.01,
+        "resonance": 0.202
+      },
+      {
+        "generation": 100,
+        "aliveCells": 132,
+        "fracAlive": 0.0367,
+        "resonance": 0.886
+      },
+      {
+        "generation": 200,
+        "aliveCells": 267,
+        "fracAlive": 0.0742,
+        "resonance": 0.729
+      },
+      {
+        "generation": 300,
+        "aliveCells": 271,
+        "fracAlive": 0.0753,
+        "resonance": 0.582
+      },
+      {
+        "generation": 400,
+        "aliveCells": 231,
+        "fracAlive": 0.0642,
+        "resonance": 0.499
+      },
+      {
+        "generation": 500,
+        "aliveCells": 205,
+        "fracAlive": 0.0569,
+        "resonance": 0.443
+      },
+      {
+        "generation": 600,
+        "aliveCells": 184,
+        "fracAlive": 0.0511,
+        "resonance": 0.42
+      },
+      {
+        "generation": 649,
+        "aliveCells": 167,
+        "fracAlive": 0.0464,
+        "resonance": 0.434
+      }
+    ],
+    "tookMs": 2365
+  },
+  {
+    "id": "spreading-front",
+    "name": "Spreading Front",
+    "outPath": "gifs-v2/spreading-front.gif",
+    "sizeKB": 725,
+    "frames": 82,
+    "generationsSimulated": 650,
+    "died": false,
+    "exploded": false,
+    "finalFracAlive": 0.1853,
+    "finalResonance": 0.813,
+    "metricsLog": [
+      {
+        "generation": 0,
+        "aliveCells": 36,
+        "fracAlive": 0.01,
+        "resonance": 0.391
+      },
+      {
+        "generation": 100,
+        "aliveCells": 114,
+        "fracAlive": 0.0317,
+        "resonance": 0.859
+      },
+      {
+        "generation": 200,
+        "aliveCells": 193,
+        "fracAlive": 0.0536,
+        "resonance": 0.762
+      },
+      {
+        "generation": 300,
+        "aliveCells": 291,
+        "fracAlive": 0.0808,
+        "resonance": 0.868
+      },
+      {
+        "generation": 400,
+        "aliveCells": 445,
+        "fracAlive": 0.1236,
+        "resonance": 0.783
+      },
+      {
+        "generation": 500,
+        "aliveCells": 573,
+        "fracAlive": 0.1592,
+        "resonance": 0.821
+      },
+      {
+        "generation": 600,
+        "aliveCells": 643,
+        "fracAlive": 0.1786,
+        "resonance": 0.852
+      },
+      {
+        "generation": 649,
+        "aliveCells": 667,
+        "fracAlive": 0.1853,
+        "resonance": 0.813
+      }
+    ],
+    "tookMs": 4036
+  },
+  {
+    "id": "fault-line",
+    "name": "Fault Line",
+    "outPath": "gifs-v2/fault-line.gif",
+    "sizeKB": 355,
+    "frames": 82,
+    "generationsSimulated": 650,
+    "died": false,
+    "exploded": false,
+    "finalFracAlive": 0.1106,
+    "finalResonance": 0.789,
+    "metricsLog": [
+      {
+        "generation": 0,
+        "aliveCells": 34,
+        "fracAlive": 0.0094,
+        "resonance": 0.048
+      },
+      {
+        "generation": 100,
+        "aliveCells": 28,
+        "fracAlive": 0.0078,
+        "resonance": 0.804
+      },
+      {
+        "generation": 200,
+        "aliveCells": 78,
+        "fracAlive": 0.0217,
+        "resonance": 0.614
+      },
+      {
+        "generation": 300,
+        "aliveCells": 116,
+        "fracAlive": 0.0322,
+        "resonance": 0.905
+      },
+      {
+        "generation": 400,
+        "aliveCells": 159,
+        "fracAlive": 0.0442,
+        "resonance": 0.769
+      },
+      {
+        "generation": 500,
+        "aliveCells": 228,
+        "fracAlive": 0.0633,
+        "resonance": 0.752
+      },
+      {
+        "generation": 600,
+        "aliveCells": 317,
+        "fracAlive": 0.0881,
+        "resonance": 0.826
+      },
+      {
+        "generation": 649,
+        "aliveCells": 398,
+        "fracAlive": 0.1106,
+        "resonance": 0.789
+      }
+    ],
+    "tookMs": 2137
+  },
+  {
+    "id": "resonant-vortex",
+    "name": "Resonant Vortex",
+    "outPath": "gifs-v2/resonant-vortex.gif",
+    "sizeKB": 2983,
+    "frames": 82,
+    "generationsSimulated": 650,
+    "died": false,
+    "exploded": false,
+    "finalFracAlive": 0.5856,
+    "finalResonance": 0.868,
+    "metricsLog": [
+      {
+        "generation": 0,
+        "aliveCells": 33,
+        "fracAlive": 0.0092,
+        "resonance": 0.155
+      },
+      {
+        "generation": 100,
+        "aliveCells": 350,
+        "fracAlive": 0.0972,
+        "resonance": 0.811
+      },
+      {
+        "generation": 200,
+        "aliveCells": 1084,
+        "fracAlive": 0.3011,
+        "resonance": 0.899
+      },
+      {
+        "generation": 300,
+        "aliveCells": 2214,
+        "fracAlive": 0.615,
+        "resonance": 0.819
+      },
+      {
+        "generation": 400,
+        "aliveCells": 2109,
+        "fracAlive": 0.5858,
+        "resonance": 0.751
+      },
+      {
+        "generation": 500,
+        "aliveCells": 2108,
+        "fracAlive": 0.5856,
+        "resonance": 0.847
+      },
+      {
+        "generation": 600,
+        "aliveCells": 2108,
+        "fracAlive": 0.5856,
+        "resonance": 0.864
+      },
+      {
+        "generation": 649,
+        "aliveCells": 2108,
+        "fracAlive": 0.5856,
+        "resonance": 0.868
+      }
+    ],
+    "tookMs": 13238
+  },
+  {
+    "id": "charged-current",
+    "name": "Charged Current",
+    "outPath": "gifs-v2/charged-current.gif",
+    "sizeKB": 2840,
+    "frames": 82,
+    "generationsSimulated": 650,
+    "died": false,
+    "exploded": false,
+    "finalFracAlive": 0.5917,
+    "finalResonance": 0.818,
+    "metricsLog": [
+      {
+        "generation": 0,
+        "aliveCells": 38,
+        "fracAlive": 0.0106,
+        "resonance": 0.346
+      },
+      {
+        "generation": 100,
+        "aliveCells": 459,
+        "fracAlive": 0.1275,
+        "resonance": 0.965
+      },
+      {
+        "generation": 200,
+        "aliveCells": 1438,
+        "fracAlive": 0.3994,
+        "resonance": 0.91
+      },
+      {
+        "generation": 300,
+        "aliveCells": 2614,
+        "fracAlive": 0.7261,
+        "resonance": 0.754
+      },
+      {
+        "generation": 400,
+        "aliveCells": 2300,
+        "fracAlive": 0.6389,
+        "resonance": 0.751
+      },
+      {
+        "generation": 500,
+        "aliveCells": 2166,
+        "fracAlive": 0.6017,
+        "resonance": 0.8
+      },
+      {
+        "generation": 600,
+        "aliveCells": 2140,
+        "fracAlive": 0.5944,
+        "resonance": 0.813
+      },
+      {
+        "generation": 649,
+        "aliveCells": 2130,
+        "fracAlive": 0.5917,
+        "resonance": 0.818
+      }
+    ],
+    "tookMs": 18820
+  },
+  {
     "id": "resonant-bloom",
     "name": "Resonant Bloom",
     "outPath": "gifs-v2/resonant-bloom.gif",
@@ -189,192 +756,192 @@
     "tookMs": 7719
   },
   {
-    "id": "drifting-vortex",
-    "name": "Drifting Vortex",
-    "outPath": "gifs-v2/drifting-vortex.gif",
-    "sizeKB": 1890,
+    "id": "pulse-current",
+    "name": "Pulse Current",
+    "outPath": "gifs-v2/pulse-current.gif",
+    "sizeKB": 2074,
     "frames": 82,
     "generationsSimulated": 650,
     "died": false,
     "exploded": false,
-    "finalFracAlive": 0.6047,
-    "finalResonance": 0.85,
+    "finalFracAlive": 0.6017,
+    "finalResonance": 0.877,
     "metricsLog": [
       {
         "generation": 0,
-        "aliveCells": 34,
-        "fracAlive": 0.0094,
-        "resonance": 0.128
+        "aliveCells": 40,
+        "fracAlive": 0.0111,
+        "resonance": 0.277
       },
       {
         "generation": 100,
-        "aliveCells": 213,
-        "fracAlive": 0.0592,
-        "resonance": 0.766
+        "aliveCells": 648,
+        "fracAlive": 0.18,
+        "resonance": 0.72
       },
       {
         "generation": 200,
-        "aliveCells": 313,
-        "fracAlive": 0.0869,
-        "resonance": 0.898
+        "aliveCells": 694,
+        "fracAlive": 0.1928,
+        "resonance": 0.797
       },
       {
         "generation": 300,
-        "aliveCells": 945,
-        "fracAlive": 0.2625,
-        "resonance": 0.974
+        "aliveCells": 819,
+        "fracAlive": 0.2275,
+        "resonance": 0.969
       },
       {
         "generation": 400,
-        "aliveCells": 1353,
-        "fracAlive": 0.3758,
-        "resonance": 0.984
+        "aliveCells": 1399,
+        "fracAlive": 0.3886,
+        "resonance": 0.947
       },
       {
         "generation": 500,
-        "aliveCells": 2008,
-        "fracAlive": 0.5578,
-        "resonance": 0.861
+        "aliveCells": 1949,
+        "fracAlive": 0.5414,
+        "resonance": 0.864
       },
       {
         "generation": 600,
-        "aliveCells": 2232,
-        "fracAlive": 0.62,
-        "resonance": 0.83
+        "aliveCells": 2281,
+        "fracAlive": 0.6336,
+        "resonance": 0.85
       },
       {
         "generation": 649,
-        "aliveCells": 2177,
-        "fracAlive": 0.6047,
-        "resonance": 0.85
+        "aliveCells": 2166,
+        "fracAlive": 0.6017,
+        "resonance": 0.877
       }
     ],
-    "tookMs": 18710
+    "tookMs": 15377
   },
   {
-    "id": "pulsing-heart",
-    "name": "Pulsing Heart",
-    "outPath": "gifs-v2/pulsing-heart.gif",
-    "sizeKB": 1565,
+    "id": "coral-echo",
+    "name": "Coral Echo",
+    "outPath": "gifs-v2/coral-echo.gif",
+    "sizeKB": 579,
     "frames": 82,
     "generationsSimulated": 650,
     "died": false,
     "exploded": false,
-    "finalFracAlive": 0.65,
-    "finalResonance": 0.926,
+    "finalFracAlive": 0.1889,
+    "finalResonance": 0.852,
     "metricsLog": [
       {
         "generation": 0,
         "aliveCells": 35,
         "fracAlive": 0.0097,
-        "resonance": 0.167
+        "resonance": 0.441
       },
       {
         "generation": 100,
-        "aliveCells": 84,
-        "fracAlive": 0.0233,
-        "resonance": 0.888
+        "aliveCells": 56,
+        "fracAlive": 0.0156,
+        "resonance": 0.975
       },
       {
         "generation": 200,
-        "aliveCells": 163,
-        "fracAlive": 0.0453,
-        "resonance": 0.715
+        "aliveCells": 90,
+        "fracAlive": 0.025,
+        "resonance": 0.795
       },
       {
         "generation": 300,
-        "aliveCells": 511,
-        "fracAlive": 0.1419,
-        "resonance": 0.948
+        "aliveCells": 157,
+        "fracAlive": 0.0436,
+        "resonance": 0.709
       },
       {
         "generation": 400,
-        "aliveCells": 1812,
-        "fracAlive": 0.5033,
-        "resonance": 0.883
+        "aliveCells": 258,
+        "fracAlive": 0.0717,
+        "resonance": 0.777
       },
       {
         "generation": 500,
-        "aliveCells": 1890,
-        "fracAlive": 0.525,
-        "resonance": 0.932
+        "aliveCells": 404,
+        "fracAlive": 0.1122,
+        "resonance": 0.806
       },
       {
         "generation": 600,
-        "aliveCells": 1849,
-        "fracAlive": 0.5136,
-        "resonance": 0.895
+        "aliveCells": 584,
+        "fracAlive": 0.1622,
+        "resonance": 0.818
       },
       {
         "generation": 649,
-        "aliveCells": 2340,
-        "fracAlive": 0.65,
-        "resonance": 0.926
+        "aliveCells": 680,
+        "fracAlive": 0.1889,
+        "resonance": 0.852
       }
     ],
-    "tookMs": 15550
+    "tookMs": 3304
   },
   {
-    "id": "charged-current",
-    "name": "Charged Current",
-    "outPath": "gifs-v2/charged-current.gif",
-    "sizeKB": 2840,
+    "id": "pulsating-full",
+    "name": "Pulsating Full",
+    "outPath": "gifs-v2/pulsating-full.gif",
+    "sizeKB": 3116,
     "frames": 82,
     "generationsSimulated": 650,
     "died": false,
     "exploded": false,
-    "finalFracAlive": 0.5917,
-    "finalResonance": 0.818,
+    "finalFracAlive": 0.5544,
+    "finalResonance": 0.355,
     "metricsLog": [
       {
         "generation": 0,
-        "aliveCells": 38,
-        "fracAlive": 0.0106,
-        "resonance": 0.346
+        "aliveCells": 90,
+        "fracAlive": 0.025,
+        "resonance": 0.035
       },
       {
         "generation": 100,
-        "aliveCells": 459,
-        "fracAlive": 0.1275,
-        "resonance": 0.965
+        "aliveCells": 448,
+        "fracAlive": 0.1244,
+        "resonance": 0.083
       },
       {
         "generation": 200,
-        "aliveCells": 1438,
-        "fracAlive": 0.3994,
-        "resonance": 0.91
+        "aliveCells": 1080,
+        "fracAlive": 0.3,
+        "resonance": 0.287
       },
       {
         "generation": 300,
-        "aliveCells": 2614,
-        "fracAlive": 0.7261,
-        "resonance": 0.754
+        "aliveCells": 1821,
+        "fracAlive": 0.5058,
+        "resonance": 0.278
       },
       {
         "generation": 400,
-        "aliveCells": 2300,
-        "fracAlive": 0.6389,
-        "resonance": 0.751
+        "aliveCells": 2022,
+        "fracAlive": 0.5617,
+        "resonance": 0.339
       },
       {
         "generation": 500,
-        "aliveCells": 2166,
-        "fracAlive": 0.6017,
-        "resonance": 0.8
+        "aliveCells": 2071,
+        "fracAlive": 0.5753,
+        "resonance": 0.324
       },
       {
         "generation": 600,
-        "aliveCells": 2140,
-        "fracAlive": 0.5944,
-        "resonance": 0.813
+        "aliveCells": 1972,
+        "fracAlive": 0.5478,
+        "resonance": 0.332
       },
       {
         "generation": 649,
-        "aliveCells": 2130,
-        "fracAlive": 0.5917,
-        "resonance": 0.818
+        "aliveCells": 1996,
+        "fracAlive": 0.5544,
+        "resonance": 0.355
       }
     ],
-    "tookMs": 18820
+    "tookMs": 10719
   }
 ]

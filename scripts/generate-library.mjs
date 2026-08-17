@@ -1,17 +1,10 @@
 // Writes explorations/library.html once from the preset library + on-disk
 // GIFs/stills. Re-run after adding a preset, a favorite, or a showcase GIF.
+// `npm test` fails if the committed HTML drifts from this function.
 import { writeFileSync, existsSync } from 'fs';
+import { pathToFileURL } from 'url';
 import { PRESETS } from '../src/presets.js';
 import { FAVORITES } from '../src/favorites.js';
-
-const GIFS_V2 = {
-  'stable-crystal': '../gifs-v2/stable-crystal.gif',
-  'resonant-bloom': '../gifs-v2/resonant-bloom.gif',
-  'ember-bloom': '../gifs-v2/ember-bloom.gif',
-  'drifting-vortex': '../gifs-v2/drifting-vortex.gif',
-  'pulsing-heart': '../gifs-v2/pulsing-heart.gif',
-  'charged-current': '../gifs-v2/charged-current.gif',
-};
 
 const FALLBACK = {
   'coral-reef': '../gifs/dense-coral.gif',
@@ -31,11 +24,12 @@ function xe(s) {
     .replace(/"/g, '&quot;');
 }
 
-function thumbFor(p) {
-  const rel = GIFS_V2[p.id] || FALLBACK[p.id];
+function thumbFor(id) {
+  const v2 = `gifs-v2/${id}.gif`;
+  if (existsSync(v2)) return `../${v2}`;
+  const rel = FALLBACK[id];
   if (!rel) return null;
-  const disk = rel.replace('../', '');
-  return existsSync(disk) ? rel : null;
+  return existsSync(rel.replace('../', '')) ? rel : null;
 }
 
 function firstLine(desc) {
@@ -57,25 +51,26 @@ function card(href, kind, seedType, name, desc, src) {
       </a>`;
 }
 
-const favCards = FAVORITES.map((f) => card(
-  `./workbench.html?favorite=${f.id}&mode=watch#favorite=${f.id}`,
-  'Favorite',
-  f.seedType,
-  f.name,
-  f.description,
-  null,
-)).join('\n');
+export function buildLibraryHtml() {
+  const favCards = FAVORITES.map((f) => card(
+    `./workbench.html?favorite=${f.id}&mode=watch`,
+    'Favorite',
+    f.seedType,
+    f.name,
+    f.description,
+    thumbFor(f.id),
+  )).join('\n');
 
-const cards = PRESETS.map((p) => card(
-  `./workbench.html?preset=${p.id}&mode=watch#preset=${p.id}`,
-  p.discovered ? 'Discovered' : 'Classic',
-  p.seedType,
-  p.name,
-  p.description,
-  thumbFor(p),
-)).join('\n');
+  const cards = PRESETS.map((p) => card(
+    `./workbench.html?preset=${p.id}&mode=watch`,
+    p.discovered ? 'Discovered' : 'Classic',
+    p.seedType,
+    p.name,
+    p.description,
+    thumbFor(p.id),
+  )).join('\n');
 
-const html = `<!doctype html>
+  return `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
@@ -94,6 +89,8 @@ const html = `<!doctype html>
       <a href="./library.html" aria-current="page">Library</a>
       <a href="./workbench.html">Workbench</a>
       <a href="../explorer.html">2D</a>
+      <a href="../viewer3d.html">3D</a>
+      <a href="../langtons-ant.html">Ant</a>
     </nav>
   </header>
   <div class="scroll">
@@ -115,6 +112,11 @@ ${cards}
 </body>
 </html>
 `;
+}
 
-writeFileSync('explorations/library.html', html);
-console.log(`wrote explorations/library.html (${FAVORITES.length} favorites, ${PRESETS.length} presets)`);
+const invoked = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+if (invoked) {
+  const html = buildLibraryHtml();
+  writeFileSync('explorations/library.html', html);
+  console.log(`wrote explorations/library.html (${FAVORITES.length} favorite${FAVORITES.length === 1 ? '' : 's'}, ${PRESETS.length} presets)`);
+}

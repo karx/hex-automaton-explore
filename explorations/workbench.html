@@ -20,6 +20,7 @@
       <a href="./workbench.html" aria-current="page">Workbench</a>
       <a href="../explorer.html">2D</a>
       <a href="../viewer3d.html">3D</a>
+      <a href="../langtons-ant.html">Ant</a>
     </nav>
   </header>
   <div class="stage">
@@ -72,6 +73,7 @@
     import { buildShareText } from '../src/share-text.js';
     import { generateShareUrl, parseShareHash } from '../src/share-url.js';
     import { exportRuleKit, ruleKitToJSON, parseRuleKit, buildEngineFromRuleKit, downloadRuleKit, readFileAsText } from '../src/ruleKit.js';
+    import { pageQuery } from '../src/page-query.js';
 
     const PARAM_RANGES = {
       birthLow: [0, 5, 0.05], birthHigh: [0, 6, 0.05], birthDensity: [0, 1, 0.01],
@@ -83,14 +85,7 @@
       momentumSmoothing: [0, 1, 0.01], leakConcentration: [0, 1, 0.01],
     };
 
-    const search = new URLSearchParams(location.search);
-    const hashRaw = location.hash.startsWith('#') ? location.hash.slice(1) : '';
-    const hashQ = (!hashRaw.startsWith('s=') && hashRaw.includes('='))
-      ? new URLSearchParams(hashRaw)
-      : new URLSearchParams();
-    const q = {
-      get(key) { return search.get(key) || hashQ.get(key); },
-    };
+    const q = pageQuery();
     let favorite = null;
     let preset;
     if (q.get('favorite')) {
