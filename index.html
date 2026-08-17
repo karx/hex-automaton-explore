@@ -337,7 +337,7 @@
     let particleSystem = new ParticleSystem();
     let currentPreset = getPreset('resonant-bloom');
     let flowAnimT = 0;
-    const growthTape = new GrowthTape({ maxFrames: 4, every: 40 });
+    const growthTape = new GrowthTape({ every: 24 });
 
     const layerState = { density: true, energyGlow: true, momentumArrows: true, particles: true };
     for (const [id, key] of [['layerDensity', 'density'], ['layerEnergy', 'energyGlow'], ['layerMomentum', 'momentumArrows'], ['layerParticles', 'particles']]) {

@@ -16,7 +16,7 @@ Also in the repo, unrelated to the field engine but sharing its hex-grid math: *
 
 **Run it locally:** [`index.html`](index.html) (2D) · [`viewer3d.html`](viewer3d.html) (3D) · [`langtons-ant.html`](langtons-ant.html) — needs a static server, see [Quick start](#quick-start).
 
-**Write-ups:** [`docs/VARIANT_REPORT.md`](docs/VARIANT_REPORT.md) (v1 engine + original 8 variants) · [`docs/VISUALIZATION_STYLE_GUIDE.md`](docs/VISUALIZATION_STYLE_GUIDE.md) (v2 visual language, ontology, presets, 3D) · [`docs/ATTRIBUTE_GLOSSARY.md`](docs/ATTRIBUTE_GLOSSARY.md) (v4 — what every parameter and slider means, mental model) · [`docs/LANGTONS_ANT.md`](docs/LANGTONS_ANT.md) (hex Langton's Ant findings) · [`docs/TESTING_AND_QA.md`](docs/TESTING_AND_QA.md) (what's actually tested vs. not — read before trusting a green CI run) · [`docs/PHYSICS_DISCLAIMER.md`](docs/PHYSICS_DISCLAIMER.md) (this is not a physics simulation — what "energy," "momentum," and "force" do and don't mean here)
+**Write-ups:** [`docs/VARIANT_REPORT.md`](docs/VARIANT_REPORT.md) (v1 engine + original 8 variants) · [`docs/VISUALIZATION_STYLE_GUIDE.md`](docs/VISUALIZATION_STYLE_GUIDE.md) (v2 visual language, ontology, presets, 3D) · [`docs/ATTRIBUTE_GLOSSARY.md`](docs/ATTRIBUTE_GLOSSARY.md) (v4 — what every parameter and slider means, mental model) · [`docs/LANGTONS_ANT.md`](docs/LANGTONS_ANT.md) (hex Langton's Ant findings) · [`docs/SHARE_CARD.md`](docs/SHARE_CARD.md) (share-card assembly: irreducible field, growth tape, `#s=` link) · [`docs/TESTING_AND_QA.md`](docs/TESTING_AND_QA.md) (what's actually tested vs. not — read before trusting a green CI run) · [`docs/PHYSICS_DISCLAIMER.md`](docs/PHYSICS_DISCLAIMER.md) (this is not a physics simulation — what "energy," "momentum," and "force" do and don't mean here)
 
 ## Showcase
 
@@ -148,11 +148,13 @@ current numbers substituted in, not a raw parameter dump.
 
 **Share this run** (2D and 3D) mints a unique 1200×630 card of *this grown
 field* — the same layered renderer as the showcase GIFs, plus a 4-frame
-growth strip and the generation count as an irreducibility claim: the only
-way to know the state at step N is to compute those N steps. Preview, share
-(Web Share PNG or download), copy text, or copy a `#s=` link that reloads
-the same rules on a fresh seed. The card embeds the snapshot; the link does
-not (too large). Use the JSON kit when you need a bit-identical resume.
+growth strip (log-spaced: seed → early → late → now) and the generation
+count as an irreducibility claim: the only way to know the state at step N
+is to compute those N steps. How the card is assembled is in
+[`docs/SHARE_CARD.md`](docs/SHARE_CARD.md). Preview, share (Web Share PNG
+or download), copy text, or copy a `#s=` link that reloads the same rules
+on a fresh seed. The card embeds the snapshot; the link does not (too
+large). Use the JSON kit when you need a bit-identical resume.
 
 ## Preset library
 

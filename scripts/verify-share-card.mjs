@@ -6,7 +6,7 @@ import { buildCardData, classifyOutcome, irreducibleCaption, formatSteps } from 
 import { generateShareCardSVG } from '../src/share-card.js';
 import { buildShareText } from '../src/share-text.js';
 import { encodeSharePayload, decodeSharePayload, parseShareHash, generateShareUrl } from '../src/share-url.js';
-import { GrowthTape, snapshotField, isSafeImage } from '../src/share-capture.js';
+import { GrowthTape, snapshotField, isSafeImage, selectAsymptoticFrames, logTargets } from '../src/share-capture.js';
 
 let failed = 0;
 function check(label, ok) {
@@ -18,7 +18,7 @@ const preset = getPreset('resonant-bloom');
 const params = getPresetParams(preset);
 const engine = new Engine(40, 40, params, getPresetSeedFn(preset));
 const canvasFactory = (w, h) => createCanvas(w, h);
-const tape = new GrowthTape({ maxFrames: 4, every: 20, canvasFactory });
+const tape = new GrowthTape({ every: 20, canvasFactory });
 tape.capture(engine);
 for (let i = 0; i < 80; i++) {
   engine.step();
@@ -70,6 +70,23 @@ const noSnap = buildCardData({
 });
 check('fieldSnapshot null skips capture', noSnap.fieldSnapshot === null);
 check('growth tape kept seed + later frames', tape.frames.length >= 2 && tape.frames[0].generation === 0 && tape.frames[tape.frames.length - 1].generation === 80);
+
+const shown = data.growthFrames.map((f) => f.generation);
+check('card strip is at most 4 frames', data.growthFrames.length <= 4);
+check('card strip starts at seed and ends at now', shown[0] === 0 && shown[shown.length - 1] === 80);
+
+const fake = [0, 20, 40, 60, 80, 100, 120, 160, 200, 240, 320, 400, 480, 640, 800, 960, 1000]
+  .map((g) => ({ generation: g, image: `data:image/png;base64,${g}` }));
+const picked = selectAsymptoticFrames(fake, 4);
+const gens = picked.map((f) => f.generation);
+check('asymptotic pick keeps endpoints', gens[0] === 0 && gens[gens.length - 1] === 1000);
+check('asymptotic pick is 4 frames', gens.length === 4);
+const gaps = [gens[1] - gens[0], gens[2] - gens[1], gens[3] - gens[2]];
+check(`asymptotic gaps grow (${gaps.join(', ')})`, gaps[0] < gaps[1] && gaps[1] < gaps[2]);
+check('not clustered on the tail', gens[1] < 80 && gens[2] < 400);
+const targets = logTargets(0, 1000, 4);
+check('log targets ~ 0, 10, 99, 1000', Math.abs(targets[1] - 10) < 2 && Math.abs(targets[2] - 99) < 3 && Math.abs(targets[3] - 1000) < 0.01);
+check('short lists pass through', selectAsymptoticFrames(fake.slice(0, 3), 4).length === 3);
 check('irreducible caption names the step count', data.irreducible.kicker === 'COMPUTED' && data.irreducible.steps === '80' && data.irreducible.unit === 'STEPS');
 check('formatSteps groups thousands', formatSteps(10247) === '10,247');
 check('irreducible seed copy differs', irreducibleCaption(0).lines[0].includes('Seed only'));

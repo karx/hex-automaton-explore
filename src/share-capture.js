@@ -116,18 +116,92 @@ export function snapshotField(engine, {
   return canvasToDataURL(fitted, mime, quality);
 }
 
-// Keeps seed + a few later frames so the card can show the path, not just
-// the destination. Density-only and a cached layout so the live loop does
-// not hitch every `every` generations.
+// Log-spaced generation targets from first to last, inclusive.
+// gen 0..1000, count 4 → ~0, 10, 99, 1000 — gaps grow; not a recent cluster.
+export function logTargets(t0, t1, count) {
+  const start = t0 | 0;
+  const end = t1 | 0;
+  if (count <= 1) return [end];
+  const span = Math.max(0, end - start);
+  const out = [];
+  for (let i = 0; i < count; i++) {
+    const u = i / (count - 1);
+    out.push(start + Math.expm1(Math.log1p(span) * u));
+  }
+  out[0] = start;
+  out[count - 1] = end;
+  return out;
+}
+
+export function selectAsymptoticFrames(frames, count = 4) {
+  if (!Array.isArray(frames) || frames.length === 0) return [];
+  const sorted = [...frames].sort((a, b) => (a.generation | 0) - (b.generation | 0));
+  const uniq = [];
+  for (const f of sorted) {
+    if (!uniq.length || uniq[uniq.length - 1].generation !== f.generation) uniq.push(f);
+  }
+  if (uniq.length <= count) return uniq;
+  const targets = logTargets(uniq[0].generation, uniq[uniq.length - 1].generation, count);
+  const used = new Set();
+  const picked = [];
+  for (const target of targets) {
+    let best = -1;
+    let bestDist = Infinity;
+    for (let i = 0; i < uniq.length; i++) {
+      if (used.has(i)) continue;
+      const d = Math.abs((uniq[i].generation | 0) - target);
+      if (d < bestDist) {
+        bestDist = d;
+        best = i;
+      }
+    }
+    if (best >= 0) {
+      used.add(best);
+      picked.push(uniq[best]);
+    }
+  }
+  return picked.sort((a, b) => (a.generation | 0) - (b.generation | 0));
+}
+
+function isLogMilestone(gen) {
+  const g = gen | 0;
+  if (g <= 1) return true;
+  return (g & (g - 1)) === 0;
+}
+
+function dropLeastLogUseful(frames) {
+  if (frames.length < 3) {
+    frames.shift();
+    return;
+  }
+  let drop = 1;
+  let minRedundancy = Infinity;
+  for (let i = 1; i < frames.length - 1; i++) {
+    const prev = Math.log1p(frames[i - 1].generation);
+    const cur = Math.log1p(frames[i].generation);
+    const next = Math.log1p(frames[i + 1].generation);
+    const redundancy = Math.min(cur - prev, next - cur);
+    if (redundancy < minRedundancy) {
+      minRedundancy = redundancy;
+      drop = i;
+    }
+  }
+  frames.splice(drop, 1);
+}
+
+// Records stills during the run. Stores many frames; the card picks a
+// log-spaced subset so the strip is seed → early → late → now, not four
+// recent twins. Density-only + cached layout so the live loop does not hitch.
 export class GrowthTape {
   constructor({
-    maxFrames = 4,
-    every = 40,
+    maxFrames = 32,
+    maxStore,
+    every = 24,
     cellSize = 2,
     canvasFactory,
     layers = { density: true, energyGlow: false, momentumArrows: false },
   } = {}) {
-    this.maxFrames = maxFrames;
+    this.maxStore = maxStore || maxFrames || 32;
     this.every = every;
     this.cellSize = cellSize;
     this.canvasFactory = canvasFactory;
@@ -174,9 +248,7 @@ export class GrowthTape {
       return;
     }
     this.frames.push(frame);
-    while (this.frames.length > this.maxFrames) {
-      this.frames.splice(this.frames.length > 2 ? 1 : 0, 1);
-    }
+    while (this.frames.length > this.maxStore) dropLeastLogUseful(this.frames);
   }
 
   maybeCapture(engine) {
@@ -185,7 +257,10 @@ export class GrowthTape {
       this.capture(engine);
       return;
     }
+    const g = engine.generation | 0;
     const last = this.frames[this.frames.length - 1];
-    if ((engine.generation | 0) - last.generation >= this.every) this.capture(engine);
+    const dueLinear = g - last.generation >= this.every;
+    const dueLog = isLogMilestone(g) && last.generation !== g;
+    if (dueLinear || dueLog) this.capture(engine);
   }
 }

@@ -254,7 +254,7 @@
 
     let engine, running = true, frame = 0, lastFpsT = performance.now(), fps = 0;
     let currentPreset = getPreset('resonant-bloom');
-    const growthTape = new GrowthTape({ maxFrames: 4, every: 40 });
+    const growthTape = new GrowthTape({ every: 24 });
 
     const viewer = new Viewer3D(sceneWrap);
 

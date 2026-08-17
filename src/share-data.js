@@ -1,7 +1,7 @@
 // Single assembler for the share card, share text, and #s= deep link.
 // Preview / share / copy all call this. Reads engine fields — never the DOM.
 import { generateCompactFormula } from './formula.js';
-import { snapshotField } from './share-capture.js';
+import { snapshotField, selectAsymptoticFrames } from './share-capture.js';
 
 export const SITE_URL = 'https://karx.github.io/hex-automaton-explore/';
 
@@ -104,7 +104,7 @@ export function buildCardData({
     params: { ...engine.params },
     siteUrl: SITE_URL,
     fieldSnapshot: snapshot || null,
-    growthFrames: Array.isArray(growthFrames) ? growthFrames.slice(0, 4) : [],
+    growthFrames: selectAsymptoticFrames(Array.isArray(growthFrames) ? growthFrames : [], 4),
     irreducible: irreducibleCaption(generation),
   };
 }
