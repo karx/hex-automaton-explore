@@ -71,7 +71,7 @@
     import { buildCardData } from '../src/share-data.js';
     import { generateShareCardSVG, previewCard, shareCard, slugFilename } from '../src/share-card.js';
     import { buildShareText } from '../src/share-text.js';
-    import { generateShareUrl, parseShareHash } from '../src/share-url.js';
+    import { generateShareUrl, parseShareLocation } from '../src/share-url.js';
     import { exportRuleKit, ruleKitToJSON, parseRuleKit, buildEngineFromRuleKit, downloadRuleKit, readFileAsText } from '../src/ruleKit.js';
     import { pageQuery } from '../src/page-query.js';
 
@@ -561,7 +561,7 @@
       if (map[ev.key]) setMode(map[ev.key]);
     });
 
-    const shared = parseShareHash(location.hash);
+    const shared = parseShareLocation();
     if (shared) applySharePayload(shared);
     document.getElementById('presetCrumb').textContent = sessionName();
 

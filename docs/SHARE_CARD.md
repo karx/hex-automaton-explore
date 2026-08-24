@@ -9,7 +9,9 @@ There are two clocks. One runs in the background. One fires when you click.
 Source: `src/share-data.js` (one assembler), `src/share-capture.js` (stills +
 growth tape), `src/share-card.js` (1200×630 SVG), `src/share-text.js`,
 `src/share-url.js`. Wired from `explorer.html`, `viewer3d.html`, and
-the workbench. A `#s=` hash on the site root redirects into the workbench.
+the workbench. Share links are `explorations/workbench.html?s=…` (query, not a
+hash — `#s=` is dropped by PowerShell, some unfurlers, and clean-URL redirects).
+A leftover `#s=` or `?s=` on the site root still redirects into the workbench.
 
 ---
 
@@ -83,7 +85,7 @@ render of the same engine fields the GIF pipeline uses (`src/render.js`).
           ▼               ▼               ▼
    generateShareCardSVG  buildShareText  generateShareUrl
           │               │               │
-     1200×630 SVG    tweet-sized text   #s= token
+     1200×630 SVG    tweet-sized text   ?s= token
           │               │               │
      Preview overlay      clipboard       clipboard
      or PNG file
@@ -192,15 +194,16 @@ matters, plus just enough rule to restart.
 
 ## 6. Four outputs, one data object
 
-The `#s=` link carries **rules + sliders + the receipt numbers**. It does
+The `?s=` link carries **rules + sliders + the receipt numbers**. It does
 not carry pixels or canvas state. Opening it reseeds and grows a new
-field. The JSON rule kit is still the only bit-identical resume.
+field. The JSON rule kit is still the only bit-identical resume. Old `#s=`
+links still parse.
 
 | Channel | Has the picture? | Reconstructs the rules? | Reconstructs this canvas? |
 |---|---|---|---|
 | Card PNG | Yes — this field, this gen | No | No |
 | Share text | No — names the steps | Via the URL in the text | No |
-| `#s=` link | No | Yes — fresh seed | No |
+| `?s=` link | No | Yes — fresh seed | No |
 | Rule-kit JSON | No | Yes | Yes, if “include state” is on |
 
 ---

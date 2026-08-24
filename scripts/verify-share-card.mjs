@@ -5,7 +5,7 @@ import { generateCompactFormula } from '../src/formula.js';
 import { buildCardData, classifyOutcome, irreducibleCaption, formatSteps } from '../src/share-data.js';
 import { generateShareCardSVG } from '../src/share-card.js';
 import { buildShareText } from '../src/share-text.js';
-import { encodeSharePayload, decodeSharePayload, parseShareHash, generateShareUrl } from '../src/share-url.js';
+import { encodeSharePayload, decodeSharePayload, parseShareHash, parseShareLocation, generateShareUrl } from '../src/share-url.js';
 import { GrowthTape, snapshotField, isSafeImage, selectAsymptoticFrames, logTargets } from '../src/share-capture.js';
 
 let failed = 0;
@@ -125,7 +125,7 @@ const text = buildShareText(data);
 check('share text names the run', text.includes('HEX AUTOMATON — Resonant Bloom'));
 check('share text includes computed steps', text.includes('COMPUTED 80 STEPS') && text.includes(data.outcome));
 check('share text includes irreducibility', text.includes('No closed form'));
-check('share text includes a deep link', text.includes('https://karx.github.io/hex-automaton-explore/#s='));
+check('share text includes a deep link', text.includes('https://karx.github.io/hex-automaton-explore/explorations/workbench.html?s='));
 check('share text includes birth line', text.includes(data.formulaLines[0]));
 
 const noImg = generateShareCardSVG({ ...data, fieldSnapshot: 'javascript:alert(1)', growthFrames: [{ generation: 0, image: 'http://evil.example/x.png' }] });
@@ -140,10 +140,13 @@ check('decoded params.birthLow matches', Math.abs(decoded.params.birthLow - engi
 check('decoded sliders match', decoded.survivalPressure === preset.survivalPressure && decoded.momentumBias === preset.momentumBias);
 
 const url = generateShareUrl(data);
-const hash = url.slice(url.indexOf('#'));
-check('generateShareUrl is a #s= link', hash.startsWith('#s='));
-const fromHash = parseShareHash(hash);
-check('parseShareHash round-trips', fromHash && fromHash.title === 'Resonant Bloom' && fromHash.generation === 80);
+check('generateShareUrl is a workbench ?s= link', url.includes('/explorations/workbench.html?s='));
+const urlToken = new URL(url).searchParams.get('s');
+check('generateShareUrl token parses', parseShareLocation({ search: `?s=${urlToken}`, hash: '' })?.generation === 80);
+const fromHash = parseShareHash(`#s=${urlToken}`);
+check('parseShareHash still reads old #s= links', fromHash && fromHash.title === 'Resonant Bloom' && fromHash.generation === 80);
+check('parseShareLocation reads ?s=', parseShareLocation({ search: `?s=${urlToken}`, hash: '' })?.generation === 80);
+check('parseShareLocation prefers ?s= over hash', parseShareLocation({ search: `?s=${urlToken}`, hash: '#s=not-valid' })?.generation === 80);
 check('parseShareHash rejects empty', parseShareHash('') === null);
 check('parseShareHash rejects junk', parseShareHash('#s=not-valid') === null);
 check('decodeSharePayload rejects junk', decodeSharePayload('%%%') === null);

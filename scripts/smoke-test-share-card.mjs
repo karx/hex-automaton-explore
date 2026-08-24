@@ -33,7 +33,7 @@ await page.waitForTimeout(200);
 const textStatus = await page.locator('#shareStatus').innerText();
 const copiedText = await page.evaluate(() => navigator.clipboard.readText());
 console.log('2d copy text status:', textStatus);
-console.log('2d share text has deep link:', copiedText.includes('#s='), 'has HEX AUTOMATON:', copiedText.includes('HEX AUTOMATON'));
+console.log('2d share text has deep link:', copiedText.includes('?s='), 'has HEX AUTOMATON:', copiedText.includes('HEX AUTOMATON'));
 console.log('2d share text irreducible:', copiedText.includes('COMPUTED'), copiedText.includes('No closed form'));
 
 await page.click('#copyShareLinkBtn');
@@ -43,8 +43,8 @@ const copiedLink = await page.evaluate(() => navigator.clipboard.readText());
 console.log('2d copy link status:', linkStatus);
 console.log('2d share link:', copiedLink.slice(0, 80) + '…');
 
-const hash = copiedLink.includes('#') ? copiedLink.slice(copiedLink.indexOf('#')) : '';
-await page.goto(`http://localhost:4177/explorer.html${hash}`, { waitUntil: 'load' });
+const shareQuery = copiedLink.includes('?s=') ? copiedLink.slice(copiedLink.indexOf('?s=')) : '';
+await page.goto(`http://localhost:4177/explorer.html${shareQuery}`, { waitUntil: 'load' });
 await page.waitForTimeout(800);
 const loadStatus = await page.locator('#shareStatus').innerText();
 console.log('2d hash load status:', loadStatus);
