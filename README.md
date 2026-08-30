@@ -238,6 +238,10 @@ node scripts/analyze-langtons-ant.mjs  # long-run displacement analysis (highway
 node scripts/render-langtons-ant.mjs   # snapshot PNGs at increasing step counts -> scripts/
 npx serve -l 4178 .
 node scripts/smoke-test-langtons-ant.mjs
+
+# v5 (generative music video — see docs/MUSIC_VIDEO.md)
+node scripts/stream-music-video.mjs --duration=5 --sink=file --out=scratch/smoke.mp4  # staged smoke test
+npm run music-video    # full 3600s run (needs ffmpeg on PATH)
 ```
 
 ## Layout
@@ -259,6 +263,9 @@ src/formula.js           live rule set -> human-readable formula text
 src/ruleKit.js           rule kit export/import (params + optional canvas state)
 src/langtonsAnt.js       hex-generalized Langton's Ant (sparse infinite grid; unrelated to Engine)
 src/langtonsAntRender.js auto-fitting canvas rendering for the ant's growing pattern
+src/lyrics.js            arrangement + live stats -> timed lyrics transcript (.lrc/.txt)
+src/music/               generative music pipeline: schema, theory/synth/rng components,
+                         perc/bass/pad/lead layers, arrangement, composer (see docs/MUSIC_VIDEO.md)
 index.html               reading landing (live field → library / workbench)
 explorer.html            classic 2D instrument
 viewer3d.html            interactive 3D browser demo
@@ -277,4 +284,5 @@ docs/ATTRIBUTE_GLOSSARY.md           v4 write-up — every parameter + ontology 
 docs/LANGTONS_ANT.md                 hex Langton's Ant findings (no highway, fractal shell instead)
 docs/TESTING_AND_QA.md               what's actually tested vs. not — read before trusting a green CI run
 docs/PHYSICS_DISCLAIMER.md           this is not a physics simulation — what the field names don't mean
+docs/MUSIC_VIDEO.md                  generative music-video pipeline: schema, layers, arrangement, streaming
 ```

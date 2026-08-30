@@ -11,7 +11,9 @@
     "start": "npx --yes serve .",
     "library": "node scripts/generate-library.mjs",
     "gifs": "node scripts/generate-gifs-v2.mjs",
-    "test": "node scripts/verify-seo.mjs && node scripts/verify-library.mjs && node scripts/verify-rulekit.mjs && node scripts/verify-share-card.mjs && node scripts/verify-langtons-ant.mjs && node scripts/verify-presets.mjs && node scripts/verify-favorites.mjs && node scripts/regress-presets.mjs"
+    "test": "node scripts/verify-seo.mjs && node scripts/verify-library.mjs && node scripts/verify-rulekit.mjs && node scripts/verify-share-card.mjs && node scripts/verify-langtons-ant.mjs && node scripts/verify-presets.mjs && node scripts/verify-favorites.mjs && node scripts/regress-presets.mjs && node scripts/verify-schema.mjs && node scripts/verify-music-theory.mjs && node scripts/verify-wavetable.mjs && node scripts/verify-groove.mjs && node scripts/verify-arrangement.mjs && node scripts/verify-composer.mjs && node scripts/verify-lyrics.mjs",
+    "music-video": "node scripts/stream-music-video.mjs",
+    "rtmp-server": "docker run --rm -p 1935:1935 -p 8888:8888 bluenviron/mediamtx"
   },
   "keywords": [
     "cellular-automaton",
